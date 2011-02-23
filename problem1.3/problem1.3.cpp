@@ -3,19 +3,19 @@
 // Ax+By=C
 
 
-int gcd (int a, int b, int & x, int & y) {
+__int64 gcd (__int64 a, __int64 b, __int64 & x, __int64 & y) {
    if (a == 0) {
       x = 0; y = 1;
       return b;
    }
-   int x1, y1;
-   int d = gcd (b%a, a, x1, y1);
+   __int64 x1, y1;
+   __int64 d = gcd (b%a, a, x1, y1);
    x = y1 - (b / a) * x1;
    y = x1;
    return d;
 }
 
-int gcd (int a, int b) {
+__int64 gcd (__int64 a, __int64 b) {
    return b ? gcd(b, a % b) : a;
 }
 
@@ -24,7 +24,7 @@ int main()
    std::ifstream input("in.txt");
    std::ofstream output("out.txt");
 
-   int a, b, c;
+   __int64 a, b, c;
 
    while (input >> a >> b >> c)
    {
@@ -64,8 +64,8 @@ int main()
       }
       if (c % gcd(a, b) == 0)
       {
-         int x, y;
-         int g = gcd(a, b, x, y);
+         __int64 x, y;
+         __int64 g = gcd(a, b, x, y);
          output << x * c / g << ' ' << y * c / g << '\n';
          continue;
       }
