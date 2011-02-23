@@ -1,5 +1,4 @@
 #include <fstream>
-#include <cstdio>
 #include <cmath>
 #include <vector>
 
@@ -8,8 +7,8 @@
 int main()
 {
    std::ifstream input("in.txt");
-   FILE* output = fopen("out.txt", "w");
-
+   std::ofstream output("out.txt");
+   
    double x1, y1, x2, y2, x0, y0, s = 0;
 
    input >> x0 >> y0;
@@ -24,8 +23,8 @@ int main()
    }
    
    s += (x1 - x0) * (y1 + y0);
-
-   fprintf(output, "%.8f", fabs(s) / 2);
-   fclose(output);
+   
+   output << std::fixed <<fabs(s) / 2;
+ 
    return 0;
 }
