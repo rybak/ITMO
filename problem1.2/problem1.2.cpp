@@ -1,4 +1,5 @@
 #include <fstream>
+#include <cstdio>
 #include <cmath>
 #include <vector>
 
@@ -7,34 +8,24 @@
 int main()
 {
    std::ifstream input("in.txt");
-   std::ofstream output("out.txt");
+   FILE* output = fopen("out.txt", "w");
 
-   struct point
+   double x1, y1, x2, y2, x0, y0, s = 0;
+
+   input >> x0 >> y0;
+   x1 = x0;
+   y1 = y0;
+
+   while (input >> x2 >> y2)
    {
-      double x, y;
-   };
-
-   std::vector<point> a;
-   point p, p1, p2;
-   double t1, t2;
-
-   while (input >> t1 >> t2)
-   {
-      p.x = t1;
-      p.y = t2;
-      a.push_back(p);
+      s += (x1 - x2) * (y1 + y2);
+      x1 = x2;
+      y1 = y2;
    }
    
-   double s = 0;
-   for (unsigned i = 0; i < a.size(); i++)
-   {
-      p1 = i ? a[i-1] : a.back();
-      p2 = a[i];
-      s += (p1.x - p2.x) * (p1.y + p2.y);
-   }
-   s /= 2;
+   s += (x1 - x0) * (y1 + y0);
 
-   output << fabs(s);
-
+   fprintf(output, "%.8f", fabs(s) / 2);
+   fclose(output);
    return 0;
 }
