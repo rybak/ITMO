@@ -10,7 +10,7 @@ int main()
    input >> n;
 
    if (n > 0)
-		output << x << ' ' << y << '\n';
+      output << x << ' ' << y << '\n';
 
    while (i < n)
    {
@@ -28,13 +28,13 @@ int main()
       {
          dx = -dy - 1;
          dy = 0;
-			continue;
+         continue;
       }
       if (dx < 0)
       {
          dy = dx;
          dx = 0;
-			continue;
+         continue;
       }
       if (dy < 0)
       {
