@@ -1,21 +1,22 @@
+
 #include <fstream>
 
 // Ax+By=C
 
 
-__int64 gcd (__int64 a, __int64 b, __int64 & x, __int64 & y) {
+long long  gcd (long long  a, long long  b, long long  & x, long long  & y) {
    if (a == 0) {
       x = 0; y = 1;
       return b;
    }
-   __int64 x1, y1;
-   __int64 d = gcd (b%a, a, x1, y1);
+   long long  x1, y1;
+   long long  d = gcd (b%a, a, x1, y1);
    x = y1 - (b / a) * x1;
    y = x1;
    return d;
 }
 
-__int64 gcd (__int64 a, __int64 b) {
+long long  gcd (long long  a, long long  b) {
    return b ? gcd(b, a % b) : a;
 }
 
@@ -24,7 +25,7 @@ int main()
    std::ifstream input("in.txt");
    std::ofstream output("out.txt");
 
-   __int64 a, b, c;
+   long long  a, b, c;
 
    while (input >> a >> b >> c)
    {
@@ -64,8 +65,8 @@ int main()
       }
       if (c % gcd(a, b) == 0)
       {
-         __int64 x, y;
-         __int64 g = gcd(a, b, x, y);
+         long long  x, y;
+         long long  g = gcd(a, b, x, y);
          output << x * c / g << ' ' << y * c / g << '\n';
          continue;
       }
@@ -75,3 +76,4 @@ int main()
 
    return 0;
 }
+
