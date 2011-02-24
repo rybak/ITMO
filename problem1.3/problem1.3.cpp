@@ -1,22 +1,26 @@
-
 #include <fstream>
 
 // Ax+By=C
 
-
-long long  gcd (long long  a, long long  b, long long  & x, long long  & y) {
-   if (a == 0) {
+long long gcd (long long a, long long b, long long & x, long long & y)
+{
+   if ((a + b == a) || (a + b == b) )
+   {
       x = 0; y = 1;
-      return b;
+      if (b == 0)
+         x = 1;
+      y = y - x;
+      return a + b;
    }
-   long long  x1, y1;
-   long long  d = gcd (b%a, a, x1, y1);
+   long long x1, y1;
+   long long d = gcd (b%a, a, x1, y1);
    x = y1 - (b / a) * x1;
    y = x1;
    return d;
 }
 
-long long  gcd (long long  a, long long  b) {
+long long gcd (long long a, long long b)
+{
    return b ? gcd(b, a % b) : a;
 }
 
@@ -25,7 +29,7 @@ int main()
    std::ifstream input("in.txt");
    std::ofstream output("out.txt");
 
-   long long  a, b, c;
+   long long a, b, c;
 
    while (input >> a >> b >> c)
    {
@@ -37,37 +41,16 @@ int main()
             output << "<none>\n";
          continue;
       }
-      if (a == 0)
-      {
-         if (c == 0)
-            output << "0 0\n";
-         else
-         {
-            if (c % b != 0)
-               output << "<none>\n";
-            else
-               output << "0 " << c / b << '\n';
-         }
-         continue;
-      }
-      if (b == 0)
-      {
-         if (c == 0)
-            output << "0 0\n";
-         else
-         {
-            if (c % a != 0)
-               output << "<none>\n";
-            else
-               output << c / a << " 0" <<'\n';
-         }
-         continue;
-      }
       if (c % gcd(a, b) == 0)
       {
-         long long  x, y;
-         long long  g = gcd(a, b, x, y);
-         output << x * c / g << ' ' << y * c / g << '\n';
+         long long x, y;
+         long long g = gcd(a, b, x, y);
+         long long a1 = x * c / g;
+         long long a2 = y * c / g;
+         
+         output << a1 << ' ' << a2 << '\n';
+         if (a1 * a + a2 * b != c)
+            output << "\n\n\t\tFAIL\n\n";
          continue;
       }
       else
@@ -76,4 +59,3 @@ int main()
 
    return 0;
 }
-
