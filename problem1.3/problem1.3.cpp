@@ -3,18 +3,15 @@
 
 // Ax+By=C
 
-long long gcd (long long a, long long b, long long & x, long long & y)
+long long  gcd (long long  a, long long  b, long long  & x, long long  & y)
 {
-   if ((a + b == a) || (a + b == b) )
+   if (a == 0)
    {
       x = 0; y = 1;
-      if (b == 0)
-         x = 1;
-      y = y - x;
-      return a + b;
+      return b;
    }
-   long long x1, y1;
-   long long d = gcd (b%a, a, x1, y1);
+   long long  x1, y1;
+   long long  d = gcd (b%a, a, x1, y1);
    x = y1 - (b / a) * x1;
    y = x1;
    return d;
@@ -46,11 +43,11 @@ int main()
       {
          long long x, y;
          long long g = gcd(a, b, x, y);
-         long long a1 = x * c / g;
-         long long a2 = y * c / g;
+         x = x * c / g;
+         y = y * c / g;
          
-         output << a1 << ' ' << a2 << '\n';
-         assert(a1 * a + a2 * b == c);
+         output << x << ' ' << y << '\n';
+         assert(x * a + y * b == c);
          continue;
       }
       else
