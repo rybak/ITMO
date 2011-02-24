@@ -1,4 +1,5 @@
 #include <fstream>
+#include <cassert>
 
 // Ax+By=C
 
@@ -49,8 +50,7 @@ int main()
          long long a2 = y * c / g;
          
          output << a1 << ' ' << a2 << '\n';
-         if (a1 * a + a2 * b != c)
-            output << "\n\n\t\tFAIL\n\n";
+         assert(a1 * a + a2 * b == c);
          continue;
       }
       else
