@@ -2,8 +2,8 @@
 #include "big_int.h"
 #include <string>
 #include <fstream>
+#include <iostream>
 using std::string;
-
 big_int_t::big_int_t()
 {
    digits_.push_back(0);
@@ -25,18 +25,24 @@ big_int_t big_int_t::operator-() const
 
 big_int_t& big_int_t::operator+=(const big_int_t& b)
 {
+//   std::cerr << "\noperator+=\n" << *this << "\n" << b << "\n";
    if (b.neg_ != neg_)
       return *this -= (-b);
-   size_t res_size = size() + 1;
-   size_t sum_size = size();
-   if (b.size() >= res_size)
-      res_size = b.size() + 1;
-   if (b.size() < sum_size)
-      sum_size = b.size();
-   digits_.resize(res_size, 0);
-   for (size_t i = 0; i < sum_size; ++i)
+   size_t max_size = size();
+   if (b.size() > max_size)
+      max_size = b.size();
+   digits_.resize(max_size + 1, 0);
+   for (size_t i = 0, n = b.size(); i < n; ++i)
    {
       digits_[i] += b.digits_[i];
+      if (digits_[i] >= base)
+      {
+         digits_[i] -= base;
+         digits_[i + 1]++;
+      }
+   }
+   for (size_t i = b.size(); i < max_size; ++i)
+   {
       if (digits_[i] >= base)
       {
          digits_[i] -= base;
@@ -51,7 +57,8 @@ big_int_t& big_int_t::operator+=(const big_int_t& b)
 
 big_int_t& big_int_t::operator-=(const big_int_t& b)
 {
-
+  // std::cerr << "\noperator-=\n" << *this << "\n" << b << "\n";
+   //std::ofstream debug_out("debug", std::ios_base::app);
    if (b.neg_ != neg_)
       return *this += (-b);
    if (b.abs_compare(*this) > 0)
@@ -60,24 +67,20 @@ big_int_t& big_int_t::operator-=(const big_int_t& b)
       t -= *this;
       return *this = -t;
    }
-   // copypasta
-   size_t res_size = size() + 1;
-   size_t sum_size = size();
-   if (b.size() >= res_size)
-      res_size = b.size();
-   if (b.size() < sum_size)
-      sum_size = b.size();
-   digits_.resize(res_size + 1, 0);
-   for (size_t i = 0; i < sum_size; ++i)
+   size_t max_size = size();
+   if (b.size() > max_size)
+      max_size = b.size();
+   digits_.resize(max_size + 1, 0);
+   for (size_t i = 0; i < b.size(); ++i)
    {
-      if (digits_[i] < b.digits_[i])
+      digits_[i] = digits_[i] - b.digits_[i];
+      if (digits_[i] < 0)
       {
          digits_[i] += base;
          digits_[i + 1]--;
       }
-      digits_[i] = digits_[i] - b.digits_[i];
    }
-   for (size_t i = 0; i < res_size - 1; ++i)
+   for (size_t i = b.size(); i < max_size; ++i)
    {
       if (digits_[i] < 0)
       {

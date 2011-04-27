@@ -36,6 +36,7 @@ struct big_int_t
 
 
 private:
+   std::string to_debug_string() const;
    vector<long long> digits_;
    //size_t size();
    size_t size() const;
