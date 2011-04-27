@@ -33,6 +33,8 @@ struct big_int_t
    
    big_int_t& operator+=(const big_int_t&);
    big_int_t& operator-=(const big_int_t&);
+   big_int_t& operator*=(long long);
+
 
 
 private:
@@ -49,5 +51,7 @@ private:
 
 big_int_t operator+(const big_int_t&, const big_int_t&);
 big_int_t operator-(const big_int_t&, const big_int_t&);
+big_int_t operator*(const big_int_t&, long long);
+//big_int_t operator*(const big_int_t&, const big_int_t&);
 
 // END big_int.h

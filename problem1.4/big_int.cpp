@@ -23,6 +23,8 @@ big_int_t big_int_t::operator-() const
    return t;
 }
 
+// += -= *= /=
+
 big_int_t& big_int_t::operator+=(const big_int_t& b)
 {
 //   std::cerr << "\noperator+=\n" << *this << "\n" << b << "\n";
@@ -93,15 +95,39 @@ big_int_t& big_int_t::operator-=(const big_int_t& b)
    return *this;
 }
 
-
-/*
-void big_int_t::divmod(big_int_t& digits_, big_int_t& b, big_int_t& div, big_int_t& mod)
+big_int_t& big_int_t::operator*=(long long b)
 {
-
+   if (b == 0)
+   {
+      (*this).digits_.resize(0);
+      digits_.push_back(0);
+      neg_ = false;
+      return *this;
+   }
+   if (b < 0)
+   {
+      b = -b;
+      neg_ = !neg_;
+   }
+   digits_.resize(size() + 1, 0);
+   for (size_t i = 0, n = size(); i < n; ++i)
+      digits_[i] *= b;
+   for (size_t i = 0, n = size(); i < n; ++i)
+   {
+      if (digits_[i] > base)
+      {
+         if ((i + 1) >= n)
+            digits_.push_back(digits_[i] / base);
+         else
+            digits_[i + 1] += digits_[i] / base;
+         digits_[i] %= base;
+      }
+   }
+   while (digits_.back() == 0)
+      digits_.pop_back();
 }
-*/
-/*big_int_t to_big_int_t_from_()*/
 
+// + - * /
 big_int_t operator+(const big_int_t&a, const big_int_t& b)
 {
    big_int_t t = a;
@@ -109,12 +135,27 @@ big_int_t operator+(const big_int_t&a, const big_int_t& b)
    return t;
 }
 
+/* binary minus */
 big_int_t operator-(const big_int_t&a, const big_int_t& b)
 {
    big_int_t t = a;
    t -= b;
    return t;
 }
+
+big_int_t operator*(const big_int_t&a, long long b)
+{
+   big_int_t t = a;
+   t *= b;
+   return t;
+}
+
+/*big_int_t operator*(const big_int_t&a, const big_int_t& b)
+{
+   big_int_t t = a;
+   t *= b;
+   return t;
+}*/
 
 // compare
 
