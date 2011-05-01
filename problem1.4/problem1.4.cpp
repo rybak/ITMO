@@ -14,12 +14,11 @@ int main()
    ifstream input("in.txt");
    ofstream output("out.txt");
    
-   big_int_t a, b;
-   long long c;
-   input >> a >> b >> c;
-   /*output << a + b << "\n";
-   output << a - b << "\n";*/
-   output << a * c << "\n";
-   output << b * c << "\n";
+   big_int_t a, b, c;
+   input >> a >> b;
+   c = a * b;
+   output << c << "\n";
+   c = b * a;
+   output << c << "\n";
    return 0;
 }
