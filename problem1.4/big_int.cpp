@@ -51,8 +51,7 @@ big_int_t& big_int_t::operator+=(const big_int_t& b)
          digits_[i + 1]++;
       }
    }
-   while ((digits_.back() == 0) && (digits_.size() > 0))
-      digits_.pop_back();
+   norm();
    return *this;
 }
 
@@ -90,8 +89,7 @@ big_int_t& big_int_t::operator-=(const big_int_t& b)
          digits_[i + 1]--;
       }
    }
-   while ((digits_.back() == 0) && (digits_.size() > 0))
-      digits_.pop_back();
+   norm();
    return *this;
 }
 
@@ -123,8 +121,7 @@ big_int_t& big_int_t::operator*=(long long b)
          digits_[i] %= base;
       }
    }
-   while ((digits_.back() == 0) && (digits_.size() > 0))
-      digits_.pop_back();
+   norm();
    return (*this);
 }
 
@@ -149,8 +146,7 @@ big_int_t& big_int_t::operator*=(const big_int_t& b)
       }
       c.digits_[m + i] += ost;
    }
-   while ((c.digits_.back() == 0) && (c.digits_.size() > 0))
-      c.digits_.pop_back();
+   c.norm();
    return (*this) = c;
 }
 
@@ -343,6 +339,9 @@ size_t big_int_t::size() const
 
 void big_int_t::norm()
 {
-   while ((size() > 1) && (digits_.back() == 0))
+   while ((digits_.size() > 1) && (digits_.back() == 0))
       digits_.pop_back();
+   if (digits_.size() == 1)
+      if (digits_[0] == 0)
+         neg_ = false;
 }
