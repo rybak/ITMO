@@ -10,48 +10,56 @@ using std::ostream;
 
 const long long base = 1000000000;
 const size_t base_length = 9;
-
-struct big_int_t
+struct big_int_division_by_zero{};
+struct big_int
 {
-   big_int_t();
-   big_int_t(const big_int_t&);
-   big_int_t& operator=(const big_int_t&);
-//   const big_int_t& operator+ (big_int_t&) const;
+   big_int();
+   big_int(long long n);
+   big_int(const big_int&);
+   big_int& operator=(const big_int&);
+//   const big_int& operator+ (big_int&) const;
 
-   friend ostream& operator<< (ostream&, const big_int_t&);
-   friend istream& operator>> (istream&, big_int_t&);
+   friend ostream& operator<< (ostream&, const big_int&);
+   friend istream& operator>> (istream&, big_int&);
 /* compare */
-   bool operator>(const big_int_t&) const;
-   bool operator<(const big_int_t&) const;
-   bool operator<=(const big_int_t&) const;
-   bool operator>=(const big_int_t&) const;
-   bool operator==(const big_int_t&) const;
-   bool operator!=(const big_int_t&) const;
+   bool operator>(const big_int&) const;
+   bool operator<(const big_int&) const;
+   bool operator<=(const big_int&) const;
+   bool operator>=(const big_int&) const;
+   bool operator==(const big_int&) const;
+   bool operator!=(const big_int&) const;
 /* arithmetic */
    
-   big_int_t operator-() const;
+   big_int operator-() const;
    
-   big_int_t& operator+=(const big_int_t&);
-   big_int_t& operator-=(const big_int_t&);
-   big_int_t& operator*=(long long);
-   big_int_t& operator*=(const big_int_t&);
+   big_int& operator+=(const big_int&);
+   big_int& operator-=(const big_int&);
+   big_int& operator*=(long long);
+   big_int& operator*=(const big_int&);
 
+   big_int& operator<<= (size_t);
+   big_int& operator>>= (size_t);
+
+   std::pair<big_int, big_int> divmod(const big_int&) const;
+
+   big_int& operator++();
 private:
    std::string to_debug_string() const;
    vector<long long> digits_;
-   //size_t size();
+
    size_t size() const;
    bool neg_;
-   int compare_to (const big_int_t&) const;
-   int abs_compare (const big_int_t&) const;
-   void norm();
 
+   int compare_to(const big_int&) const;
+   int abs_compare(const big_int&) const;
+
+   void norm();
 };
 
-big_int_t operator+(const big_int_t&, const big_int_t&);
-big_int_t operator-(const big_int_t&, const big_int_t&);
-big_int_t operator*(const big_int_t&, long long);
-big_int_t operator*(const big_int_t&, const big_int_t&);
-//big_int_t operator*(const big_int_t&, const big_int_t&);
+big_int operator+(const big_int&, const big_int&);
+big_int operator-(const big_int&, const big_int&);
+big_int operator*(const big_int&, long long);
+big_int operator*(const big_int&, const big_int&);
+big_int operator/(const big_int&, const big_int&);
 
 // END big_int.h
