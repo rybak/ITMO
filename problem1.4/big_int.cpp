@@ -134,7 +134,7 @@ big_int& big_int::operator*=(long long b)
       }
    }
    norm();
-   return (*this);
+   return *this;
 }
 
 big_int& big_int::operator*=(const big_int& b)
@@ -159,30 +159,26 @@ big_int& big_int::operator*=(const big_int& b)
       c.digits_[m + i] += ost;
    }
    c.norm();
-   return (*this) = c;
+   return *this = c;
 }
 
 big_int& big_int::operator<<= (size_t shift)
-{/// DOESNOT WORK
-   long long carry;
-   size_t push_back_size = shift/sizeof(long long)/8 + 1;
-   for (size_t i = 0; i <= push_back_size; i++)
-	   digits_.push_back(0);
-   for (size_t i = 0; i < shift; i++)
+{
+   digits_.resize(size() + (1 << shift) / base + 1, 0);
+   for (size_t j = 0; j < shift; ++j)
    {
-      carry = 0;
-      for (size_t j = 0; j < digits_.size(); j++)
+      digits_.resize(size() + 1, 0);
+      for (size_t i = 0, n = size(); i < n; ++i)
+         digits_[i] <<= 1;
+      for (size_t i = 0, n = size(); i < n; ++i)
       {
-         if (carry)
-         {
-            carry = digits_[j];
-            digits_[j] <<= 1;
-            digits_[j] |= 1;
-         }
-         else
-         {
-            carry = digits_[j];
-            digits_[j] <<= 1;
+         if (digits_[i] >= base)
+         {  
+            if ((i + 1) >= n)
+               digits_.push_back(digits_[i] / base);
+            else
+               digits_[i + 1] += digits_[i] / base;
+            digits_[i] %= base;
          }
       }
    }
@@ -219,17 +215,18 @@ std::pair<big_int, big_int> big_int::divmod (const big_int& b) const
    dividend.neg_ = false;
    divisor.neg_ = false;
    
-   long long shift(0);
    if ((divisor.size() == 1) && (divisor.digits_[0] == 0))
    {
       throw big_int_division_by_zero();
    }
+
    big_int quotient(0);
-   quotient.digits_.resize(dividend.size());
-      
+   quotient.digits_.resize(dividend.size(), 0);
+
+   long long shift(0);
    while (divisor < dividend)
    {
-      divisor *= 2;
+      divisor <<= 1;
       shift++;
    }
    if (divisor > dividend)
@@ -245,23 +242,20 @@ std::pair<big_int, big_int> big_int::divmod (const big_int& b) const
          {          
             dividend -= divisor;
             divisor  >>= 1;
-            quotient *= 2;
+            quotient <<= 1;
             ++quotient;
          }
          else
          {
             divisor >>= 1;
-            quotient *= 2;
+            quotient <<= 1;
          }
       }
-   }
-   // commment
-   
+   }     
    quotient.norm();
    dividend.norm();
    quotient.neg_ = neg_ ^ b.neg_;
    dividend.neg_ = neg_;
-
    return std::make_pair(quotient, dividend);
 }
 
@@ -333,17 +327,6 @@ int big_int::compare_to(const big_int& b)const
       if (b.neg_)
          return 1;
    return abs_compare(b);
-/*   if (size() != b.size())
-      return (size() > b.size())? 1 : -1;
-   for (long i = size() - 1; i >= 0; --i)
-      if (digits_[i] != b.digits_[i])
-      {
-         if (digits_[i] < b.digits_[i])
-            return -1;
-         else
-            return 1;
-      }*/
-   return 0;
 }
 
 bool big_int::operator>(const big_int& b)const
