@@ -47,6 +47,8 @@ struct big_int
    big_int& operator>>=(size_t);
 
    std::pair<big_int, big_int> divmod(const big_int&) const;
+   big_int& operator/=(const big_int&);
+   big_int& operator%=(const big_int&);
 
    big_int& operator++();
 private:
@@ -67,6 +69,9 @@ big_int operator-(const big_int&, const big_int&);
 big_int operator*(const big_int&, long long);
 big_int operator*(const big_int&, const big_int&);
 big_int operator/(const big_int&, const big_int&);
+big_int operator%(const big_int&, const big_int&);
+
+big_int abs(big_int&);
 
 // END big_int.h
 

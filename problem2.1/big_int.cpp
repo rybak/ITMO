@@ -11,6 +11,7 @@ big_int.cpp with    digits_container
 
 using std::string;
 
+
 big_int::big_int():digits_(), neg_(false)
 {}
 
@@ -29,7 +30,12 @@ big_int big_int::operator-() const
    return t;
 }
 
-// += -= *= /=
+big_int abs(big_int& a)
+{
+   return a < big_int(0)? -a : a;
+}
+
+// += -= *= divmod <<= >>= /= %=
 
 big_int& big_int::operator+=(const big_int& b)
 {
@@ -254,7 +260,17 @@ std::pair<big_int, big_int> big_int::divmod(const big_int& b) const
    return std::make_pair(quotient, dividend);
 }
 
-// + - * /
+big_int& big_int::operator/=(const big_int& b)
+{
+   return *this = divmod(b).first;
+}
+
+big_int& big_int::operator%=(const big_int& b)
+{
+   return *this = divmod(b).second;
+}
+
+// + - * / %
 big_int operator+(const big_int&a, const big_int& b)
 {
    big_int t = a;
@@ -281,6 +297,20 @@ big_int operator*(const big_int&a, const big_int& b)
 {
    big_int t = a;
    t *= b;
+   return t;
+}
+
+big_int operator/(const big_int&a, const big_int& b)
+{
+   big_int t = a;
+   t /= b;
+   return t;
+}
+
+big_int operator%(const big_int&a, const big_int& b)
+{
+   big_int t = a;
+   t %= b;
    return t;
 }
 
@@ -353,7 +383,6 @@ big_int & big_int::operator=(const big_int& b)
 }
 
 // input output // big_int
-
 ostream& operator<<(ostream& stream, const big_int& var)
 {
    if (var.neg_)
