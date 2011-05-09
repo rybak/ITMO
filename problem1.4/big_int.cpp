@@ -11,15 +11,23 @@ big_int.cpp WITHOUT digits_container
 
 using std::string;
 
-big_int::big_int():digits_(1), neg_(false)
-{}
-
-big_int::big_int(long long n):digits_(3), neg_(n < 0)
+big_int::big_int()
 {
-   digits_[0] = n % base;
-   digits_[1] = (n / base) % base;
-   digits_[2] = (n / base) / base;
+   digits_.push_back(0);
+   neg_ = false;
+}
+
+big_int::big_int(long long n)
+{
+   digits_.push_back(n);
    norm();
+   neg_ = n < 0;
+}
+
+big_int::big_int(const big_int& b)
+{
+   digits_ = b.digits_;
+   neg_ = b.neg_;
 }
 
 big_int big_int::operator-() const
@@ -30,7 +38,6 @@ big_int big_int::operator-() const
 }
 
 // += -= *= /=
-
 big_int& big_int::operator+=(const big_int& b)
 {
    if (b.neg_ != neg_)
@@ -60,10 +67,6 @@ big_int& big_int::operator+=(const big_int& b)
    return *this;
 }
 
-big_int& big_int::operator++()
-{
-   return (*this) += 1;
-}
 
 big_int& big_int::operator-=(const big_int& b)
 {
@@ -102,12 +105,10 @@ big_int& big_int::operator-=(const big_int& b)
 
 big_int& big_int::operator*=(long long b)
 {
-   if (b >= base)
-      return *this *= big_int(b);
    if (b == 0)
    {
-      (*this).digits_.resize(1);
-      digits_[0] = 0;
+      (*this).digits_.resize(0);
+      digits_.push_back(0);
       neg_ = false;
       return *this;
    }
@@ -159,11 +160,12 @@ big_int& big_int::operator*=(const big_int& b)
    return *this = c;
 }
 
-big_int& big_int::operator<<=(size_t shift)
+big_int& big_int::operator<<= (size_t shift)
 {
-   digits_.resize(size() + (1LL << shift) / base + 1, 0);
+   digits_.resize(size() + (1 << shift) / base + 1, 0);
    for (size_t j = 0; j < shift; ++j)
    {
+      digits_.resize(size() + 1, 0);
       for (size_t i = 0, n = size(); i < n; ++i)
          digits_[i] <<= 1;
       for (size_t i = 0, n = size(); i < n; ++i)
@@ -182,7 +184,7 @@ big_int& big_int::operator<<=(size_t shift)
    return *this;
 }
 
-big_int& big_int::operator>>=(size_t shift)
+big_int& big_int::operator>>= (size_t shift)
 {
    long long carry;
    
@@ -201,7 +203,7 @@ big_int& big_int::operator>>=(size_t shift)
    return *this;
 }
 
-std::pair<big_int, big_int> big_int::divmod(const big_int& b) const
+std::pair<big_int, big_int> big_int::divmod (const big_int& b) const
 {
    big_int dividend(*this);
    big_int divisor(b);
@@ -313,7 +315,7 @@ int big_int::compare_to(const big_int& b)const
       if (b.neg_)
          return 1;
    return abs_compare(b);
-	}
+}
 
 bool big_int::operator>(const big_int& b)const
 {
@@ -353,7 +355,6 @@ big_int & big_int::operator=(const big_int& b)
 }
 
 // input output // big_int
-
 ostream& operator<<(ostream& stream, const big_int& var)
 {
    if (var.neg_)
@@ -384,8 +385,7 @@ istream& operator>>(istream& stream, big_int& var)
    size_t len = s.length();
    if (len == 0)
       return stream;
-   var.digits_.resize((len - 1) / base_length + 1, 0);
-   
+
    size_t start_pos = 0;
    if (s[0] == '-')
    {
@@ -395,20 +395,19 @@ istream& operator>>(istream& stream, big_int& var)
    }
    else
       var.neg_ = false;
-   
+   var.digits_.assign((len - 1) / base_length + 1, 0);
+  
    size_t first_digit_len = len - (var.size() - 1) * base_length;
    for (size_t j = start_pos; j < (first_digit_len + start_pos); ++j)
       var.digits_[var.size() - 1] = var.digits_[var.size() - 1] * 10 + s[j] - '0';
    
    first_digit_len += start_pos;
-
    for (size_t i = 0, n = var.size() - 1; i < n; ++i)
    {
       size_t pos = first_digit_len + (i * base_length);
       for (size_t j = pos; j < (pos + base_length); ++j)
          var.digits_[n - i - 1] = var.digits_[n - i - 1] * 10 + s[j] - '0';
    }
-
    return stream;
 }
 
@@ -422,8 +421,11 @@ void big_int::norm()
    while ((digits_.size() > 1) && (digits_.back() == 0))
       digits_.pop_back();
    if (digits_.size() == 1)
-   {
       if (digits_[0] == 0)
          neg_ = false;
-   }
+}
+
+big_int& big_int::operator++()
+{
+   return (*this) += 1;
 }

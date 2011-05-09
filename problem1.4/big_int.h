@@ -20,6 +20,7 @@ struct big_int
 {
    big_int();
    big_int(long long n);
+   big_int& (const big_int&);
    big_int& operator=(const big_int&);
 
    friend ostream& operator<< (ostream&, const big_int&);
