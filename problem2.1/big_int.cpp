@@ -15,12 +15,21 @@ using std::string;
 big_int::big_int():digits_(), neg_(false)
 {}
 
-big_int::big_int(long long n):digits_(3), neg_(n < 0)
+big_int::big_int(long long n): neg_(n < 0)
 {
    n = n < 0 ? -n : n;
-   digits_[0] = n % base;
-   digits_[1] = (n / base) % base;
-   digits_[2] = (n / base) / base;
+   if (n < base)
+   {
+      digits_[0] = n;
+   }
+   else
+   {
+      while (n > 0)
+      {
+         digits_.push_back(n % base);
+         n /= base;
+      }
+   }
    norm();
 }
 
@@ -456,9 +465,9 @@ void big_int::norm()
 {
    while ((digits_.size() > 1) && (digits_[size() - 1] == 0))
       digits_.pop_back();
-   if (digits_.size() == 1)
+   if (digits_[0] == 0)
    {
-      if (digits_[0] == 0)
+      if (digits_.size() == 1)      
          neg_ = false;
    }
 }
