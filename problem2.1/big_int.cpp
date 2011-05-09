@@ -17,6 +17,7 @@ big_int::big_int():digits_(), neg_(false)
 
 big_int::big_int(long long n):digits_(3), neg_(n < 0)
 {
+   n = n < 0 ? -n : n;
    digits_[0] = n % base;
    digits_[1] = (n / base) % base;
    digits_[2] = (n / base) / base;
@@ -266,11 +267,11 @@ std::pair<big_int, big_int> big_int::divmod(const big_int& b) const
             quotient <<= 1;
          }
       }
-   }     
-   quotient.norm();
-   dividend.norm();
+   }
    quotient.neg_ = neg_ ^ b.neg_;
    dividend.neg_ = neg_;
+   quotient.norm();
+   dividend.norm();
    return std::make_pair(quotient, dividend);
 }
 
@@ -407,7 +408,7 @@ ostream& operator<<(ostream& stream, const big_int& var)
          stream << '0';
       stream << var.digits_[n - i - 1];
    }
-
+   
    return stream;
 }
 
@@ -442,6 +443,7 @@ istream& operator>>(istream& stream, big_int& var)
       for (size_t j = pos; j < (pos + base_length); ++j)
          var.digits_[n - i - 1] = var.digits_[n - i - 1] * 10 + s[j] - '0';
    }
+   var.norm();
    return stream;
 }
 
