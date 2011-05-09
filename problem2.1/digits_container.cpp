@@ -1,10 +1,5 @@
-/*
-digits_container.cpp
-*/
-
 #include <assert.h>
 #include "digits_container.h"
-
 
 digits_container::digits_container()
 {
@@ -31,6 +26,7 @@ digits_container::digits_container(const digits_container& val): size_(val.size_
    if (size_ == 1)
    {
       digit_ = val.digit_;
+      capacity_ = 1;
    }
    else
    {
@@ -112,7 +108,6 @@ void digits_container::push_back(long long x)
 
 void digits_container::pop_back()
 {
-
    if (size_ == 0)
    {
       throw digits_container_empty();
