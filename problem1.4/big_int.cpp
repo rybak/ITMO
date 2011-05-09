@@ -162,7 +162,7 @@ big_int& big_int::operator*=(const big_int& b)
 
 big_int& big_int::operator<<= (size_t shift)
 {
-   digits_.resize(size() + (1 << shift) / base + 1, 0);
+   digits_.resize(size() + (1LL << shift) / base + 1, 0);
    for (size_t j = 0; j < shift; ++j)
    {
       digits_.resize(size() + 1, 0);
