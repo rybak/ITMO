@@ -1,17 +1,20 @@
+#ifndef BIG_INT_H
+#define BIG_INT_H
+
+//typedef unsigned long size_t;
+
 /*
 rybak andrey
-big_int.h WITHOUT digits_container
+big_int.h with    digits_container
 */
 
-#pragma once
-
-#include <vector>
+//#include <vector>
 #include <string>
-using std::vector;
+//using std::vector;
 using std::istream;
 using std::ostream;
 
-//#include "digits_container.h"
+#include "digits_container.h"
 
 const long long base = 1000000000;
 const size_t base_length = 9;
@@ -47,7 +50,7 @@ struct big_int
 
    big_int& operator++();
 private:
-   typedef vector<long long> digits_container;
+   //typedef vector<long long> digits_container;
    digits_container digits_;
 
    size_t size() const;
@@ -66,3 +69,5 @@ big_int operator*(const big_int&, const big_int&);
 big_int operator/(const big_int&, const big_int&);
 
 // END big_int.h
+
+#endif
