@@ -54,7 +54,6 @@ void digits_container::resize(size_t new_size)
 {
    if (new_size == size_)
       return;
-   assert(new_size != size_);
    if (new_size <= 1)
    {
       long long old = 0;
@@ -67,10 +66,7 @@ void digits_container::resize(size_t new_size)
    }
    else
    {
-      assert(new_size > 1);
       size_t new_capacity = calc_capacity(new_size);
-      assert(new_size <= new_capacity);
-      assert(new_capacity > 1);
       size_t min = size_ < new_size ? size_ : new_size;
       if (new_capacity != capacity_)
       {

@@ -23,6 +23,20 @@ big_int::big_int(long long n):digits_(3), neg_(n < 0)
    norm();
 }
 
+big_int & big_int::operator=(const big_int& b)
+{
+   digits_ = b.digits_;
+   neg_ = b.neg_;
+   return *this;
+}
+
+void big_int::swap(big_int& b)
+{
+   big_int t = *this;
+   *this = b;
+   b = t;
+}
+
 big_int big_int::operator-() const
 {
    big_int t = *this;
@@ -278,7 +292,6 @@ big_int operator+(const big_int&a, const big_int& b)
    return t;
 }
 
-/* binary minus */
 big_int operator-(const big_int&a, const big_int& b)
 {
    big_int t = a;
@@ -373,13 +386,6 @@ bool big_int::operator==(const big_int& b)const
 bool big_int::operator!=(const big_int& b)const
 {
    return this->compare_to(b) != 0;
-}
-
-big_int & big_int::operator=(const big_int& b)
-{
-   digits_ = b.digits_;
-   neg_ = b.neg_;
-   return *this;
 }
 
 // input output // big_int
