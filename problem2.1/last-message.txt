@@ -1,4 +1,4 @@
-Accepted
+Some tests were failed.
 
-[Generated at May 9, 2011 10:14:17 PM GMT+03:00]
+[Generated at May 13, 2011 5:17:21 PM GMT+03:00]
 

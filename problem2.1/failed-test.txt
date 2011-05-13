@@ -1,0 +1,12 @@
+Running 5 test cases...
+big_int_test.cpp(388): error in "io_test": check iss1.fail() == iss2.fail() failed [false != true]
+big_int_test.cpp(388): error in "io_test": check iss1.fail() == iss2.fail() failed [false != true]
+big_int_test.cpp(386): error in "io_test": check iss1.good() == iss2.good() failed [true != false]
+big_int_test.cpp(388): error in "io_test": check iss1.fail() == iss2.fail() failed [false != true]
+big_int_test.cpp(386): error in "io_test": check iss1.good() == iss2.good() failed [true != false]
+big_int_test.cpp(388): error in "io_test": check iss1.fail() == iss2.fail() failed [false != true]
+big_int_test.cpp(387): error in "io_test": check iss1.eof() == iss2.eof() failed [true != false]
+big_int_test.cpp(388): error in "io_test": check iss1.fail() == iss2.fail() failed [false != true]
+big_int_test.cpp(412): error in "io_test": check x1 == big_int(x2) failed [42369 != 42]
+big_int_test.cpp(413): error in "io_test": check s1 == s2 failed [ != .da]
+big_int_test.cpp(416): error in "io_test": check iss1.fail() == iss2.fail() failed [true != false]
