@@ -7,14 +7,10 @@ big_int.h WITHOUT digits_container
 
 #include <vector>
 #include <string>
-using std::vector;
-using std::istream;
-using std::ostream;
 
 //#include "digits_container.h"
 
-const long long base = 1000000000;
-const size_t base_length = 9;
+
 struct big_int_division_by_zero{};
 struct big_int
 {
@@ -23,8 +19,8 @@ struct big_int
    big_int(const big_int&);
    big_int& operator=(const big_int&);
 
-   friend ostream& operator<< (ostream&, const big_int&);
-   friend istream& operator>> (istream&, big_int&);
+   friend std::ostream& operator<< (std::ostream&, const big_int&);
+   friend std::istream& operator>> (std::istream&, big_int&);
 /* compare */
    bool operator>(const big_int&) const;
    bool operator<(const big_int&) const;
@@ -47,8 +43,11 @@ struct big_int
    std::pair<big_int, big_int> divmod(const big_int&) const;
 
    big_int& operator++();
+
 private:
-   typedef vector<long long> digits_container;
+   static const long long base = 1000000000;
+   static const size_t base_length = 9;
+   typedef std::vector<long long> digits_container;
    digits_container digits_;
 
    size_t size() const;
@@ -57,7 +56,7 @@ private:
    int compare_to(const big_int&) const;
    int abs_compare(const big_int&) const;
 
-   void norm();
+   void normalize();
 };
 
 big_int operator+(const big_int&, const big_int&);

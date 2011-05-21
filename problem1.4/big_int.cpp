@@ -9,7 +9,6 @@ big_int.cpp WITHOUT digits_container
 
 #include "big_int.h"
 
-using std::string;
 
 big_int::big_int()
 {
@@ -20,7 +19,7 @@ big_int::big_int()
 big_int::big_int(long long n)
 {
    digits_.push_back(n);
-   norm();
+   normalize();
    neg_ = n < 0;
 }
 
@@ -63,7 +62,7 @@ big_int& big_int::operator+=(const big_int& b)
          digits_[i + 1]++;
       }
    }
-   norm();
+   normalize();
    return *this;
 }
 
@@ -99,7 +98,7 @@ big_int& big_int::operator-=(const big_int& b)
          digits_[i + 1]--;
       }
    }
-   norm();
+   normalize();
    return *this;
 }
 
@@ -131,7 +130,7 @@ big_int& big_int::operator*=(long long b)
          digits_[i] %= base;
       }
    }
-   norm();
+   normalize();
    return *this;
 }
 
@@ -156,7 +155,7 @@ big_int& big_int::operator*=(const big_int& b)
       }
       c.digits_[m + i] += ost;
    }
-   c.norm();
+   c.normalize();
    return *this = c;
 }
 
@@ -180,7 +179,7 @@ big_int& big_int::operator<<= (size_t shift)
          }
       }
    }
-   norm();
+   normalize();
    return *this;
 }
 
@@ -199,7 +198,7 @@ big_int& big_int::operator>>= (size_t shift)
             digits_[j - 1] += (base >> 1);
       }
    }
-   norm();
+   normalize();
    return *this;
 }
 
@@ -249,8 +248,8 @@ std::pair<big_int, big_int> big_int::divmod (const big_int& b) const
          }
       }
    }     
-   quotient.norm();
-   dividend.norm();
+   quotient.normalize();
+   dividend.normalize();
    quotient.neg_ = neg_ ^ b.neg_;
    dividend.neg_ = neg_;
    return std::make_pair(quotient, dividend);
@@ -355,21 +354,21 @@ big_int & big_int::operator=(const big_int& b)
 }
 
 // input output // big_int
-ostream& operator<<(ostream& stream, const big_int& var)
+std::ostream& operator<<(std::ostream& stream, const big_int& var)
 {
    if (var.neg_)
       stream << '-';
    stream << var.digits_[var.size() - 1];
    for (size_t i = 0, n = var.size() - 1; i < n; ++i)
    {
-      string s;
+      std::string s;
       size_t l = 0;
       for (long long temp = var.digits_[n - i - 1]; temp > 9; )
       {
          temp /= 10;
          l++;
       }
-      for (size_t j = l + 1; j < base_length; ++j)
+      for (size_t j = l + 1; j < big_int::base_length; ++j)
          stream << '0';
       stream << var.digits_[n - i - 1];
    }
@@ -377,9 +376,9 @@ ostream& operator<<(ostream& stream, const big_int& var)
    return stream;
 }
 
-istream& operator>>(istream& stream, big_int& var)
+std::istream& operator>>(std::istream& stream, big_int& var)
 {
-   string s;
+   std::string s;
    stream >> s;
    
    size_t len = s.length();
@@ -395,17 +394,17 @@ istream& operator>>(istream& stream, big_int& var)
    }
    else
       var.neg_ = false;
-   var.digits_.assign((len - 1) / base_length + 1, 0);
+   var.digits_.assign((len - 1) / big_int::base_length + 1, 0);
   
-   size_t first_digit_len = len - (var.size() - 1) * base_length;
+   size_t first_digit_len = len - (var.size() - 1) * big_int::base_length;
    for (size_t j = start_pos; j < (first_digit_len + start_pos); ++j)
       var.digits_[var.size() - 1] = var.digits_[var.size() - 1] * 10 + s[j] - '0';
    
    first_digit_len += start_pos;
    for (size_t i = 0, n = var.size() - 1; i < n; ++i)
    {
-      size_t pos = first_digit_len + (i * base_length);
-      for (size_t j = pos; j < (pos + base_length); ++j)
+      size_t pos = first_digit_len + (i * big_int::base_length);
+      for (size_t j = pos; j < (pos + big_int::base_length); ++j)
          var.digits_[n - i - 1] = var.digits_[n - i - 1] * 10 + s[j] - '0';
    }
    return stream;
@@ -416,7 +415,7 @@ size_t big_int::size() const
    return digits_.size();
 }
 
-void big_int::norm()
+void big_int::normalize()
 {
    while ((digits_.size() > 1) && (digits_.back() == 0))
       digits_.pop_back();
