@@ -8,11 +8,7 @@ rybak andrey
 big_int.h with    digits_container
 */
 
-//#include <vector>
 #include <string>
-//using std::vector;
-using std::istream;
-using std::ostream;
 
 #include "digits_container.h"
 
@@ -22,12 +18,12 @@ struct big_int_division_by_zero{};
 struct big_int
 {
    big_int();
-   big_int(long long n);
+   explicit big_int(long long n);
    big_int& operator=(const big_int&);
    void swap(big_int&);
 
-   friend ostream& operator<< (ostream&, const big_int&);
-   friend istream& operator>> (istream&, big_int&);
+   friend std::ostream& operator<< (std::ostream&, const big_int&);
+   friend std::istream& operator>> (std::istream&, big_int&);
 /* compare */
    bool operator>(const big_int&) const;
    bool operator<(const big_int&) const;
@@ -59,15 +55,16 @@ private:
    size_t size() const;
    bool neg_;
 
-   int compare_to(const big_int&) const;
-   int abs_compare(const big_int&) const;
+   long long compare_to(const big_int&) const;
+   long long abs_compare(const big_int&) const;
 
-   void norm();
+   void normalize();
 };
 
 big_int operator+(const big_int&, const big_int&);
 big_int operator-(const big_int&, const big_int&);
 big_int operator*(const big_int&, long long);
+big_int operator*(long long, const big_int&);
 big_int operator*(const big_int&, const big_int&);
 big_int operator/(const big_int&, const big_int&);
 big_int operator%(const big_int&, const big_int&);

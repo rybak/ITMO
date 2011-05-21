@@ -68,7 +68,7 @@ void digits_container::resize(size_t new_size)
    {
       size_t new_capacity = calc_capacity(new_size);
       size_t min = size_ < new_size ? size_ : new_size;
-      if (new_capacity != capacity_)
+      if (new_capacity > capacity_)
       {
          long long *new_digits = new long long[capacity_ = new_capacity];
          for (size_t i = 0; i < min; ++i)
@@ -128,7 +128,7 @@ long long& digits_container::operator[](size_t index)
 {
    if (index < size_)
    {
-      if (size_ == 1)   
+      if (size_ == 1)
          return digit_;
       else
          return digits_[index];

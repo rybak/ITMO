@@ -30,7 +30,7 @@ big_int::big_int(long long n): neg_(n < 0)
          n /= base;
       }
    }
-   norm();
+   normalize();
 }
 
 big_int & big_int::operator=(const big_int& b)
@@ -86,13 +86,13 @@ big_int& big_int::operator+=(const big_int& b)
          digits_[i + 1]++;
       }
    }
-   norm();
+   normalize();
    return *this;
 }
 
 big_int& big_int::operator++()
 {
-   return (*this) += 1;
+   return (*this) += big_int(1);
 }
 
 big_int& big_int::operator-=(const big_int& b)
@@ -126,7 +126,7 @@ big_int& big_int::operator-=(const big_int& b)
          digits_[i + 1]--;
       }
    }
-   norm();
+   normalize();
    return *this;
 }
 
@@ -160,7 +160,7 @@ big_int& big_int::operator*=(long long b)
          digits_[i] %= base;
       }
    }
-   norm();
+   normalize();
    return *this;
 }
 
@@ -185,7 +185,7 @@ big_int& big_int::operator*=(const big_int& b)
       }
       c.digits_[m + i] += ost;
    }
-   c.norm();
+   c.normalize();
    return *this = c;
 }
 
@@ -208,7 +208,7 @@ big_int& big_int::operator<<=(size_t shift)
          }
       }
    }
-   norm();
+   normalize();
    return *this;
 }
 
@@ -227,7 +227,7 @@ big_int& big_int::operator>>=(size_t shift)
             digits_[j - 1] += (base >> 1);
       }
    }
-   norm();
+   normalize();
    return *this;
 }
 
@@ -279,8 +279,8 @@ std::pair<big_int, big_int> big_int::divmod(const big_int& b) const
    }
    quotient.neg_ = neg_ ^ b.neg_;
    dividend.neg_ = neg_;
-   quotient.norm();
-   dividend.norm();
+   quotient.normalize();
+   dividend.normalize();
    return std::make_pair(quotient, dividend);
 }
 
@@ -316,6 +316,13 @@ big_int operator*(const big_int&a, long long b)
    return t;
 }
 
+big_int operator*(long long b, const big_int&a)
+{
+   big_int t = a;
+   t *= b;
+   return t;
+}
+
 big_int operator*(const big_int&a, const big_int& b)
 {
    big_int t = a;
@@ -338,11 +345,11 @@ big_int operator%(const big_int&a, const big_int& b)
 }
 
 // compare
-int big_int::abs_compare(const big_int& b) const
+long long big_int::abs_compare(const big_int& b) const
 {
    if (size() != b.size())
       return (size() > b.size())? 1 : -1;
-   for (long i = size() - 1; i >= 0; --i)
+   for (size_t i = size() - 1; i > 0; --i)
       if (digits_[i] != b.digits_[i])
       {
          if (digits_[i] < b.digits_[i])
@@ -350,10 +357,10 @@ int big_int::abs_compare(const big_int& b) const
          else
             return 1;
       }
-   return 0;
+   return digits_[0] - b.digits_[0];
 }
 
-int big_int::compare_to(const big_int& b)const
+long long big_int::compare_to(const big_int& b)const
 {
    if (this->neg_)
    {
@@ -399,7 +406,7 @@ bool big_int::operator!=(const big_int& b)const
 }
 
 // input output // big_int
-ostream& operator<<(ostream& stream, const big_int& var)
+std::ostream& operator<<(std::ostream& stream, const big_int& var)
 {
    if (var.neg_)
       stream << '-';
@@ -421,7 +428,7 @@ ostream& operator<<(ostream& stream, const big_int& var)
    return stream;
 }
 
-istream& operator>>(istream& stream, big_int& var)
+std::istream& operator>>(std::istream& stream, big_int& var)
 {
    string s;
    stream >> s;
@@ -452,7 +459,7 @@ istream& operator>>(istream& stream, big_int& var)
       for (size_t j = pos; j < (pos + base_length); ++j)
          var.digits_[n - i - 1] = var.digits_[n - i - 1] * 10 + s[j] - '0';
    }
-   var.norm();
+   var.normalize();
    return stream;
 }
 
@@ -461,7 +468,7 @@ size_t big_int::size() const
    return digits_.size();
 }
 
-void big_int::norm()
+void big_int::normalize()
 {
    while ((digits_.size() > 1) && (digits_[size() - 1] == 0))
       digits_.pop_back();
