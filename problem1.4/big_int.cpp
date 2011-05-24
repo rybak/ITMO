@@ -248,10 +248,10 @@ std::pair<big_int, big_int> big_int::divmod (const big_int& b) const
          }
       }
    }     
-   quotient.normalize();
-   dividend.normalize();
    quotient.neg_ = neg_ ^ b.neg_;
    dividend.neg_ = neg_;
+   quotient.normalize();
+   dividend.normalize();
    return std::make_pair(quotient, dividend);
 }
 
