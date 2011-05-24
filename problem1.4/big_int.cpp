@@ -9,7 +9,7 @@ big_int.cpp WITHOUT digits_container
 
 #include "big_int.h"
 
-big_int::big_int(long long n = 0)
+big_int::big_int(long long n)
 {
    do
    {
