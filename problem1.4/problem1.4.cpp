@@ -9,6 +9,7 @@ using std::string;
 using std::ifstream;
 using std::ofstream;
 using std::pair;
+
 int main()
 {
    ifstream input("in.txt");
@@ -18,7 +19,7 @@ int main()
    while (input >> a)
    {
       input >> b;
-      if (b == 0) 
+      if (b == big_int(0))
          output << error;
       else
       {

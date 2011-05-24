@@ -426,5 +426,5 @@ void big_int::normalize()
 
 big_int& big_int::operator++()
 {
-   return (*this) += 1;
+   return (*this) += big_int(1);
 }
