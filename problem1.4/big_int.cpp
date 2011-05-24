@@ -9,17 +9,13 @@ big_int.cpp WITHOUT digits_container
 
 #include "big_int.h"
 
-
-big_int::big_int()
+big_int::big_int(long long n = 0)
 {
-   digits_.push_back(0);
-   neg_ = false;
-}
-
-big_int::big_int(long long n)
-{
-   digits_.push_back(n);
-   normalize();
+   do
+   {
+      digits_.push_back(n % base);
+      n /= base;
+   } while (n > 0);
    neg_ = n < 0;
 }
 
@@ -62,7 +58,7 @@ big_int& big_int::operator+=(const big_int& b)
          digits_[i + 1]++;
       }
    }
-   normalize();
+   cut_leading_zeros();
    return *this;
 }
 
@@ -98,7 +94,7 @@ big_int& big_int::operator-=(const big_int& b)
          digits_[i + 1]--;
       }
    }
-   normalize();
+   cut_leading_zeros();
    return *this;
 }
 
@@ -130,7 +126,7 @@ big_int& big_int::operator*=(long long b)
          digits_[i] %= base;
       }
    }
-   normalize();
+   cut_leading_zeros();
    return *this;
 }
 
@@ -155,7 +151,7 @@ big_int& big_int::operator*=(const big_int& b)
       }
       c.digits_[m + i] += ost;
    }
-   c.normalize();
+   c.cut_leading_zeros();
    return *this = c;
 }
 
@@ -179,7 +175,7 @@ big_int& big_int::operator<<= (size_t shift)
          }
       }
    }
-   normalize();
+   cut_leading_zeros();
    return *this;
 }
 
@@ -198,7 +194,7 @@ big_int& big_int::operator>>= (size_t shift)
             digits_[j - 1] += (base >> 1);
       }
    }
-   normalize();
+   cut_leading_zeros();
    return *this;
 }
 
@@ -250,8 +246,8 @@ std::pair<big_int, big_int> big_int::divmod (const big_int& b) const
    }
    quotient.neg_ = neg_ ^ b.neg_;
    dividend.neg_ = neg_;
-   quotient.normalize();
-   dividend.normalize();
+   quotient.cut_leading_zeros();
+   dividend.cut_leading_zeros();
    return std::make_pair(quotient, dividend);
 }
 
@@ -415,7 +411,7 @@ size_t big_int::size() const
    return digits_.size();
 }
 
-void big_int::normalize()
+void big_int::cut_leading_zeros()
 {
    while ((digits_.size() > 1) && (digits_.back() == 0))
       digits_.pop_back();
