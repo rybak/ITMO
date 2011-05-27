@@ -1,4 +1,0 @@
-Some tests were failed.
-
-[Generated at May 13, 2011 5:17:21 PM GMT+03:00]
-

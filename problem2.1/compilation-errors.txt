@@ -1,5 +1,0 @@
-problem2.1.obj : error LNK2005: _main already defined in big_int_test.obj [X:\evaluator\export\problem2.1\build.xml]
-Debug\build.exe : fatal error LNK1169: one or more multiply defined symbols found [X:\evaluator\export\problem2.1\build.xml]
-
-[Generated at May 9, 2011 6:27:31 PM GMT+03:00]
-

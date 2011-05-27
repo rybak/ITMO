@@ -1,4 +1,0 @@
-x:\evaluator\export\problem1.4\big_int.cpp(165): warning C4334: '<<' : result of 32-bit shift implicitly converted to 64 bits (was 64-bit shift intended?) [X:\evaluator\export\problem1.4\problem1.4.vcxproj]
-
-[Generated at May 9, 2011 4:45:53 PM GMT+03:00]
-
