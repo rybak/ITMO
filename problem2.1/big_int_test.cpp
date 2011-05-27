@@ -297,7 +297,10 @@ BOOST_AUTO_TEST_CASE( swap_test )
     big_int f(e);
 
     e.swap(e);
-    BOOST_CHECK_EQU
+    BOOST_CHECK_EQUAL(f, e);
+
+    e = e;
+    BOOST_CHECK_EQUAL(f);
 }
 
 BOOST_AUTO_TEST_CASE( io_test )
