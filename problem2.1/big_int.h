@@ -52,7 +52,7 @@ private:
    //typedef std::vector<long long> digits_container;
    digits_container digits_;
 
-   bool neg_;
+   bool negative_;
 
    size_t size() const;
 

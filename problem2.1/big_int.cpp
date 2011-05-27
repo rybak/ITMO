@@ -6,14 +6,13 @@ big_int.cpp with    digits_container
 #include <string>
 #include <fstream>
 #include <iostream>
-
+#include <stdlib.h>
 #include "big_int.h"
 
-big_int::big_int(long long n): neg_(n < 0)
+big_int::big_int(long long n) : negative_(n < 0)
 {
-   if (neg_)
+   if (negative_)
       n = -n;
-   digits_.resize(0);
    do
    {
       digits_.push_back(n % base);
@@ -22,30 +21,28 @@ big_int::big_int(long long n): neg_(n < 0)
    cut_leading_zeros();
 }
 
-big_int::big_int(const big_int& b) : digits_(b.digits_), neg_(b.neg_)
+big_int::big_int(const big_int& b) : digits_(b.digits_), negative_(b.negative_)
 {}
 
 big_int& big_int::operator=(const big_int& b)
 {
    digits_ = b.digits_;
-   neg_ = b.neg_;
+   negative_ = b.negative_;
    return *this;
 }
 
 big_int big_int::operator-() const
 {
    big_int t = *this;
-   t.neg_ = !t.neg_;
+   t.negative_ = !t.negative_;
    return t;
 }
 
 big_int& big_int::operator+=(const big_int& b)
 {
-   if (b.neg_ != neg_)
+   if (b.negative_ != negative_)
       return *this -= (-b);
-   size_t max_size = size();
-   if (b.size() > max_size)
-      max_size = b.size();
+   size_t max_size = std::max(size(), b.size());
    digits_.resize(max_size + 1);
    for (size_t i = 0, n = b.size(); i < n; ++i)
    {
@@ -75,17 +72,11 @@ big_int& big_int::operator++()
 
 big_int& big_int::operator-=(const big_int& b)
 {
-   if (b.neg_ != neg_)
+   if (b.negative_ != negative_)
       return *this += (-b);
    if (b.abs_compare(*this) > 0)
-   {
-      big_int t = b;
-      t -= *this;
-      return *this = -t;
-   }
-   size_t max_size = size();
-   if (b.size() > max_size)
-      max_size = b.size();
+      return *this = -(b - *this);
+   size_t max_size = std::max(size(), b.size());
    digits_.resize(max_size + 1);
    for (size_t i = 0; i < b.size(); ++i)
    {
@@ -110,19 +101,14 @@ big_int& big_int::operator-=(const big_int& b)
 
 big_int& big_int::operator*=(long long b)
 {
-   if (b >= base)
+   if (abs(b) >= base)
       return *this *= big_int(b);
    if (b == 0)
-   {
-      digits_.resize(1);
-      digits_[0] = 0;
-      neg_ = false;
-      return *this;
-   }
+      return *this = big_int(0);
    if (b < 0)
    {
       b = -b;
-      neg_ = !neg_;
+      negative_ = !negative_;
    }
    digits_.resize(size() + 1);
    for (size_t i = 0, n = size(); i < n; ++i)
@@ -144,24 +130,26 @@ big_int& big_int::operator*=(long long b)
 
 big_int& big_int::operator*=(const big_int& b)
 {
+   if (b == big_int(0))
+      return *this = b;
    big_int c;
-   c.neg_ = neg_ ^ b.neg_;
+   c.negative_ = negative_ ^ b.negative_;
    c.digits_.resize(size() + b.size());
    size_t pos;
-   long long ost;
+   long long carry;
    size_t n = b.size(), m = size();
    for (size_t i = 0; i < n; ++i)
    {
-      ost = 0;
+      carry = 0;
       for (size_t j = 0; j < m; ++j)
       {
          pos = j + i;
-         c.digits_[pos] += digits_[j] * b.digits_[i] + ost;
-         ost = c.digits_[pos] / base;
+         c.digits_[pos] += digits_[j] * b.digits_[i] + carry;
+         carry = c.digits_[pos] / base;
          if (c.digits_[pos] > base)
             c.digits_[pos] %= base;
       }
-      c.digits_[m + i] += ost;
+      c.digits_[m + i] += carry;
    }
    c.cut_leading_zeros();
    return *this = c;
@@ -211,19 +199,17 @@ big_int& big_int::operator>>=(size_t shift)
 
 std::pair<big_int, big_int> big_int::divmod(const big_int& b) const
 {
+   if (b == big_int(0))
+      throw big_int_division_by_zero();
+
    big_int dividend(*this);
    big_int divisor(b);
    /* absolute division
       signs will be given later*/
-   dividend.neg_ = false;
-   divisor.neg_ = false;
-   
-   if ((divisor.size() == 1) && (divisor.digits_[0] == 0))
-   {
-      throw big_int_division_by_zero();
-   }
+   dividend.negative_ = false;
+   divisor.negative_ = false;
 
-   big_int quotient(0);
+   big_int quotient;
    quotient.digits_.resize(dividend.size());
 
    long long shift(0);
@@ -255,8 +241,8 @@ std::pair<big_int, big_int> big_int::divmod(const big_int& b) const
          }
       }
    }
-   quotient.neg_ = neg_ ^ b.neg_;
-   dividend.neg_ = neg_;
+   quotient.negative_ = negative_ ^ b.negative_;
+   dividend.negative_ = negative_;
    quotient.cut_leading_zeros();
    dividend.cut_leading_zeros();
    return std::make_pair(quotient, dividend);
@@ -322,12 +308,11 @@ big_int operator%(const big_int&a, const big_int& b)
    return t;
 }
 
-// compare
 int big_int::abs_compare(const big_int& b) const
 {
    if (size() != b.size())
       return (size() > b.size())? 1 : -1;
-   for (long long i = size() - 1; i >= 0; --i)
+   for (long i = size() - 1; i >= 0; --i)
       if (digits_[i] != b.digits_[i])
       {
          if (digits_[i] < b.digits_[i])
@@ -340,15 +325,15 @@ int big_int::abs_compare(const big_int& b) const
 
 int big_int::compare_to(const big_int& b)const
 {
-   if (this->neg_)
+   if (this->negative_)
    {
-      if (b.neg_)
+      if (b.negative_)
          return (-b).compare_to(-(*this));
       else
          return -1;
    }
    else
-      if (b.neg_)
+      if (b.negative_)
          return 1;
    return abs_compare(b);
 }
@@ -383,10 +368,9 @@ bool big_int::operator!=(const big_int& b)const
    return this->compare_to(b) != 0;
 }
 
-// input output // big_int
 std::ostream& operator<<(std::ostream& stream, const big_int& var)
 {
-   if (var.neg_)
+   if (var.negative_)
       stream << '-';
    stream << var.digits_[var.size() - 1];
    for (size_t i = 0, n = var.size() - 1; i < n; ++i)
@@ -446,10 +430,10 @@ std::istream& operator>>(std::istream& stream, big_int& var)
    {
       start_pos = 1;
       len--;
-      var.neg_ = true;
+      var.negative_ = true;
    }
    else
-      var.neg_ = false;  
+      var.negative_ = false;  
    var.digits_ = digits_container((len - 1) / big_int::base_length + 1);
    
    size_t first_digit_len = len - (var.size() - 1) * big_int::base_length;
@@ -478,13 +462,13 @@ void big_int::cut_leading_zeros()
       digits_.pop_back();
    if (digits_[0] == 0)
       if (digits_.size() == 1)
-         neg_ = false;
+         negative_ = false;
 }
 
 void big_int::swap(big_int& b)
 {
    digits_.swap(b.digits_);
-   std::swap(neg_, b.neg_);
+   std::swap(negative_, b.negative_);
 }
 
 big_int abs(big_int& a)

@@ -6,7 +6,7 @@ big_int.cpp WITHOUT digits_container
 #include <string>
 #include <fstream>
 #include <iostream>
-
+#include <stdlib.h>
 #include "big_int.h"
 
 big_int::big_int(long long n) : negative_(n < 0)
@@ -76,9 +76,7 @@ big_int& big_int::operator-=(const big_int& b)
       return *this += (-b);
    if (b.abs_compare(*this) > 0)
       return *this = -(b - *this);
-   size_t max_size = size();
-   if (b.size() > max_size)
-      max_size = b.size();
+   size_t max_size = std::max(size(), b.size());
    digits_.resize(max_size + 1, 0);
    for (size_t i = 0; i < b.size(); ++i)
    {
@@ -103,15 +101,10 @@ big_int& big_int::operator-=(const big_int& b)
 
 big_int& big_int::operator*=(long long b)
 {
-   if (b >= base)
+   if (abs(b) >= base)
       return *this *= big_int(b);
    if (b == 0)
-   {
-      digits_.resize(1);
-      digits_[0] = 0;
-      negative_ = false;
-      return *this;
-   }
+      return *this = big_int(0);
    if (b < 0)
    {
       b = -b;
@@ -137,6 +130,8 @@ big_int& big_int::operator*=(long long b)
 
 big_int& big_int::operator*=(const big_int& b)
 {
+   if (b == big_int(0))
+      return *this = b;
    big_int c;
    c.negative_ = negative_ ^ b.negative_;
    c.digits_.resize(size() + b.size(), 0);
@@ -204,19 +199,17 @@ big_int& big_int::operator>>=(size_t shift)
 
 std::pair<big_int, big_int> big_int::divmod(const big_int& b) const
 {
+   if (b == big_int(0))
+      throw big_int_division_by_zero();
+
    big_int dividend(*this);
    big_int divisor(b);
    /* absolute division
       signs will be given later*/
    dividend.negative_ = false;
    divisor.negative_ = false;
-   
-   if (divisor == big_int(0))
-   {
-      throw big_int_division_by_zero();
-   }
 
-   big_int quotient(0);
+   big_int quotient;
    quotient.digits_.resize(dividend.size(), 0);
 
    long long shift(0);
@@ -423,6 +416,8 @@ std::istream& operator>>(std::istream& stream, big_int& var)
       for (size_t j = pos; j < (pos + big_int::base_length); ++j)
          var.digits_[n - i - 1] = var.digits_[n - i - 1] * 10 + s[j] - '0';
    }
+
+   var.cut_leading_zeros();   
    return stream;
 }
 

@@ -2,12 +2,8 @@
 #include <algorithm>
 #include "digits_container.h"
 
-digits_container::digits_container()
-{
-   digit_ = 0;
-   capacity_ = size_ = 1;
-   return;
-}
+digits_container::digits_container() : digit_(0), size_(0), capacity_(1)
+{}
 
 digits_container::digits_container(size_t count) : size_(count)
 {
