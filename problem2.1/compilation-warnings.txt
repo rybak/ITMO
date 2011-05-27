@@ -1,0 +1,12 @@
+x:\evaluator\export\problem2.1\big_int_test.cpp(303): warning C4003: not enough actual parameters for macro 'BOOST_CHECK_EQUAL' [X:\evaluator\export\problem2.1\build.xml]
+x:\evaluator\export\problem2.1\big_int_test.cpp(303): warning C4003: not enough actual parameters for macro 'BOOST_PP_SEQ_SIZE_1' [X:\evaluator\export\problem2.1\build.xml]
+x:\evaluator\export\problem2.1\big_int_test.cpp(303): warning C4003: not enough actual parameters for macro 'BOOST_PP_SEQ_SIZE_1' [X:\evaluator\export\problem2.1\build.xml]
+x:\evaluator\export\problem2.1\big_int_test.cpp(303): warning C4003: not enough actual parameters for macro 'BOOST_PP_SEQ_SIZE_0' [X:\evaluator\export\problem2.1\build.xml]
+x:\evaluator\export\problem2.1\big_int_test.cpp(303): warning C4003: not enough actual parameters for macro 'BOOST_PP_SEQ_ELEM_0' [X:\evaluator\export\problem2.1\build.xml]
+x:\evaluator\export\problem2.1\big_int_test.cpp(303): warning C4003: not enough actual parameters for macro 'BOOST_STRINGIZE' [X:\evaluator\export\problem2.1\build.xml]
+x:\evaluator\export\problem2.1\big_int_test.cpp(303): warning C4003: not enough actual parameters for macro 'BOOST_DO_STRINGIZE' [X:\evaluator\export\problem2.1\build.xml]
+x:\evaluator\export\problem2.1\big_int_test.cpp(303): warning C4003: not enough actual parameters for macro 'BOOST_PP_SEQ_SIZE_0' [X:\evaluator\export\problem2.1\build.xml]
+x:\evaluator\export\problem2.1\big_int_test.cpp(303): warning C4003: not enough actual parameters for macro 'BOOST_PP_SEQ_TAIL_I' [X:\evaluator\export\problem2.1\build.xml]
+
+[Generated at May 27, 2011 11:25:16 PM GMT+03:00]
+

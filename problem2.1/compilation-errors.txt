@@ -1,5 +1,4 @@
-x:\evaluator\export\problem2.1\big_int_test.cpp(301): error C2065: 'BOOST_CHECK_EQU' : undeclared identifier [X:\evaluator\export\problem2.1\build.xml]
-x:\evaluator\export\problem2.1\big_int_test.cpp(301): error C2143: syntax error : missing ';' before '}' [X:\evaluator\export\problem2.1\build.xml]
+x:\evaluator\export\problem2.1\big_int_test.cpp(303): error C2059: syntax error : ',' [X:\evaluator\export\problem2.1\build.xml]
 
-[Generated at May 27, 2011 11:18:08 PM GMT+03:00]
+[Generated at May 27, 2011 11:25:16 PM GMT+03:00]
 
