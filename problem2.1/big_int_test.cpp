@@ -300,7 +300,7 @@ BOOST_AUTO_TEST_CASE( swap_test )
     BOOST_CHECK_EQUAL(f, e);
 
     e = e;
-    BOOST_CHECK_EQUAL(f);
+    BOOST_CHECK_EQUAL(f, e);
 }
 
 BOOST_AUTO_TEST_CASE( io_test )
