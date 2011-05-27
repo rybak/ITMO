@@ -1,11 +1,10 @@
 #include <fstream>
 #include <string>
 #include <vector>
-using std::string;
 
 #include "big_int.h"
-// big_int
 
+using std::string;
 using std::ifstream;
 using std::ofstream;
 using std::pair;
@@ -16,9 +15,8 @@ int main()
    ofstream output("out.txt");
    big_int a, b;
    const string error = "<error>\n\n"; 
-   while (input >> a)
+   while (input >> a >> b)
    {
-      input >> b;
       if (b == big_int(0))
          output << error;
       else

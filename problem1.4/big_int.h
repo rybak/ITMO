@@ -49,7 +49,7 @@ private:
    static const size_t base_length = 9;
    typedef std::vector<long long> digits_container;
    digits_container digits_;
-   bool neg_;
+   bool negative_;
 
    size_t size() const;
    
