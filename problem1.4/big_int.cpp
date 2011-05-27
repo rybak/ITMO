@@ -9,20 +9,26 @@ big_int.cpp WITHOUT digits_container
 
 #include "big_int.h"
 
-big_int::big_int(long long n)
+big_int::big_int(long long n): neg_(n < 0)
 {
+   if (neg_)
+      n = -n;
    do
    {
       digits_.push_back(n % base);
       n /= base;
    } while (n > 0);
-   neg_ = n < 0;
+   cut_leading_zeros();
 }
 
-big_int::big_int(const big_int& b)
+big_int::big_int(const big_int& b) : digits_(b.digits_), neg_(b.neg_)
+{}
+
+big_int& big_int::operator=(const big_int& b)
 {
    digits_ = b.digits_;
    neg_ = b.neg_;
+   return *this;
 }
 
 big_int big_int::operator-() const
@@ -32,7 +38,6 @@ big_int big_int::operator-() const
    return t;
 }
 
-// += -= *= /=
 big_int& big_int::operator+=(const big_int& b)
 {
    if (b.neg_ != neg_)
@@ -62,6 +67,10 @@ big_int& big_int::operator+=(const big_int& b)
    return *this;
 }
 
+big_int& big_int::operator++()
+{
+   return (*this) += big_int(1);
+}
 
 big_int& big_int::operator-=(const big_int& b)
 {
@@ -100,10 +109,12 @@ big_int& big_int::operator-=(const big_int& b)
 
 big_int& big_int::operator*=(long long b)
 {
+   if (b >= base)
+      return *this *= big_int(b);
    if (b == 0)
    {
-      (*this).digits_.resize(0);
-      digits_.push_back(0);
+      digits_.resize(1);
+      digits_[0] = 0;
       neg_ = false;
       return *this;
    }
@@ -155,12 +166,11 @@ big_int& big_int::operator*=(const big_int& b)
    return *this = c;
 }
 
-big_int& big_int::operator<<= (size_t shift)
+big_int& big_int::operator<<=(size_t shift)
 {
    digits_.resize(size() + (1LL << shift) / base + 1, 0);
    for (size_t j = 0; j < shift; ++j)
    {
-      digits_.resize(size() + 1, 0);
       for (size_t i = 0, n = size(); i < n; ++i)
          digits_[i] <<= 1;
       for (size_t i = 0, n = size(); i < n; ++i)
@@ -179,7 +189,7 @@ big_int& big_int::operator<<= (size_t shift)
    return *this;
 }
 
-big_int& big_int::operator>>= (size_t shift)
+big_int& big_int::operator>>=(size_t shift)
 {
    long long carry;
    
@@ -198,7 +208,7 @@ big_int& big_int::operator>>= (size_t shift)
    return *this;
 }
 
-std::pair<big_int, big_int> big_int::divmod (const big_int& b) const
+std::pair<big_int, big_int> big_int::divmod(const big_int& b) const
 {
    big_int dividend(*this);
    big_int divisor(b);
@@ -259,7 +269,6 @@ big_int operator+(const big_int&a, const big_int& b)
    return t;
 }
 
-/* binary minus */
 big_int operator-(const big_int&a, const big_int& b)
 {
    big_int t = a;
@@ -342,13 +351,6 @@ bool big_int::operator!=(const big_int& b)const
    return this->compare_to(b) != 0;
 }
 
-big_int & big_int::operator=(const big_int& b)
-{
-   digits_ = b.digits_;
-   neg_ = b.neg_;
-   return *this;
-}
-
 // input output // big_int
 std::ostream& operator<<(std::ostream& stream, const big_int& var)
 {
@@ -374,10 +376,37 @@ std::ostream& operator<<(std::ostream& stream, const big_int& var)
 
 std::istream& operator>>(std::istream& stream, big_int& var)
 {
-   std::string s;
-   stream >> s;
+   while (!stream.eof() && isspace(stream.peek()))
+      stream.get();
+   if (stream.eof())
+   {
+      stream.setstate(std::ios::failbit);
+      return stream;
+   }
+   std::string s = "";
+   if (stream.peek() == '+' || stream.peek() == '-') {
+      if (stream.peek() == '-')
+         s.push_back('-');
+      stream.get();
+   }
+   if (stream.eof())
+   {
+      stream.setstate(std::ios::failbit);
+      return stream;
+   }
+   if (!isdigit(stream.peek()))
+   {
+      stream.seekg(0, std::ios::end);
+      stream.setstate(std::ios::failbit);
+      return stream;
+   }
+   while (!stream.eof() && isdigit(stream.peek()))
+   {
+      s.push_back(static_cast<char>(stream.get()));
+   }
    
    size_t len = s.length();
+
    if (len == 0)
       return stream;
 
@@ -415,12 +444,7 @@ void big_int::cut_leading_zeros()
 {
    while ((digits_.size() > 1) && (digits_.back() == 0))
       digits_.pop_back();
-   if (digits_.size() == 1)
-      if (digits_[0] == 0)
+   if (digits_[0] == 0)
+      if (digits_.size() == 1)
          neg_ = false;
-}
-
-big_int& big_int::operator++()
-{
-   return (*this) += big_int(1);
 }

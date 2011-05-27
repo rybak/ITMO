@@ -1,40 +1,38 @@
 #ifndef BIG_INT_H
 #define BIG_INT_H
 
-//typedef unsigned long size_t;
-
 /*
 rybak andrey
 big_int.h with    digits_container
 */
 
 #include <string>
-
 #include "digits_container.h"
 
-const long long base = 1000000000;
-const size_t base_length = 9;
 struct big_int_division_by_zero{};
+
 struct big_int
 {
-   big_int();
-   explicit big_int(long long n);
+   explicit big_int(long long n = 0);
+   big_int(const big_int&);
    big_int& operator=(const big_int&);
    void swap(big_int&);
 
+   /* I/O */
    friend std::ostream& operator<< (std::ostream&, const big_int&);
    friend std::istream& operator>> (std::istream&, big_int&);
-/* compare */
+
+   /* compare */
    bool operator>(const big_int&) const;
    bool operator<(const big_int&) const;
    bool operator<=(const big_int&) const;
    bool operator>=(const big_int&) const;
    bool operator==(const big_int&) const;
    bool operator!=(const big_int&) const;
-/* arithmetic */
-   
+
+   /* arithmetic */
    big_int operator-() const;
-   
+
    big_int& operator+=(const big_int&);
    big_int& operator-=(const big_int&);
    big_int& operator*=(long long);
@@ -49,16 +47,19 @@ struct big_int
 
    big_int& operator++();
 private:
-   //typedef vector<long long> digits_container;
+   static const long long base = 1000000000;
+   static const size_t base_length = 9;
+   //typedef std::vector<long long> digits_container;
    digits_container digits_;
 
-   size_t size() const;
    bool neg_;
 
-   long long compare_to(const big_int&) const;
-   long long abs_compare(const big_int&) const;
+   size_t size() const;
 
-   void normalize();
+   int compare_to(const big_int&) const;
+   int abs_compare(const big_int&) const;
+
+   void cut_leading_zeros();
 };
 
 big_int operator+(const big_int&, const big_int&);

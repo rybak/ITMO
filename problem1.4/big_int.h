@@ -1,14 +1,13 @@
+#ifndef BIG_INT_H
+#define BIG_INT_H
+
 /*
 rybak andrey
 big_int.h WITHOUT digits_container
 */
 
-#pragma once
-
-#include <vector>
 #include <string>
-
-//#include "digits_container.h"
+#include <vector>
 
 struct big_int_division_by_zero{};
 
@@ -48,7 +47,6 @@ struct big_int
 private:
    static const long long base = 1000000000;
    static const size_t base_length = 9;
-
    typedef std::vector<long long> digits_container;
    digits_container digits_;
    bool neg_;
@@ -68,3 +66,5 @@ big_int operator*(const big_int&, const big_int&);
 big_int operator/(const big_int&, const big_int&);
 
 // END big_int.h
+
+#endif

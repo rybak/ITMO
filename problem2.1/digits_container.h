@@ -13,13 +13,15 @@ struct digits_container
 public:
    digits_container();
    digits_container(size_t);
-   digits_container(const digits_container&);
-   digits_container& operator=(const digits_container&);
+   digits_container(const digits_container &);
+   digits_container & operator=(const digits_container &);
 
    ~digits_container();
    void push_back(long long x);
    void pop_back();
    void resize(size_t new_size);
+
+   void swap(digits_container &);
 
    const long long operator[](size_t index) const;
    long long& operator[](size_t index);

@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <algorithm>
 #include "digits_container.h"
 
 digits_container::digits_container()
@@ -21,7 +22,7 @@ digits_container::digits_container(size_t count) : size_(count)
       digits_[i] = 0;
 }
 
-digits_container::digits_container(const digits_container& val): size_(val.size_)
+digits_container::digits_container(const digits_container &val): size_(val.size_)
 {
    if (size_ == 1)
    {
@@ -36,7 +37,7 @@ digits_container::digits_container(const digits_container& val): size_(val.size_
    }
 }
 
-digits_container& digits_container::operator=(const digits_container& val)
+digits_container& digits_container::operator=(const digits_container &val)
 {
    resize(val.size_);
    for (size_t i = 0; i < size_; ++i)
@@ -86,6 +87,13 @@ void digits_container::resize(size_t new_size)
       }
    }
    size_ = new_size;
+}
+
+void digits_container::swap(digits_container &other)
+{
+   std::swap(digit_, other.digit_);
+   std::swap(size_, other.size_);
+   std::swap(capacity_, other.capacity_);
 }
 
 const size_t digits_container::calc_capacity(size_t new_size)
