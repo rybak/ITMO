@@ -8,10 +8,12 @@ big_int.h with    digits_container
 
 #include <string>
 #include "digits_container.h"
-
-struct big_int_division_by_zero{};
+struct big_int_calc_error{};
+struct big_int_factorial_error : big_int_calc_error{};
+struct big_int_division_by_zero : big_int_calc_error{};
+struct big_int_power_error : big_int_calc_error{};
 struct big_int_constructor_bad_string{};
-struct big_int_factorial_error{};
+
 
 struct big_int
 {

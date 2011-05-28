@@ -9,7 +9,7 @@ using std::ifstream;
 using std::ofstream;
 using std::string;
 
-const string div_by_zero_error = "<error>";
+const string error = "<error>";
 
 int main()
 {
@@ -23,12 +23,12 @@ int main()
       if (s.length() > 0)
          try
          {
-            output << evaluate(s);
+            output << evaluate(s) << "\n";
             //output << p.parse(s, debug_out) << "\n";
          }
-         catch(big_int_division_by_zero)
+         catch (big_int_calc_error)
          {
-            output << div_by_zero_error << "\n";
+            output << error << "\n";
          }
    }
    
