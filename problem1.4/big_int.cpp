@@ -146,7 +146,7 @@ big_int& big_int::operator*=(const big_int& b)
          pos = j + i;
          c.digits_[pos] += digits_[j] * b.digits_[i] + carry;
          carry = c.digits_[pos] / base;
-         if (c.digits_[pos] > base)
+         if (c.digits_[pos] >= base)
             c.digits_[pos] %= base;
       }
       c.digits_[m + i] += carry;

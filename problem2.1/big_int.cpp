@@ -21,10 +21,10 @@ big_int::big_int(long long n) : negative_(n < 0)
    cut_leading_zeros();
 }
 
-big_int::big_int(const big_int& b) : digits_(b.digits_), negative_(b.negative_)
+big_int::big_int(const big_int &b) : digits_(b.digits_), negative_(b.negative_)
 {}
 
-big_int& big_int::operator=(const big_int& b)
+big_int& big_int::operator=(const big_int &b)
 {
    digits_ = b.digits_;
    negative_ = b.negative_;
@@ -38,7 +38,7 @@ big_int big_int::operator-() const
    return t;
 }
 
-big_int& big_int::operator+=(const big_int& b)
+big_int& big_int::operator+=(const big_int &b)
 {
    if (b.negative_ != negative_)
       return *this -= (-b);
@@ -70,7 +70,7 @@ big_int& big_int::operator++()
    return (*this) += big_int(1);
 }
 
-big_int& big_int::operator-=(const big_int& b)
+big_int& big_int::operator-=(const big_int &b)
 {
    if (b.negative_ != negative_)
       return *this += (-b);
@@ -128,7 +128,7 @@ big_int& big_int::operator*=(long long b)
    return *this;
 }
 
-big_int& big_int::operator*=(const big_int& b)
+big_int& big_int::operator*=(const big_int &b)
 {
    if (b == big_int(0))
       return *this = b;
@@ -146,7 +146,7 @@ big_int& big_int::operator*=(const big_int& b)
          pos = j + i;
          c.digits_[pos] += digits_[j] * b.digits_[i] + carry;
          carry = c.digits_[pos] / base;
-         if (c.digits_[pos] > base)
+         if (c.digits_[pos] >= base)
             c.digits_[pos] %= base;
       }
       c.digits_[m + i] += carry;
@@ -197,7 +197,7 @@ big_int& big_int::operator>>=(size_t shift)
    return *this;
 }
 
-std::pair<big_int, big_int> big_int::divmod(const big_int& b) const
+std::pair<big_int, big_int> big_int::divmod(const big_int &b) const
 {
    if (b == big_int(0))
       throw big_int_division_by_zero();
@@ -248,67 +248,67 @@ std::pair<big_int, big_int> big_int::divmod(const big_int& b) const
    return std::make_pair(quotient, dividend);
 }
 
-big_int& big_int::operator/=(const big_int& b)
+big_int& big_int::operator/=(const big_int &b)
 {
    return *this = divmod(b).first;
 }
 
-big_int& big_int::operator%=(const big_int& b)
+big_int& big_int::operator%=(const big_int &b)
 {
    return *this = divmod(b).second;
 }
 
 // + - * / %
-big_int operator+(const big_int&a, const big_int& b)
+big_int operator+(const big_int &a, const big_int &b)
 {
    big_int t = a;
    t += b;
    return t;
 }
 
-big_int operator-(const big_int&a, const big_int& b)
+big_int operator-(const big_int &a, const big_int &b)
 {
    big_int t = a;
    t -= b;
    return t;
 }
 
-big_int operator*(const big_int&a, long long b)
+big_int operator*(const big_int &a, long long b)
 {
    big_int t = a;
    t *= b;
    return t;
 }
 
-big_int operator*(long long b, const big_int&a)
+big_int operator*(long long b, const big_int &a)
 {
    big_int t = a;
    t *= b;
    return t;
 }
 
-big_int operator*(const big_int&a, const big_int& b)
+big_int operator*(const big_int &a, const big_int &b)
 {
    big_int t = a;
    t *= b;
    return t;
 }
 
-big_int operator/(const big_int&a, const big_int& b)
+big_int operator/(const big_int &a, const big_int &b)
 {
    big_int t = a;
    t /= b;
    return t;
 }
 
-big_int operator%(const big_int&a, const big_int& b)
+big_int operator%(const big_int &a, const big_int &b)
 {
    big_int t = a;
    t %= b;
    return t;
 }
 
-int big_int::abs_compare(const big_int& b) const
+int big_int::abs_compare(const big_int &b) const
 {
    if (size() != b.size())
       return (size() > b.size())? 1 : -1;
@@ -323,7 +323,7 @@ int big_int::abs_compare(const big_int& b) const
    return 0;
 }
 
-int big_int::compare_to(const big_int& b)const
+int big_int::compare_to(const big_int &b)const
 {
    if (this->negative_)
    {
@@ -338,37 +338,37 @@ int big_int::compare_to(const big_int& b)const
    return abs_compare(b);
 }
 
-bool big_int::operator>(const big_int& b)const
+bool big_int::operator>(const big_int &b)const
 {
    return this->compare_to(b) > 0;
 }
 
-bool big_int::operator<(const big_int& b)const
+bool big_int::operator<(const big_int &b)const
 {
    return this->compare_to(b) < 0;
 }
 
-bool big_int::operator>=(const big_int& b)const
+bool big_int::operator>=(const big_int &b)const
 {
    return this->compare_to(b) >= 0;
 }
 
-bool big_int::operator<=(const big_int& b)const
+bool big_int::operator<=(const big_int &b)const
 {
    return this->compare_to(b) <= 0;
 }
 
-bool big_int::operator==(const big_int& b)const
+bool big_int::operator==(const big_int &b)const
 {
    return this->compare_to(b) == 0;
 }
 
-bool big_int::operator!=(const big_int& b)const
+bool big_int::operator!=(const big_int &b)const
 {
    return this->compare_to(b) != 0;
 }
 
-std::ostream& operator<<(std::ostream& stream, const big_int& var)
+std::ostream& operator<<(std::ostream &stream, const big_int &var)
 {
    if (var.negative_)
       stream << '-';
@@ -390,7 +390,7 @@ std::ostream& operator<<(std::ostream& stream, const big_int& var)
    return stream;
 }
 
-std::istream& operator>>(std::istream& stream, big_int& var)
+std::istream& operator>>(std::istream &stream, big_int &var)
 {
    while (!stream.eof() && isspace(stream.peek()))
       stream.get();
@@ -465,13 +465,13 @@ void big_int::cut_leading_zeros()
          negative_ = false;
 }
 
-void big_int::swap(big_int& b)
+void big_int::swap(big_int &b)
 {
    digits_.swap(b.digits_);
    std::swap(negative_, b.negative_);
 }
 
-big_int abs(big_int& a)
+big_int abs(big_int &a)
 {
    return a < big_int(0)? -a : a;
 }
