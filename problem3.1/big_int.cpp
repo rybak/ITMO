@@ -65,11 +65,15 @@ big_int big_int::operator-() const
 {
    big_int t = *this;
    t.negative_ = !t.negative_;
+   t.cut_leading_zeros();
    return t;
 }
 
 big_int& big_int::operator+=(const big_int &b)
 {
+   static const big_int ZERO(0);
+   if (b == ZERO)
+      return *this;
    if (b.negative_ != negative_)
       return *this -= (-b);
    size_t max_size = std::max(size(), b.size());
@@ -102,6 +106,9 @@ big_int& big_int::operator++()
 
 big_int& big_int::operator-=(const big_int &b)
 {
+   static const big_int ZERO(0);
+   if (b == ZERO)
+      return *this;
    if (b.negative_ != negative_)
       return *this += (-b);
    if (b.abs_compare(*this) > 0)
@@ -348,6 +355,8 @@ big_int power(big_int a, big_int b)
    {
       if (b == ZERO && a != ZERO)
          return ONE;
+      /*else
+         throw big_int_power_error();*/
       return ZERO;
    }
 

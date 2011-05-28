@@ -16,13 +16,16 @@ int main()
    ifstream input("in.txt");
    ofstream output("out.txt");
    ofstream debug_out("debug.txt");
+   int i = 0;
    while (input)
    {
+      ++i;
       string s;
       getline(input, s);
       if (s.length() > 0)
          try
          {
+//             std::cerr << "\nTEST CASE "<< i << " " << s << "\n";
             output << evaluate(s) << "\n";
             //output << p.parse(s, debug_out) << "\n";
          }
