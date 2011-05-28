@@ -210,7 +210,7 @@ std::pair<big_int, big_int> big_int::divmod(const big_int &b) const
    divisor.negative_ = false;
 
    big_int quotient;
-   quotient.digits_.resize(dividend.size());
+//   quotient.digits_.resize(dividend.size());
 
    long long shift(0);
    while (divisor < dividend)
