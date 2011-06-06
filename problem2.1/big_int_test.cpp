@@ -4,6 +4,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "big_int.h"
+#include "big_int.h"
 
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int.hpp>
@@ -35,17 +36,13 @@ bool implies(bool a, bool b)
     return !a || b;
 }
 
-big_int next_random_big_int()
+big_int next_random_big_int(int length)
 {
-    variate_generator<mt19937&, geometric_distribution<> > length_generator(
-            gen,
-            geometric_distribution<>(0.98));
-
     variate_generator<mt19937&, uniform_int<> > digit_generator(
             gen,
             uniform_int<>(0, 9));
 
-    int length = length_generator() - 1;
+
     big_int res;
     for (int i = 0; i < length; ++i) {
         res *= big_int(10);
@@ -61,6 +58,16 @@ big_int next_random_big_int()
     return res;
 }
 
+big_int next_random_big_int()
+{
+    variate_generator<mt19937&, geometric_distribution<> > length_generator(
+            gen,
+            geometric_distribution<>(0.98));
+
+    int length = length_generator() - 1;
+    return next_random_big_int(length);
+}
+
 vector<big_int> get_numbers()
 {
     vector<big_int> numbers;
@@ -68,7 +75,8 @@ vector<big_int> get_numbers()
     numbers.push_back(big_int(1));
     numbers.push_back(lexical_cast<big_int>("00000000000000000000312321"));
     numbers.push_back(lexical_cast<big_int>("-0000000000000000000000312"));
-    generate_n(back_inserter(numbers), TESTS_SIZE - numbers.size(), next_random_big_int);
+    generate_n(back_inserter(numbers), TESTS_SIZE - numbers.size(), 
+            static_cast<big_int (*) ()>(next_random_big_int));
     return numbers;
 }
 
@@ -301,6 +309,16 @@ BOOST_AUTO_TEST_CASE( swap_test )
 
     e = e;
     BOOST_CHECK_EQUAL(f, e);
+
+    const int L = 100;
+    big_int long_int1 = next_random_big_int(L);
+    big_int long_int2 = next_random_big_int(L);
+
+    for (int i = 0; i < 1e7; ++i)
+    {
+        long_int1.swap(long_int2);
+    }
+
 }
 
 BOOST_AUTO_TEST_CASE( io_test )
@@ -340,7 +358,7 @@ BOOST_AUTO_TEST_CASE( io_test )
         string_representation = "-" + string_representation;
 
         BOOST_CHECK_EQUAL(lexical_cast<string>(test_int), string_representation);
-	}
+    }
 
     vector<big_int> numbers = get_numbers();
     size_t size = numbers.size();
@@ -388,6 +406,7 @@ BOOST_AUTO_TEST_CASE( io_test )
         int x2;
         iss2 >> x2;
 
+        std::cerr << "'" << bad_string << "'\n";
         BOOST_CHECK_EQUAL(iss1.good(), iss2.good());
         BOOST_CHECK_EQUAL(iss1.eof(), iss2.eof());
         BOOST_CHECK_EQUAL(iss1.fail(), iss2.fail());
@@ -397,6 +416,9 @@ BOOST_AUTO_TEST_CASE( io_test )
     ok_strings.push_back("42");
     ok_strings.push_back(" 42");
     ok_strings.push_back(" 42 ");
+    ok_strings.push_back("\n42 ");
+    ok_strings.push_back("\t42 ");
+    ok_strings.push_back("\n\t 42 ");
     ok_strings.push_back(" 42.da");
     ok_strings.push_back("42 asdf");
 
