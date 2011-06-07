@@ -40,6 +40,8 @@ big_int big_int::operator-() const
 
 big_int& big_int::operator+=(const big_int &b)
 {
+   if (b == big_int(0))
+      return *this;
    if (b.negative_ != negative_)
       return *this -= (-b);
    size_t max_size = std::max(size(), b.size());
@@ -72,6 +74,8 @@ big_int& big_int::operator++()
 
 big_int& big_int::operator-=(const big_int &b)
 {
+   if (b == big_int(0))
+      return *this;
    if (b.negative_ != negative_)
       return *this += (-b);
    if (b.abs_compare(*this) > 0)
