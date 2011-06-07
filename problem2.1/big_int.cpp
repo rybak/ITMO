@@ -35,6 +35,7 @@ big_int big_int::operator-() const
 {
    big_int t = *this;
    t.negative_ = !t.negative_;
+   t.cut_leading_zeros();
    return t;
 }
 
