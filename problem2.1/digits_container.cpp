@@ -64,21 +64,21 @@ void digits_container::resize(size_t new_size)
    else
    {
       size_t new_capacity = calc_capacity(new_size);
-      size_t min = size_ < new_size ? size_ : new_size;
+      size_t min_size = std::min(size_, new_size);
       if (new_capacity > capacity_)
       {
          long long *new_digits = new long long[capacity_ = new_capacity];
-         for (size_t i = 0; i < min; ++i)
+         for (size_t i = 0; i < min_size; ++i)
             new_digits[i] = (*this)[i];
          if (size_ > 1)
             delete[] digits_;
-         for (size_t i = min; i < new_size; ++i)
+         for (size_t i = min_size; i < new_size; ++i)
             new_digits[i] = 0;
          digits_ = new_digits;
       }
       else
       {
-         for (size_t i = min; i < new_size; ++i)
+         for (size_t i = min_size; i < new_size; ++i)
             digits_[i] = 0;
       }
    }
