@@ -87,6 +87,7 @@ void digits_container::resize(size_t new_size)
 
 void digits_container::swap(digits_container &other)
 {
+   // вроде digit_ всегда будет полностью покрывать digits_
    std::swap(digit_, other.digit_);
    std::swap(size_, other.size_);
    std::swap(capacity_, other.capacity_);
