@@ -360,7 +360,7 @@ std::ostream& operator<<(std::ostream& stream, const big_int& var)
 
 std::istream& operator>>(std::istream& stream, big_int& var)
 {
-   while (!stream.eof() && isspace(stream.peek()))
+   while (isspace(stream.peek()))
       stream.get();
    if (stream.eof())
    {
@@ -373,18 +373,13 @@ std::istream& operator>>(std::istream& stream, big_int& var)
          s.push_back('-');
       stream.get();
    }
-   if (stream.eof())
-   {
-      stream.setstate(std::ios::failbit);
-      return stream;
-   }
    if (!isdigit(stream.peek()))
    {
       stream.seekg(0, std::ios::end);
       stream.setstate(std::ios::failbit);
       return stream;
    }
-   while (!stream.eof() && isdigit(stream.peek()))
+   while (isdigit(stream.peek()))
    {
       s.push_back(static_cast<char>(stream.get()));
    }
