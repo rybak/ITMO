@@ -6,7 +6,7 @@ big_int.cpp WITHOUT digits_container
 #include <string>
 #include <fstream>
 #include <iostream>
-#include <stdlib.h>
+#include <cstdlib>
 #include "big_int.h"
 
 big_int::big_int(long long n) : negative_(n < 0)
@@ -375,7 +375,6 @@ std::istream& operator>>(std::istream& stream, big_int& var)
    }
    if (!isdigit(stream.peek()))
    {
-      stream.seekg(0, std::ios::end);
       stream.setstate(std::ios::failbit);
       return stream;
    }
