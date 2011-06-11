@@ -28,8 +28,8 @@ public:
 
    const size_t size() const;
 private:
-   static const size_t capacity_up = 2;
-   static const size_t calc_capacity(size_t new_size);
+   static const size_t capacity_factor = 2;
+   static size_t calc_capacity(size_t new_size);
    union
    {
       long long digit_;

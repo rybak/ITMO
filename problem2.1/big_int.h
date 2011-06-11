@@ -46,6 +46,7 @@ struct big_int
    big_int& operator%=(const big_int&);
 
    big_int& operator++();
+
 private:
    static const long long base = 1000000000;
    static const size_t base_length = 9;
@@ -70,7 +71,7 @@ big_int operator*(const big_int&, const big_int&);
 big_int operator/(const big_int&, const big_int&);
 big_int operator%(const big_int&, const big_int&);
 
-big_int abs(big_int&);
+big_int abs(const big_int&);
 
 // END big_int.h
 

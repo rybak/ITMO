@@ -465,7 +465,7 @@ void big_int::swap(big_int &b)
    std::swap(negative_, b.negative_);
 }
 
-big_int abs(big_int &a)
+big_int abs(const big_int &a)
 {
    return a < big_int(0)? -a : a;
 }

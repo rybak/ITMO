@@ -22,14 +22,13 @@ digits_container::digits_container(const digits_container &val): size_(val.size_
 {
    if (size_ == 1)
    {
-      digit_ = val.digit_;
+      digit_ = val[0];
       capacity_ = 1;
    }
    else
    {
       digits_ = new long long[capacity_ = calc_capacity(size_)];
-      for (size_t i = 0; i < size_; ++i)
-         digits_[i] = val.digits_[i];
+      std::copy(val.digits_, val.digits_ + size_, digits_);
    }
 }
 
@@ -43,12 +42,30 @@ digits_container& digits_container::operator=(const digits_container &val)
 
 digits_container::~digits_container()
 {
-   if (size_ > 1)
+   if (capacity_ > 1)
       delete[] digits_;
 }
 
 void digits_container::resize(size_t new_size)
 {
+   if (new_size == size_)
+      return;
+   if (new_size > capacity_)
+   {
+      digits_container new_containter(new_size);
+      size_t min_size = std::min(size_, new_size);
+      for (size_t i = 0; i < min_size; ++i)
+         new_containter[i] = (*this)[i];
+      swap(new_containter);
+      std::fill(digits_ + min_size, digits_ + new_size, 0);
+   }
+   else
+   {
+      if (capacity_ > 1)
+         std::fill(digits_ + std::min(size_, new_size), digits_ + new_size, 0);
+   }
+   size_ = new_size;
+      /*
    if (new_size == size_)
       return;
    if (new_size <= 1)
@@ -72,32 +89,50 @@ void digits_container::resize(size_t new_size)
             new_digits[i] = (*this)[i];
          if (size_ > 1)
             delete[] digits_;
-         for (size_t i = min_size; i < new_size; ++i)
-            new_digits[i] = 0;
+         std::fill(new_digits + min_size, new_digits + new_size, 0);
          digits_ = new_digits;
       }
       else
       {
-         for (size_t i = min_size; i < new_size; ++i)
-            digits_[i] = 0;
+         std::fill(digits_ + min_size, digits_ + new_size, 0);
       }
    }
-   size_ = new_size;
+   size_ = new_size;*/
 }
 
 void digits_container::swap(digits_container &other)
 {
-   // вроде digit_ всегда будет полностью покрывать digits_
-   std::swap(digit_, other.digit_);
+   if (capacity_ != 1)
+   {
+      if (other.capacity_ != 1)
+         std::swap(digits_, other.digits_);
+      else
+      {
+         long long digit = other.digit_;
+         other.digits_ = digits_;
+         digit_ = digit;
+      }
+   }
+   else
+   {
+      if (other.capacity_ != 1)
+      {
+         long long *digits = other.digits_;
+         other.digit_ = digit_;
+         digits_ = digits;
+      }
+      else
+         std::swap(digit_, other.digit_);
+   }
    std::swap(size_, other.size_);
    std::swap(capacity_, other.capacity_);
 }
 
-const size_t digits_container::calc_capacity(size_t new_size)
+size_t digits_container::calc_capacity(size_t new_size)
 {
    size_t new_capacity = 1;
    while (new_capacity < new_size)
-      new_capacity *= capacity_up;
+      new_capacity *= capacity_factor;
    return new_capacity;
 }
 
@@ -121,7 +156,7 @@ const long long digits_container::operator[](size_t index) const
 {
    if (index < size_)
    {
-      if (size_ == 1)
+      if (capacity_ == 1)
          return digit_;
       else
          return digits_[index];
@@ -133,7 +168,7 @@ long long& digits_container::operator[](size_t index)
 {
    if (index < size_)
    {
-      if (size_ == 1)
+      if (capacity_ == 1)
          return digit_;
       else
          return digits_[index];
