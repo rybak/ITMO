@@ -1,12 +1,4 @@
-x:\evaluator\export\problem2.1\big_int_test.cpp(303): warning C4003: not enough actual parameters for macro 'BOOST_CHECK_EQUAL' [X:\evaluator\export\problem2.1\build.xml]
-x:\evaluator\export\problem2.1\big_int_test.cpp(303): warning C4003: not enough actual parameters for macro 'BOOST_PP_SEQ_SIZE_1' [X:\evaluator\export\problem2.1\build.xml]
-x:\evaluator\export\problem2.1\big_int_test.cpp(303): warning C4003: not enough actual parameters for macro 'BOOST_PP_SEQ_SIZE_1' [X:\evaluator\export\problem2.1\build.xml]
-x:\evaluator\export\problem2.1\big_int_test.cpp(303): warning C4003: not enough actual parameters for macro 'BOOST_PP_SEQ_SIZE_0' [X:\evaluator\export\problem2.1\build.xml]
-x:\evaluator\export\problem2.1\big_int_test.cpp(303): warning C4003: not enough actual parameters for macro 'BOOST_PP_SEQ_ELEM_0' [X:\evaluator\export\problem2.1\build.xml]
-x:\evaluator\export\problem2.1\big_int_test.cpp(303): warning C4003: not enough actual parameters for macro 'BOOST_STRINGIZE' [X:\evaluator\export\problem2.1\build.xml]
-x:\evaluator\export\problem2.1\big_int_test.cpp(303): warning C4003: not enough actual parameters for macro 'BOOST_DO_STRINGIZE' [X:\evaluator\export\problem2.1\build.xml]
-x:\evaluator\export\problem2.1\big_int_test.cpp(303): warning C4003: not enough actual parameters for macro 'BOOST_PP_SEQ_SIZE_0' [X:\evaluator\export\problem2.1\build.xml]
-x:\evaluator\export\problem2.1\big_int_test.cpp(303): warning C4003: not enough actual parameters for macro 'BOOST_PP_SEQ_TAIL_I' [X:\evaluator\export\problem2.1\build.xml]
+c:\program files\microsoft visual studio 10.0\vc\include\xutility(2227): warning C4996: 'std::_Copy_impl': Function call with parameters that may be unsafe - this call relies on the caller to check that the passed values are correct. To disable this warning, use -D_SCL_SECURE_NO_WARNINGS. See documentation on how to use Visual C++ 'Checked Iterators' [X:\evaluator\export\problem2.1\build.xml]
 
-[Generated at May 27, 2011 11:27:49 PM GMT+03:00]
+[Generated at June 11, 2011 9:37:27 PM GMT+03:00]
 

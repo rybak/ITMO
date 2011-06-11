@@ -1,4 +1,0 @@
-x:\evaluator\export\problem2.1\big_int_test.cpp(303): error C2059: syntax error : ',' [X:\evaluator\export\problem2.1\build.xml]
-
-[Generated at May 27, 2011 11:27:48 PM GMT+03:00]
-
