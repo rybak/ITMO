@@ -71,7 +71,6 @@ big_int big_int::operator-() const
 
 big_int& big_int::operator+=(const big_int &b)
 {
-   static const big_int ZERO(0);
    if (b == ZERO)
       return *this;
    if (b.negative_ != negative_)
@@ -106,7 +105,6 @@ big_int& big_int::operator++()
 
 big_int& big_int::operator-=(const big_int &b)
 {
-   static const big_int ZERO(0);
    if (b == ZERO)
       return *this;
    if (b.negative_ != negative_)
@@ -236,7 +234,6 @@ big_int& big_int::operator>>=(size_t shift)
 
 std::pair<big_int, big_int> big_int::divmod(const big_int &b) const
 {
-   static const big_int ZERO(0);
    if (b == ZERO)
       throw big_int_division_by_zero();
 
@@ -348,24 +345,21 @@ big_int operator%(const big_int &a, const big_int &b)
 
 big_int power(big_int a, big_int b)
 {
-   static const big_int ZERO(0);
-   static const big_int ONE(1);
-
-   if (b <= ZERO)
+   if (b <= big_int::ZERO)
    {
-      if (b == ZERO && a != ZERO)
-         return ONE;
+      if (b == big_int::ZERO && a != big_int::ZERO)
+         return big_int::ONE;
       /*else
          throw big_int_power_error();*/
-      return ZERO;
+      return big_int::ZERO;
    }
 
-   big_int res(ONE);
-   while (b > ZERO)
-		if (b % TWO == ONE)
+   big_int res(big_int::ONE);
+   while (b > big_int::ZERO)
+		if (b % big_int::TWO == big_int::ONE)
       {
          res *= a;
-			b -= ONE;
+			b -= big_int::ONE;
 		}
 		else
       {
@@ -514,8 +508,11 @@ void big_int::swap(big_int& b)
 
 big_int abs(big_int& a)
 {
-   static const big_int ZERO(0);
-   return a < ZERO ? -a : a;
+   return a < big_int::ZERO ? -a : a;
 }
 
+const big_int big_int::ZERO = big_int(0);
+const big_int big_int::ONE = big_int(1);
+const big_int big_int::TWO = big_int(2);
+const big_int big_int::TEN = big_int(10);
 

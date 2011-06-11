@@ -53,6 +53,8 @@ struct big_int
 
    big_int& operator++();
 
+   static const big_int ZERO, ONE, TWO, TEN;
+   
 private:
    static const long long base = 1000000000;
    static const size_t base_length = 9;
@@ -68,12 +70,8 @@ private:
 
    void cut_leading_zeros();
 };
-
-const big_int ZERO(0);
-const big_int ONE(1);
-const big_int TWO(2);
-const big_int TEN(10);
-
+/*
+*/
 big_int operator+(const big_int&, const big_int&);
 big_int operator-(const big_int&, const big_int&);
 big_int operator*(const big_int&, long long);

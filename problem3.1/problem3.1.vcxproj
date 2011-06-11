@@ -86,7 +86,7 @@
     <ClInclude Include="big_int.h" />
     <ClInclude Include="calculator.h" />
     <ClInclude Include="digits_container.h" />
-    <ClInclude Include="helper.hpp" />
+    <ClInclude Include="helper.h" />
     <ClInclude Include="user_functions.h" />
   </ItemGroup>
   <ItemGroup>

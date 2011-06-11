@@ -7,13 +7,10 @@ big_int sqr(big_int a)
 
 big_int fact(big_int a)
 {
-   static const big_int ZERO(0);
-   static const big_int ONE(1);
-   static const big_int TWO(2);
-   if (a < ZERO)
+   if (a < big_int::ZERO)
       throw big_int_factorial_error();
-   big_int res = ONE;
-   for (big_int i = TWO; i <= a; ++i)
+   big_int res = big_int::ONE;
+   for (big_int i = big_int::TWO; i <= a; ++i)
       res *= i;
    return res;
 }
