@@ -14,6 +14,7 @@ struct big_int_division_by_zero{};
 struct big_int
 {
    explicit big_int(long long n = 0);
+   explicit big_int(const std::string &s);
    big_int(const big_int&);
    big_int& operator=(const big_int&);
    void swap(big_int&);

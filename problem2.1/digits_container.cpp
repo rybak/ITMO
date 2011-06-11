@@ -14,8 +14,7 @@ digits_container::digits_container(size_t count) : size_(count)
       return;
    }
    digits_ = new long long[capacity_ = calc_capacity(count)];
-   for (size_t i = 0; i < capacity_; ++i)
-      digits_[i] = 0;
+   std::fill(digits_, digits_ + capacity_, 0);
 }
 
 digits_container::digits_container(const digits_container &val): size_(val.size_)
@@ -53,11 +52,10 @@ void digits_container::resize(size_t new_size)
    if (new_size > capacity_)
    {
       digits_container new_containter(new_size);
-      size_t min_size = std::min(size_, new_size);
-      for (size_t i = 0; i < min_size; ++i)
+       for (size_t i = 0; i < size_; ++i)
          new_containter[i] = (*this)[i];
       swap(new_containter);
-      std::fill(digits_ + min_size, digits_ + new_size, 0);
+      std::fill(digits_ + size_, digits_ + new_size, 0);
    }
    else
    {
@@ -102,6 +100,11 @@ void digits_container::resize(size_t new_size)
 
 void digits_container::swap(digits_container &other)
 {
+   if (sizeof(digit_) > sizeof(digits_))
+      std::swap(digit_, other.digit_);
+   else
+      std::swap(digits_, other.digits_);
+   /*
    if (capacity_ != 1)
    {
       if (other.capacity_ != 1)
@@ -123,7 +126,7 @@ void digits_container::swap(digits_container &other)
       }
       else
          std::swap(digit_, other.digit_);
-   }
+   }*/
    std::swap(size_, other.size_);
    std::swap(capacity_, other.capacity_);
 }

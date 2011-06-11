@@ -21,6 +21,34 @@ big_int::big_int(long long n) : negative_(n < 0)
    cut_leading_zeros();
 }
 
+big_int::big_int(const std::string& s)
+{
+   size_t len = s.length();
+   size_t start_pos = 0;
+   if (s[0] == '-')
+   {
+      start_pos = 1;
+      len--;
+      negative_ = true;
+   }
+   else
+      negative_ = false;  
+   digits_ = digits_container((len - 1) / big_int::base_length + 1);
+   
+   size_t first_digit_len = len - (size() - 1) * big_int::base_length;
+   for (size_t j = start_pos; j < (first_digit_len + start_pos); ++j)
+      digits_[size() - 1] = digits_[size() - 1] * 10 + s[j] - '0';
+   
+   first_digit_len += start_pos;
+   for (size_t i = 0, n = size() - 1; i < n; ++i)
+   {
+      size_t pos = first_digit_len + (i * big_int::base_length);
+      for (size_t j = pos; j < (pos + big_int::base_length); ++j)
+         digits_[n - i - 1] = digits_[n - i - 1] * 10 + s[j] - '0';
+   }
+   cut_leading_zeros();
+}
+
 big_int::big_int(const big_int &b) : digits_(b.digits_), negative_(b.negative_)
 {}
 
@@ -414,34 +442,7 @@ std::istream& operator>>(std::istream &stream, big_int &var)
    {
       s.push_back(static_cast<char>(stream.get()));
    }
-   
-   size_t len = s.length();
-   if (len == 0)
-      return stream;
-
-   size_t start_pos = 0;
-   if (s[0] == '-')
-   {
-      start_pos = 1;
-      len--;
-      var.negative_ = true;
-   }
-   else
-      var.negative_ = false;  
-   var.digits_ = digits_container((len - 1) / big_int::base_length + 1);
-   
-   size_t first_digit_len = len - (var.size() - 1) * big_int::base_length;
-   for (size_t j = start_pos; j < (first_digit_len + start_pos); ++j)
-      var.digits_[var.size() - 1] = var.digits_[var.size() - 1] * 10 + s[j] - '0';
-   
-   first_digit_len += start_pos;
-   for (size_t i = 0, n = var.size() - 1; i < n; ++i)
-   {
-      size_t pos = first_digit_len + (i * big_int::base_length);
-      for (size_t j = pos; j < (pos + big_int::base_length); ++j)
-         var.digits_[n - i - 1] = var.digits_[n - i - 1] * 10 + s[j] - '0';
-   }
-   var.cut_leading_zeros();
+   var = big_int(s);
    return stream;
 }
 
