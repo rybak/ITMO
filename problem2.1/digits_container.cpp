@@ -27,7 +27,8 @@ digits_container::digits_container(const digits_container &val): size_(val.size_
    else
    {
       digits_ = new long long[capacity_ = calc_capacity(size_)];
-      std::copy(val.digits_, val.digits_ + size_, digits_);
+      for (size_t i = 0; i < size_; ++i)
+         digits_[i] = val.digits_[i];
    }
 }
 
@@ -63,39 +64,6 @@ void digits_container::resize(size_t new_size)
          std::fill(digits_ + std::min(size_, new_size), digits_ + new_size, 0);
    }
    size_ = new_size;
-      /*
-   if (new_size == size_)
-      return;
-   if (new_size <= 1)
-   {
-      long long old = 0;
-      if (size_ > 0)
-         old = (*this)[0];
-      if (size_ > 1)
-         delete[] digits_;
-      capacity_ = 1;
-      digit_ = old;
-   }
-   else
-   {
-      size_t new_capacity = calc_capacity(new_size);
-      size_t min_size = std::min(size_, new_size);
-      if (new_capacity > capacity_)
-      {
-         long long *new_digits = new long long[capacity_ = new_capacity];
-         for (size_t i = 0; i < min_size; ++i)
-            new_digits[i] = (*this)[i];
-         if (size_ > 1)
-            delete[] digits_;
-         std::fill(new_digits + min_size, new_digits + new_size, 0);
-         digits_ = new_digits;
-      }
-      else
-      {
-         std::fill(digits_ + min_size, digits_ + new_size, 0);
-      }
-   }
-   size_ = new_size;*/
 }
 
 void digits_container::swap(digits_container &other)
@@ -104,29 +72,6 @@ void digits_container::swap(digits_container &other)
       std::swap(digit_, other.digit_);
    else
       std::swap(digits_, other.digits_);
-   /*
-   if (capacity_ != 1)
-   {
-      if (other.capacity_ != 1)
-         std::swap(digits_, other.digits_);
-      else
-      {
-         long long digit = other.digit_;
-         other.digits_ = digits_;
-         digit_ = digit;
-      }
-   }
-   else
-   {
-      if (other.capacity_ != 1)
-      {
-         long long *digits = other.digits_;
-         other.digit_ = digit_;
-         digits_ = digits;
-      }
-      else
-         std::swap(digit_, other.digit_);
-   }*/
    std::swap(size_, other.size_);
    std::swap(capacity_, other.capacity_);
 }
