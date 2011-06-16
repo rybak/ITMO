@@ -21,7 +21,7 @@ struct list
 template<typename List>
 struct list_length
 {
-   static const int value = 1 + list_length<List::tail>::value;
+   static const int value = 1 + list_length<typename List::tail>::value;
 };
 
 template<>
@@ -36,7 +36,7 @@ template<typename List, int n>
 struct list_partition_first
 {
    typedef
-      typename list
+      list
       <
          List::value,
          typename list_partition_first

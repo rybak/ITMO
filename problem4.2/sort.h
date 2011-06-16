@@ -13,7 +13,7 @@ struct merge
       typename struct_if
       <
          (List1::value) < (List2::value),
-         typename list
+         list
          <
             List1::value,
             typename merge
@@ -22,7 +22,7 @@ struct merge
                List2
             >::merged_list
          >,
-         typename list
+         list
          <
             List2::value,
             typename merge

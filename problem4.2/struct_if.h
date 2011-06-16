@@ -9,13 +9,13 @@ struct struct_if
 {};
 
 template<typename Then, typename Else>
-struct struct_if<true, typename Then, typename Else>
+struct struct_if<true, Then, Else>
 {
    typedef Then result;
 };
 
 template<typename Then, typename Else>
-struct struct_if<false, typename Then, typename Else>
+struct struct_if<false, Then, Else>
 {
    typedef Else result;
 };
