@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{CB40CE66-FF74-4843-9BAF-FF15E705BE19}</ProjectGuid>
+    <ProjectGuid>{B1385814-5D4D-4124-9C85-93DD9A9DA1BB}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>problem42</RootNamespace>
   </PropertyGroup>
@@ -74,11 +74,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="problem4.2.cpp" />
+    <ClCompile Include="problem4.2.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="list.h" />
     <ClInclude Include="sort.h" />
-    <ClInclude Include="vector.h" />
+    <ClInclude Include="struct_if.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
