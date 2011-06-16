@@ -1,0 +1,5 @@
+LINK : error LNK2001: unresolved external symbol _mainCRTStartup [X:\evaluator\export\problem4.2\problem4.2.vcxproj]
+Debug\problem4.2.exe : fatal error LNK1120: 1 unresolved externals [X:\evaluator\export\problem4.2\problem4.2.vcxproj]
+
+[Generated at June 16, 2011 4:21:31 PM GMT+03:00]
+
