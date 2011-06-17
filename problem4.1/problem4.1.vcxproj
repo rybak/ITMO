@@ -76,6 +76,15 @@
   <ItemGroup>
     <ClCompile Include="problem4.1.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="normalize.h" />
+    <ClInclude Include="sum.h" />
+    <ClInclude Include="big_int.h" />
+    <ClInclude Include="reverse.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="out.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
