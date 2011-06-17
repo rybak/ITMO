@@ -60,7 +60,7 @@ struct list_partition_first<empty_list, n>
 };
 
 /******************************************************************************/
-/* struct list_partition_seconde output list_part */
+/* struct list_partition_second output list_part */
 
 template<typename List, int n>
 struct list_partition_second
