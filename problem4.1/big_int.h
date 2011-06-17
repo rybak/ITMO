@@ -18,7 +18,7 @@ struct big_int
 };
 
 typedef big_int<0, end_of_big_int> ZERO;
-
+/*
 template<typename A>
 struct negate
 {
@@ -55,12 +55,22 @@ namespace
    void print_unsigned_big_int<end_of_big_int>(std::ofstream& out)
    {}
 }
+*/
+
 template<typename A>
 void print_big_int(std::ofstream& out)
 {
-   if (A::digit < 0)
+   /*if (A::digit < 0)
       out << "-";
    print_unsigned_big_int<A>(out);
+   */
+   out << A::digit;
+   print_big_int<A::tail>(out);
+}
+
+template<>
+void print_big_int<end_of_big_int>(std::ofstream& out)
+{
 }
 
 template<typename A>

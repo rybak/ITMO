@@ -55,13 +55,13 @@ struct reversed_add
 template<typename A, typename B>
 struct add
 {
-private:
-   typedef typename reverse<A>::reversed a;
-   typedef typename reverse<B>::reversed b;
-public:
    typedef typename reverse
    <
-      typename reversed_add<a, b>::sum
+      typename reversed_add
+      <
+         typename reverse<A>::reversed,
+         typename reverse<B>::reversed
+      >::sum
    >::reversed sum;
 };
 
@@ -83,84 +83,170 @@ struct add<ZERO, ZERO>
    typedef ZERO sum;
 };
 
-/*********************/
-
-/*********************/
-
-
+/****************************************************************************/
+/* FIX multiply  */
 namespace
 {
    template<typename A, typename B>
-   struct subtract_helper
+   struct multiply_helper
    {
       typedef big_int
       <
-         (A::digit) - (B::digit),
-         typename subtract_helper
+         (A::digit) * (B::digit),
+         typename multiply_helper
          <
             typename A::tail,
             typename B::tail
-         >::difference
-      > difference;
+         >::product
+      > product;
    };
 
    template<typename A>
-   struct subtract_helper<A, end_of_big_int>
+   struct multiply_helper<A, end_of_big_int>
    {
-      typedef A difference;
+      typedef A product;
    };
 
    template<typename B>
-   struct subtract_helper<end_of_big_int, B>
+   struct multiply_helper<end_of_big_int, B>
    {
-      typedef typename negate<B>::negative_number difference;
+      typedef B product;
    };
 
    template<>
-   struct subtract_helper<end_of_big_int, end_of_big_int>
+   struct multiply_helper<end_of_big_int, end_of_big_int>
    {
-      typedef end_of_big_int difference;
+      typedef end_of_big_int product;
    };
 }
-
 template<typename A, typename B>
-struct reversed_subtract
+struct reversed_multiply
 {
    typedef typename normalize
    <
-      typename subtract_helper<A, B>::difference
-   >::normalized difference;
+      typename multiply_helper<A, B>::product
+   >::normalized product;
 };
 
 template<typename A, typename B>
+struct multiply
+{
+   typedef typename reverse
+   <
+      typename reversed_multiply
+      <
+         typename reverse<A>::reversed,
+         typename reverse<B>::reversed
+      >::product
+   >::reversed product;
+};
+
+template<typename A>
+struct multiply<A, ZERO>
+{
+   typedef ZERO product;
+};
+
+template<>
+struct multiply<ZERO, ZERO>
+{
+   typedef ZERO product;
+};
+
+template<typename A>
+struct multiply<ZERO, A>
+{
+   typedef ZERO product;
+};
+
+/****************************************************************************/
+
+template<typename A, typename B, digit_t Carry>
+struct subtract_helper
+{
+   typedef typename struct_if
+   <
+      (A::digit - B::digit + Carry) < 0,
+      big_int
+      <
+         (A::digit - B::digit + Carry + base),
+         typename subtract_helper
+         <
+            typename A::tail,
+            typename B::tail,
+            -1
+         >::difference
+      >,
+      big_int
+      <
+         (A::digit - B::digit + Carry),
+         typename subtract_helper
+         <
+            typename A::tail,
+            typename B::tail,
+            0
+         >::difference
+      >
+   >::result difference;
+};
+
+/*********************/
+
+template<typename A, digit_t Carry>
+struct subtract_helper<A, end_of_big_int, Carry>
+{
+   typedef typename struct_if
+   <
+      (A::digit + Carry) < 0,
+      big_int
+      <
+         (A::digit + Carry + base),
+         typename subtract_helper
+         <
+            typename A::tail,
+            end_of_big_int,
+            -1
+         >::difference
+      >,
+      big_int
+      <
+         (A::digit + Carry),
+         typename A::tail
+      >
+   >::result difference;
+};
+
+/*********************/
+/* it is dummy */
+template<digit_t Carry>
+struct subtract_helper<end_of_big_int, end_of_big_int, Carry>
+{
+   typedef end_of_big_int difference;
+};
+
+/*********************************************************/
+template<typename A, typename B>
 struct subtract
 {
-public:
    typedef typename cut_leading_zeros
    <
       typename reverse
       <
-         typename reversed_subtract
+         typename subtract_helper
          <
             typename reverse<A>::reversed,
-            typename reverse<B>::reversed
+            typename reverse<B>::reversed,
+            0
          >::difference
       >::reversed
    >::cut difference;
 };
 
-/**********************/
 
 template<typename A>
 struct subtract<A, ZERO>
 {
    typedef A difference;
-};
-
-template<typename B>
-struct subtract<ZERO, B>
-{
-   typedef typename negate<B>::negative_number difference;
 };
 
 template<>

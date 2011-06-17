@@ -35,34 +35,18 @@ namespace
    template<typename A>
    struct normalize_helper<A, 0>
    {
-      /* FIXME! */
-      typedef typename struct_if
+      typedef big_int
       <
-         (A::digit) < (0),
-         big_int
+         (A::digit % base),
+         typename normalize_helper
          <
-            (A::digit) + (base),
-            typename normalize_helper
-            <
-               typename A::tail,
-               1 /* <<<< FIXME */
-            >::normalized
-         >,
-         big_int
-         <
-            (A::digit) % (base),
-            typename normalize_helper
-            <
-               typename A::tail,
-               (A::digit) / (base)
-            >::normalized
-         >
-      >::result normalized;
-      //typedef A normalized;//заглушка
+            typename A::tail,
+            (A::digit / base)
+         >::normalized         
+      > normalized;
    };
 
 };
-
 
 template<typename A>
 struct normalize

@@ -28,8 +28,21 @@ typedef big_int<1,
         big_int<0,
         big_int<0,
         big_int<0, end_of_big_int> > > > > > > > > > billion;
+// 6134629179
+typedef big_int<6,
+        big_int<1,
+        big_int<3,
+        big_int<4,
+        big_int<6,
+        big_int<2,
+        big_int<9,
+        big_int<1,
+        big_int<7,
+        big_int<9, end_of_big_int> > > > > > > > > > e;
+
+
 void test1()
-{/*
+{
    typedef add<a, b>::sum Sumab;
    typedef add<a, c>::sum Sumac;
    typedef add<b, c>::sum Sumbc;
@@ -44,100 +57,85 @@ void test1()
    typedef add<d, c>::sum Sumdc;
    typedef add<b, d>::sum Sumbd;
    typedef add<d, b>::sum Sumdb;
-
+   output << "11 + 23 = ";
    print_big_int<Sumab>(output);
-   output << "\n";
-   print_big_int<Sumba>(output);
-   output << "\n";
+   output << " = 23 + 11 = ";
+   println_big_int<Sumba>(output);
+
+   output << "11 + 2 = ";
    print_big_int<Sumac>(output);
-   output << "\n";
-   print_big_int<Sumca>(output);
-   output << "\n";
+   output << " = 2 + 11 = ";
+   println_big_int<Sumca>(output);
+
+   output << "23 + 2 = ";
    print_big_int<Sumbc>(output);
-   output << "\n";
-   print_big_int<Sumcb>(output);
-   output << "\n";
+   output << " = 2 + 23 = ";
+   println_big_int<Sumcb>(output);
+
+   output << "11 + 1234 = ";
    print_big_int<Sumad>(output);
-   output << "\n";
-   print_big_int<Sumda>(output);
-   output << "\n";
+   output << " = 1234 + 11 = ";
+   println_big_int<Sumda>(output);
+
+   output << "2 + 1234 = ";
    print_big_int<Sumcd>(output);
-   output << "\n";
-   print_big_int<Sumdc>(output);
-   output << "\n";
+   output << " = 1234 + 2 = ";
+   println_big_int<Sumdc>(output);
+
+   output << "23 + 1234 = ";
    print_big_int<Sumbd>(output);
-   output << "\n";
-   print_big_int<Sumdb>(output);
-   output << "\n";
+   output << " = 1234 + 23 = ";
+   println_big_int<Sumdb>(output);
    
    println_big_int<typename add<billion, typename Sumad>::sum>(output);
-   println_big_int<typename add<billion, a>::sum>(output);*/
+   println_big_int<typename add<billion, a>::sum>(output);
+   println_big_int<typename add<billion, e>::sum>(output);
 }
 
 void test2()
 {
    // a = 11 b = 23 c = 2 d = 1234
    typedef subtract<b, a>::difference ba;
-   print_big_int<b>(output);
-   output << "-";
-   print_big_int<a>(output);
-   output << "=";
-   println_big_int<ba>(output);/*
+   output << "23 - 11 = ";
+   println_big_int<ba>(output);
    typedef subtract<a, c>::difference ac;
-   typedef subtract<b, c>::difference bc;
-   typedef subtract<d, a>::difference da;
-   typedef subtract<d, b>::difference db;
-   typedef subtract<d, c>::difference dc;
-   typedef subtract<d, d>::difference dd;*/
-/*   print_big_int<a>(output);
-   output << "-";
-   print_big_int<c>(output);
-   output << "=";
+   output << "11 - 2 = ";
    println_big_int<ac>(output);
-   print_big_int<b>(output);
-   output << "-";
-   print_big_int<c>(output);
-   output << "=";
+   typedef subtract<b, c>::difference bc;
+   output << "23 - 2 = ";
    println_big_int<bc>(output);
-   print_big_int<d>(output);
-   output << "-";
-   print_big_int<a>(output);
-   output << "=";
+   
+   typedef subtract<d, a>::difference da;
+   output << "1234 - 11 = ";
    println_big_int<da>(output);
-   print_big_int<d>(output);
-   output << "-";
-   print_big_int<b>(output);
-   output << "=";   
+   
+   typedef subtract<d, b>::difference db;
+   output << "1234 - 23 = ";
    println_big_int<db>(output);
-   print_big_int<d>(output);
-   output << "-";
-   print_big_int<c>(output);
-   output << "=";
+   
+   typedef subtract<d, c>::difference dc;
+   output << "1234 - 2 = ";
    println_big_int<dc>(output);
-   print_big_int<d>(output);
-   output << "-";
-   print_big_int<d>(output);
-   output << "=";
+   
+   typedef subtract<d, d>::difference dd;
+   output << "1234 - 1234 = ";
    println_big_int<dd>(output);
    
    typedef subtract<billion, d>::difference b_d;
-   print_big_int<billion>(output);
-   output << "-";
-   print_big_int<d>(output);
-   output << "=";
+   output << "1000000000 - 1234 = ";
    println_big_int<b_d>(output);
-
-   typedef subtract<a, b>::difference ab;
-   print_big_int<a>(output);
-   output << "-";
-   print_big_int<b>(output);
-   output << "=";
-   println_big_int<ab>(output);*/
-   
+   output << "6134629179 - 1000000000 = ";
+   println_big_int<typename subtract<e, billion>::difference>(output);
 }
 
 void test3()
 {
+   typedef multiply<a, b>::product ab;
+   output << "11 * 23 = ";
+   print_big_int<ab>(output);
+   typedef multiply<b, a>::product ba;
+   output << " = 23 * 11 = ";
+   println_big_int<ba>(output);
 
 }
 int main()
@@ -146,5 +144,7 @@ int main()
    test1();
    output << "\nTest #2: subtract\n";
    test2();
+   output << "\nTest #3: multiply\n";
+   test3();
    return 0;
 }
