@@ -144,7 +144,7 @@ int main()
    test1();
    output << "\nTest #2: subtract\n";
    test2();
-   output << "\nTest #3: multiply\n";
+   output << "\nTest #3: multiply DOES NOT WORK YET\n";
    test3();
    return 0;
 }

@@ -84,7 +84,7 @@ struct add<ZERO, ZERO>
 };
 
 /****************************************************************************/
-/* FIX multiply  */
+/* FIX multiply */
 namespace
 {
    template<typename A, typename B>

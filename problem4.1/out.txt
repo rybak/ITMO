@@ -20,5 +20,5 @@ Test #2: subtract
 1000000000 - 1234 = 999998766
 6134629179 - 1000000000 = 5134629179
 
-Test #3: multiply
+Test #3: multiply DOES NOT WORK YET
 11 * 23 = 23 = 23 * 11 = 23
