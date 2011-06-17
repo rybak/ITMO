@@ -77,10 +77,12 @@
     <ClCompile Include="problem4.1.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="arithmetic.h" />
+    <ClInclude Include="cut_leading_zeros.h" />
     <ClInclude Include="normalize.h" />
-    <ClInclude Include="sum.h" />
     <ClInclude Include="big_int.h" />
     <ClInclude Include="reverse.h" />
+    <ClInclude Include="struct_if.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="out.txt" />

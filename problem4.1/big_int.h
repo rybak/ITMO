@@ -3,40 +3,71 @@
 
 #include <fstream>
 
+typedef int digit_t;
+
+static const digit_t base = 10;
+
 struct end_of_big_int
 {};
 
-template<int Digit, typename Tail>
+template<digit_t Digit, typename Tail>
 struct big_int
 {
-   static const int digit = Digit;
+   static const digit_t digit = Digit;
    typedef Tail tail;
 };
 
+typedef big_int<0, end_of_big_int> ZERO;
+
+template<typename A>
+struct negate
+{
+   typedef big_int
+   <
+      -A::digit,
+      typename negate<typename A::tail>::negative_number
+   > negative_number;
+};
+
+template<>
+struct negate<end_of_big_int>
+{
+   typedef end_of_big_int negative_number;
+};
+
+template<>
+struct negate<ZERO>
+{
+   typedef ZERO negative_number;
+};
+
+namespace
+{
+   template<typename A>
+   void print_unsigned_big_int(std::ofstream& out)
+   {
+      out << std::abs(A::digit);
+      //out << A::digit;
+      print_unsigned_big_int<A::tail>(out);
+   }
+
+   template<>
+   void print_unsigned_big_int<end_of_big_int>(std::ofstream& out)
+   {}
+}
 template<typename A>
 void print_big_int(std::ofstream& out)
 {
-   out << A::digit;
-   print_big_int<A::tail>(out);
+   if (A::digit < 0)
+      out << "-";
+   print_unsigned_big_int<A>(out);
 }
-
-template<>
-void print_big_int<end_of_big_int>(std::ofstream& out)
-{}
 
 template<typename A>
 void println_big_int(std::ofstream& out)
 {
-   out << A::digit;
-   println_big_int<A::tail>(out);
-}
-
-template<>
-void println_big_int<end_of_big_int>(std::ofstream& out)
-{
+   print_big_int<A>(out);
    out << "\n";
 }
-
-
 
 #endif

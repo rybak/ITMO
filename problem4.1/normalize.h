@@ -2,48 +2,73 @@
 #define NORMALIZE_H
 
 #include "big_int.h"
+#include "struct_if.h"
 
 namespace
 {
-   template<typename A, int Carry>
+   template<typename A, digit_t Carry>
    struct normalize_helper
    {
-      typedef big_int
+      typedef typename normalize_helper
       <
-         (A::digit + Carry) % 10,
-         typename normalize_helper
-         <
-            typename A::tail,
-            ((A::digit + Carry) / 10)
-         >::normalized
-      > normalized;
+         big_int<(A::digit) + (Carry), typename A::tail>,
+         0
+      >::normalized normalized;
    };
 
-   template<int Carry>
-   struct normalize_helper<end_of_big_int, Carry>
+   template<digit_t Carry>
+   struct normalize_helper <end_of_big_int, Carry>
    {
-      typedef big_int
+      typedef typename normalize_helper
       <
-         Carry % 10,
-         typename normalize_helper
-         <
-            end_of_big_int,
-            Carry / 10
-         >::normalized
-      > normalized;
+         big_int<Carry, end_of_big_int>,
+         0
+      >::normalized normalized;
    };
-   
+
    template<>
    struct normalize_helper<end_of_big_int, 0>
    {
       typedef end_of_big_int normalized;
    };
-}
+
+   template<typename A>
+   struct normalize_helper<A, 0>
+   {
+      /* FIXME! */
+      typedef typename struct_if
+      <
+         (A::digit) < (0),
+         big_int
+         <
+            (A::digit) + (base),
+            typename normalize_helper
+            <
+               typename A::tail,
+               1 /* <<<< FIXME */
+            >::normalized
+         >,
+         big_int
+         <
+            (A::digit) % (base),
+            typename normalize_helper
+            <
+               typename A::tail,
+               (A::digit) / (base)
+            >::normalized
+         >
+      >::result normalized;
+      //typedef A normalized;//заглушка
+   };
+
+};
+
 
 template<typename A>
 struct normalize
 {
    typedef typename normalize_helper<A, 0>::normalized normalized;
 };
+
 
 #endif
