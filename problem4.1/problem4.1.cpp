@@ -185,7 +185,7 @@ int main()
    test2();
    output << "\nTest #3: multiply_by_digit\n";
    test3();
-   output << "\nTest #4: multiply DOES NOT WORK YET\n";
+   output << "\nTest #4: multiply\n";
    test4();
    return 0;
 }
