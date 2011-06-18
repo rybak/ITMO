@@ -18,6 +18,7 @@ typedef big_int<1,
         big_int<2,
         big_int<3,
         big_int<4, end_of_big_int> > > > d;
+// 1000000000
 typedef big_int<1,
         big_int<0,
         big_int<0,
@@ -39,8 +40,10 @@ typedef big_int<6,
         big_int<1,
         big_int<7,
         big_int<9, end_of_big_int> > > > > > > > > > e;
+
 typedef big_int<9,
         big_int<9, end_of_big_int> > f;
+
 typedef big_int<3, end_of_big_int> g;
 
 void test1()

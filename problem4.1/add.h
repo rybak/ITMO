@@ -41,7 +41,7 @@ namespace
 }
 
 
-/* reversed_add takes reversed big_ints and result is reversed add */
+/* reversed_add takes reversed big_ints and result is reversed sum */
 template<typename A, typename B>
 struct reversed_add
 {
