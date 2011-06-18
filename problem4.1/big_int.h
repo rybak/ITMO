@@ -48,7 +48,7 @@ namespace
    {
       out << std::abs(A::digit);
       //out << A::digit;
-      print_unsigned_big_int<A::tail>(out);
+      print_unsigned_big_int<typename A::tail>(out);
    }
 
    template<>
@@ -65,7 +65,7 @@ void print_big_int(std::ofstream& out)
    print_unsigned_big_int<A>(out);
    */
    out << A::digit;
-   print_big_int<A::tail>(out);
+   print_big_int<typename A::tail>(out);
 }
 
 template<>

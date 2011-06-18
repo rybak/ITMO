@@ -39,7 +39,8 @@ typedef big_int<6,
         big_int<1,
         big_int<7,
         big_int<9, end_of_big_int> > > > > > > > > > e;
-
+typedef big_int<9,
+        big_int<9, end_of_big_int> > f;
 
 void test1()
 {
@@ -87,7 +88,7 @@ void test1()
    output << " = 1234 + 23 = ";
    println_big_int<Sumdb>(output);
    
-   println_big_int<typename add<billion, typename Sumad>::sum>(output);
+   println_big_int<typename add<billion, Sumad>::sum>(output);
    println_big_int<typename add<billion, a>::sum>(output);
    println_big_int<typename add<billion, e>::sum>(output);
 }
@@ -130,21 +131,61 @@ void test2()
 
 void test3()
 {
+   typedef multiply_by_digit<a, 1>::product a1;
+   output << "11 * 1 = ";
+   println_big_int<a1>(output);
+   
+   typedef multiply_by_digit<b, 2>::product b2;
+   output << "23 * 2 = ";
+   println_big_int<b2>(output);
+   
+   typedef multiply_by_digit<a, 9>::product a9;
+   output << "11 * 9 = ";
+   println_big_int<a9>(output);
+   
+   typedef multiply_by_digit<b, 9>::product b9;
+   output << "23 * 9 = ";
+   println_big_int<b9>(output);
+   
+   typedef multiply_by_digit<e, 9>::product e9;
+   output << "6134629179 * 9 = ";
+   println_big_int<e9>(output);
+   
+   typedef multiply_by_digit<f, 9>::product f9;
+   output << "99 * 9 = ";
+   println_big_int<f9>(output);
+
+   typedef multiply_by_digit<f, 10>::product f10;
+   output << "99 * 10 = ";
+   println_big_int<f10>(output);
+}
+
+void test4()
+{
+   // a = 11 b = 23 c = 2 d = 1234 e = 6134629179 f = 99
    typedef multiply<a, b>::product ab;
    output << "11 * 23 = ";
-   print_big_int<ab>(output);
+   println_big_int<ab>(output);
+
    typedef multiply<b, a>::product ba;
-   output << " = 23 * 11 = ";
+   output << "23 * 11 = ";
    println_big_int<ba>(output);
 
+   typedef multiply<e, f>::product ef;
+   output << "6134629179 * 99 = ";
+   println_big_int<ef>(output);
+
 }
+
 int main()
 {
    output << "Test #1: add\n";
    test1();
    output << "\nTest #2: subtract\n";
    test2();
-   output << "\nTest #3: multiply DOES NOT WORK YET\n";
+   output << "\nTest #3: multiply_by_digit\n";
    test3();
+   output << "\nTest #4: multiply DOES NOT WORK YET\n";
+   test4();
    return 0;
 }

@@ -84,41 +84,97 @@ struct add<ZERO, ZERO>
 };
 
 /****************************************************************************/
-/* FIX multiply */
+namespace
+{
+   template<typename A, digit_t B>
+   struct multiply_by_digit_helper
+   {
+      typedef big_int
+      <
+         ((B) * (A::digit)),
+         typename multiply_by_digit_helper
+         <
+            typename A::tail,
+            B
+         >::product
+      > product;
+   };
+   
+   template<digit_t B>
+   struct multiply_by_digit_helper<end_of_big_int, B>
+   {
+      typedef end_of_big_int product;
+   };
+
+   template<typename A>
+   struct multiply_by_digit_helper<A, 0>
+   {
+      typedef ZERO product;
+   };
+
+   template<typename A>
+   struct multiply_by_digit_helper<A, 1>
+   {
+      typedef A product;
+   };
+}
+
+template<typename A, digit_t B>
+struct reversed_multiply_by_digit /* A is reversed () */
+{
+   typedef typename normalize
+   <
+      typename multiply_by_digit_helper<A, B>::product
+   >::normalized product;
+};
+
+template<typename A, digit_t B>
+struct multiply_by_digit
+{
+   typedef typename reverse
+   <
+      typename reversed_multiply_by_digit
+      <
+         typename reverse<A>::reversed,
+         B
+      >::product
+   >::reversed product;
+
+};
+
+/* FIX multiply_helper */
 namespace
 {
    template<typename A, typename B>
    struct multiply_helper
    {
-      typedef big_int
+      typedef typename reversed_add
       <
-         (A::digit) * (B::digit),
+         typename reversed_multiply_by_digit
+         <
+            A,
+            B::digit
+         >::product,
          typename multiply_helper
          <
-            typename A::tail,
+            typename reversed_multiply_by_digit
+            <
+               A,
+               base
+            >::product,
             typename B::tail
          >::product
-      > product;
+      >::sum product;
    };
 
    template<typename A>
    struct multiply_helper<A, end_of_big_int>
    {
-      typedef A product;
-   };
-
-   template<typename B>
-   struct multiply_helper<end_of_big_int, B>
-   {
-      typedef B product;
-   };
-
-   template<>
-   struct multiply_helper<end_of_big_int, end_of_big_int>
-   {
       typedef end_of_big_int product;
    };
 }
+/* FIX multiply_helper */
+
 template<typename A, typename B>
 struct reversed_multiply
 {
