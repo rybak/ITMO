@@ -1,7 +1,7 @@
 #include <fstream>
 
 #include "big_int.h"
-#include "arithmetic.h"
+#include "arithmetics.h"
 
 std::ofstream output("out.txt");
 
@@ -41,7 +41,7 @@ typedef big_int<6,
         big_int<9, end_of_big_int> > > > > > > > > > e;
 typedef big_int<9,
         big_int<9, end_of_big_int> > f;
-
+typedef big_int<3, end_of_big_int> g;
 void test1()
 {
    typedef add<a, b>::sum Sumab;
@@ -177,6 +177,18 @@ void test4()
 
 }
 
+void test5()
+{
+   // a = 11 b = 23 c = 2 d = 1234 e = 6134629179 f = 99
+   typedef half<b>::result hb;
+   output << "half 23 = ";
+   println_big_int<hb>(output);
+
+   typedef half<e>::result he;
+   output << "half 6134629179 = ";
+   println_big_int<he>(output);
+
+}
 int main()
 {
    output << "Test #1: add\n";
@@ -187,5 +199,7 @@ int main()
    test3();
    output << "\nTest #4: multiply\n";
    test4();
+   output << "\nTest #5: half\n";
+   test5();
    return 0;
 }

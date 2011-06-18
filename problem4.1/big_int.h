@@ -18,6 +18,8 @@ struct big_int
 };
 
 typedef big_int<0, end_of_big_int> ZERO;
+typedef big_int<1, end_of_big_int> ONE;
+
 /*
 template<typename A>
 struct negate
@@ -64,7 +66,9 @@ void print_big_int(std::ofstream& out)
       out << "-";
    print_unsigned_big_int<A>(out);
    */
-   out << A::digit;
+   //  out << static_case<int>(A::digit);
+   //  out << (A::digit);
+   out << ((int) (A::digit));
    print_big_int<typename A::tail>(out);
 }
 

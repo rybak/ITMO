@@ -77,8 +77,14 @@
     <ClCompile Include="problem4.1.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="arithmetic.h" />
+    <ClInclude Include="add.h" />
+    <ClInclude Include="arithmetics.h" />
+    <ClInclude Include="compare.h" />
+    <ClInclude Include="divide.h" />
+    <ClInclude Include="length.h" />
+    <ClInclude Include="subtract.h" />
     <ClInclude Include="cut_leading_zeros.h" />
+    <ClInclude Include="multiply.h" />
     <ClInclude Include="normalize.h" />
     <ClInclude Include="big_int.h" />
     <ClInclude Include="reverse.h" />
