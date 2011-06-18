@@ -42,8 +42,11 @@ typedef big_int<6,
 typedef big_int<9,
         big_int<9, end_of_big_int> > f;
 typedef big_int<3, end_of_big_int> g;
+
 void test1()
 {
+   output << "Test #1: add\n";
+
    typedef add<a, b>::sum Sumab;
    typedef add<a, c>::sum Sumac;
    typedef add<b, c>::sum Sumbc;
@@ -58,6 +61,7 @@ void test1()
    typedef add<d, c>::sum Sumdc;
    typedef add<b, d>::sum Sumbd;
    typedef add<d, b>::sum Sumdb;
+
    output << "11 + 23 = ";
    print_big_int<Sumab>(output);
    output << " = 23 + 11 = ";
@@ -91,11 +95,15 @@ void test1()
    println_big_int<typename add<billion, Sumad>::sum>(output);
    println_big_int<typename add<billion, a>::sum>(output);
    println_big_int<typename add<billion, e>::sum>(output);
+
+   output << "\n";
 }
 
 void test2()
 {
    // a = 11 b = 23 c = 2 d = 1234
+   output << "Test #2: subtract\n";
+
    typedef subtract<b, a>::difference ba;
    output << "23 - 11 = ";
    println_big_int<ba>(output);
@@ -125,12 +133,17 @@ void test2()
    typedef subtract<billion, d>::difference b_d;
    output << "1000000000 - 1234 = ";
    println_big_int<b_d>(output);
+
    output << "6134629179 - 1000000000 = ";
    println_big_int<typename subtract<e, billion>::difference>(output);
+
+   output << "\n";
 }
 
 void test3()
 {
+   output << "Test #3: multiply_by_digit\n";
+
    typedef multiply_by_digit<a, 1>::product a1;
    output << "11 * 1 = ";
    println_big_int<a1>(output);
@@ -158,11 +171,15 @@ void test3()
    typedef multiply_by_digit<f, 10>::product f10;
    output << "99 * 10 = ";
    println_big_int<f10>(output);
+
+   output << "\n";
 }
 
 void test4()
 {
    // a = 11 b = 23 c = 2 d = 1234 e = 6134629179 f = 99
+   output << "Test #4: multiply\n";
+
    typedef multiply<a, b>::product ab;
    output << "11 * 23 = ";
    println_big_int<ab>(output);
@@ -175,11 +192,13 @@ void test4()
    output << "6134629179 * 99 = ";
    println_big_int<ef>(output);
 
+   output << "\n";
 }
 
 void test5()
 {
    // a = 11 b = 23 c = 2 d = 1234 e = 6134629179 f = 99
+   output << "Test #5: half\n";
    typedef half<b>::result hb;
    output << "half 23 = ";
    println_big_int<hb>(output);
@@ -188,18 +207,52 @@ void test5()
    output << "half 6134629179 = ";
    println_big_int<he>(output);
 
+   typedef half<d>::result hd;
+   output << "half 1234 = ";
+   println_big_int<hd>(output);
+
+   output << "\n";
 }
+
+void test6()
+{
+   // a = 11 b = 23 c = 2 d = 1234 e = 6134629179 f = 99
+   output << "Test #6: divide\n";
+
+   typedef divide<a, b> ab;
+   output << "11 / 23 = ";
+   println_big_int<ab::quotient>(output);
+   output << "11 % 23 = ";
+   println_big_int<ab::remainder>(output);
+
+   typedef divide<b, a> ba;
+   output << "23 / 11 = ";
+   println_big_int<ba::quotient>(output);
+   output << "23 % 11 = ";
+   println_big_int<ba::remainder>(output);
+
+   typedef divide<f, a> fa;
+   output << "99 / 11 = ";
+   println_big_int<fa::quotient>(output);
+   output << "99 % 11 = ";
+   println_big_int<fa::remainder>(output);
+
+   typedef divide<f, b> fb;
+   output << "99 / 23 = ";
+   println_big_int<fb::quotient>(output);
+   output << "99 % 23 = ";
+   println_big_int<fb::remainder>(output);
+
+   output << "\n";
+}
+
 int main()
 {
-   output << "Test #1: add\n";
    test1();
-   output << "\nTest #2: subtract\n";
    test2();
-   output << "\nTest #3: multiply_by_digit\n";
    test3();
-   output << "\nTest #4: multiply\n";
    test4();
-   output << "\nTest #5: half\n";
    test5();
+   test6();
    return 0;
 }
