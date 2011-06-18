@@ -73,5 +73,68 @@ struct half
    >::cut result;
 };
 
+/********************/
+namespace
+{
+   template<typename L, typename R>
+   struct center
+   {
+      typedef typename half<typename add<L, R>::sum>::result result;
+   };
+
+   template<typename A, typename B, typename L, typename C, typename R>
+   struct divide_helper
+   {
+      typedef typename struct_if
+      <
+         (compare<typename multiply<B, C>::product, A>::result > 0),
+         typename divide_helper<A, B, L, typename center<L, C>::result, C>::quotient,
+         typename divide_helper<A, B, C, typename center<C, R>::result, R>::quotient
+      >::result quotient;
+   };
+   
+   /* L==R-1  =>  (L+R)/2==L */
+   template<typename A, typename B, typename L, typename R>
+   struct divide_helper<A, B, L, L, R>
+   {
+      typedef L quotient;
+   };
+
+}
+
+template<typename A, typename B>
+struct divide
+{
+private:
+   typedef typename add<A, ONE>::sum R;
+public:
+   typedef typename divide_helper
+   <
+      A,
+      B,
+      ZERO,
+      typename half<R>::result,
+      R
+   >::quotient quotient;
+
+   typedef typename subtract
+   <
+      A,
+      typename multiply
+      <
+         B,
+         quotient
+      >::product
+   >::difference remainder;
+};
+
+template<typename A>
+struct divide<A, A>
+{
+   typedef ONE quotient;
+   typedef ZERO remainder;
+};
+
+
 
 #endif
