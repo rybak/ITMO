@@ -17,7 +17,7 @@ namespace
         (
             point(min(A.x, B.x), min(A.y, B.y)),
             point(max(A.x, B.x), max(A.y, B.y)),
-            point(min(C.x, D.x), min(D.y, D.y)),
+            point(min(C.x, D.x), min(C.y, D.y)),
             point(max(C.x, D.x), max(C.y, D.y))
         );
     }

@@ -125,11 +125,20 @@ int adaptive_left_turn(const point &a, const point &b, const point &c)
         res = grow_expansion(res, p[i].first);
         res = grow_expansion(res, p[i].second);
     }
+    /*
     for (vector<double>::const_iterator it = res.end(); it != res.begin(); --it)
     {
         if (*it > 0)
             return 1;
         if (*it < 0)
+            return -1;
+    }
+    */
+    for (int i = res.size() - 1; i >= 0; --i)
+    {
+        if (res[i] > 0)
+            return 1;
+        if (res[i] < 0)
             return -1;
     }
     return 0;
