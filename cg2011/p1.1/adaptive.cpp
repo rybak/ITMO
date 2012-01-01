@@ -2,7 +2,8 @@
 #include <cmath>
 #include <algorithm>
 #include <vector>
-
+#include <climits>
+#include <limits>
 #include "geometry.h"
 #include "adaptive.h"
 
