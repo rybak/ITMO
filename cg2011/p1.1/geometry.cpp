@@ -36,7 +36,7 @@ int left_turn(point a, point b, point c)
     return res;
 }
 
-bool intersects(segment AB, segment CD)
+bool segments_intersects(segment AB, segment CD)
 {
     point A(AB.a);
     point B(AB.b);
