@@ -28,5 +28,5 @@ int interval_left_turn(const point &a, const point &b, const point &c)
         return 1;
     if (cergt(interval_zero, t))
         return -1;
-    throw boost::numeric::interval_lib::comparison_error();
+    return 0;
 }

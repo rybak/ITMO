@@ -25,11 +25,8 @@ namespace
 int left_turn(point a, point b, point c)
 {
     int res;
-    try
-    {
-        res = interval_left_turn(a, b, c);
-    }
-    catch(...)
+    res = interval_left_turn(a, b, c);
+    if (res == 0)
     {
         res = adaptive_left_turn(a, b, c);
     }
