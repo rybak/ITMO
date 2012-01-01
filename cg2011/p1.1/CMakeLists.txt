@@ -7,4 +7,4 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules")
 set(CMAKE_BUILD_TYPE Release)
 
 add_executable (test1 test.cpp)
-add_executable (main main.cpp)
+add_executable (main main.cpp geometry.cpp interval.cpp adaptive.cpp)
