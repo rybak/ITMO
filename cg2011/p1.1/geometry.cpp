@@ -33,12 +33,32 @@ int left_turn(point a, point b, point c)
     return res;
 }
 
-bool segments_intersects(segment AB, segment CD)
+bool segments_intersects(const segment &AB, const segment &CD)
 {
     point A(AB.a);
     point B(AB.b);
     point C(CD.a);
     point D(CD.b);
+    if (!check_bounding_boxes(A, B, C, D))
+    {
+        return false;
+    }
+
+    int abc = left_turn(A, B, C);
+    int abd = left_turn(A, B, D);
+    int ab =  abc * abd;
+        
+    int cda = left_turn(C, D, A);
+    int cdb = left_turn(C, D, B);
+    int cd =  cda * cdb;
+    
+    if ((1 == ab) || (1 == cd))
+        return false;
+    return true;
+}
+
+bool segments_intersects(const point &A, const point &B, const point &C, const point &D)
+{
     if (!check_bounding_boxes(A, B, C, D))
     {
         return false;
