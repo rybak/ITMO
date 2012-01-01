@@ -5,7 +5,7 @@
 namespace
 {
     typedef boost::numeric::interval<double> interval;
-    const interval interval_zero = interval(0);    
+    const interval interval_zero = interval(0.0);    
 
     struct interval_point
     {
