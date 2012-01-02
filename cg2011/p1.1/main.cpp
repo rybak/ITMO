@@ -51,7 +51,9 @@ int main()
             point B(x2, y2);
             point C(x3, y3);
             point D(x4, y4);
-            if (segments_intersects(A, B, C, D))
+            segment AB(A, B);
+            segment CD(C, D);
+            if (segments_intersects(AB, CD))
             {
                 res += p;
             }
@@ -76,14 +78,9 @@ int main()
         point B(x2, y2);
         point C(x3, y3);
         point D(x4, y4);
-        /* segment AB(A, B);
+        segment AB(A, B);
         segment CD(C, D);
         if (segments_intersects(AB, CD))
-        {
-            res += p;
-        }*/
-        // optimization # 2
-        if (segments_intersects(A, B, C, D))
         {
             res += p;
         }
