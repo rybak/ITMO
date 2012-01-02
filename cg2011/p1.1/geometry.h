@@ -16,7 +16,7 @@ struct point
         : x(0), y(0)
     {}
 };
-
+/*
 struct segment
 {
     point a, b;
@@ -24,9 +24,9 @@ struct segment
         : a(a), b(b)
     {}
 };
-
-int left_turn(point, point, point);
-bool segments_intersects(const segment &, const segment &);
+*/
+int left_turn(const point &, const point &, const point &);
+//bool segments_intersects(const segment &, const segment &);
 bool segments_intersects(const point &, const point &, const point &, const point &);
 
 #endif
