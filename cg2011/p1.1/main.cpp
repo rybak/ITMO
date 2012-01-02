@@ -40,15 +40,17 @@ int main()
     cin >> n >> t;
     if (!t)
     {
+        double x1, y1, x2, y2;
+        double x3, y3, x4, y4;
         int res = 0;
         int p = 1;
-        point A, B, C, D;
         for (int i = 0; i < n; ++i, p *= 239)
         {
-            cin >> A.x >> A.y
-                >> B.x >> B.y
-                >> C.x >> C.y
-                >> D.x >> D.y;
+            cin >> x1 >> y1 >> x2 >> y2 >> x3 >> y3 >> x4 >> y4;
+            point A(x1, y1);
+            point B(x2, y2);
+            point C(x3, y3);
+            point D(x4, y4);
             if (segments_intersects(A, B, C, D))
             {
                 res += p;
@@ -60,15 +62,20 @@ int main()
     int seed;
     cin >> seed;
     random_input gen(seed);
+    double x1, y1, x2, y2;
+    double x3, y3, x4, y4;
     int res = 0;
     int p = 1;
-    point A, B, C, D;
     for (int i = 0; i < n; ++i, p *= 239)
     {
-        A.x = gen.get_double(); A.y = gen.get_double();
-        B.x = gen.get_double(); B.y = gen.get_double();
-        C.x = gen.get_double(); C.y = gen.get_double();
-        D.x = gen.get_double(); D.y = gen.get_double();
+        x1 = gen.get_double(); y1 = gen.get_double();
+        x2 = gen.get_double(); y2 = gen.get_double();
+        x3 = gen.get_double(); y3 = gen.get_double();
+        x4 = gen.get_double(); y4 = gen.get_double();
+        point A(x1, y1);
+        point B(x2, y2);
+        point C(x3, y3);
+        point D(x4, y4);
         if (segments_intersects(A, B, C, D))
         {
             res += p;
@@ -77,5 +84,4 @@ int main()
     cout << res << '\n';
     return 0;
 }
-
 
