@@ -32,7 +32,7 @@ int left_turn(const point &a, const point &b, const point &c)
     }
     return res;
 }
-/*
+
 bool segments_intersects(const segment &AB, const segment &CD)
 {
     point A(AB.a);
@@ -56,7 +56,7 @@ bool segments_intersects(const segment &AB, const segment &CD)
         return false;
     return true;
 }
-*/
+
 bool segments_intersects(const point &A, const point &B, const point &C, const point &D)
 {
     if (!check_bounding_boxes(A, B, C, D))
