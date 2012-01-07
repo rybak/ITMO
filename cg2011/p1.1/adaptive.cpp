@@ -31,7 +31,7 @@ namespace
     }
 
     
-    vector<double> grow_expansion(const vector<double> &e, double b)
+    vector<double> grow_expansion(vector<double> const &e, double b)
     {
         int m = e.size();
         vector<double> q(m + 1);
@@ -48,7 +48,7 @@ namespace
         return h;
     }
 
-    vector<double> grow_expansion(const vector<double> &e, double b, int start, int finish)
+    vector<double> grow_expansion(vector<double> const &e, double b, int start, int finish)
     {
         int m = finish - start + 1;
         vector<double> q(m + 1);
@@ -106,7 +106,7 @@ namespace
     }
 }
 
-int adaptive_left_turn(const point &a, const point &b, const point &c)
+int adaptive_left_turn(point const &a, point const &b, point const &c)
 {
     // (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)
     std::pair<double, double> p[6] =

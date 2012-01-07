@@ -5,11 +5,11 @@
 
 namespace
 {
-    bool intersect_axis_rectangles(const point &A, const point &B, const point &C, const point &D)
+    bool intersect_axis_rectangles(point const &A, point const &B, point const &C, point const &D)
     {
         return !( (C.x > B.x) || (D.x < A.x) || (C.y > B.y) || (D.y < A.y) );
     }
-    bool check_bounding_boxes(const point &A, const point &B, const point &C, const point &D)
+    bool check_bounding_boxes(point const &A, point const &B, point const &C, point const &D)
     {  
         using std::min;
         using std::max;
@@ -22,7 +22,7 @@ namespace
         );
     }
 }
-int left_turn(const point &a, const point &b, const point &c)
+int left_turn(point const &a, point const &b, point const &c)
 {
     int res;
     res = interval_left_turn(a, b, c);
@@ -33,7 +33,7 @@ int left_turn(const point &a, const point &b, const point &c)
     return res;
 }
 
-bool segments_intersects(const segment &AB, const segment &CD)
+bool segments_intersects(segment const &AB, segment const &CD)
 {
     point A(AB.a);
     point B(AB.b);
@@ -57,7 +57,7 @@ bool segments_intersects(const segment &AB, const segment &CD)
     return true;
 }
 
-bool segments_intersects(const point &A, const point &B, const point &C, const point &D)
+bool segments_intersects(point const &A, point const &B, point const &C, point const &D)
 {
     if (!check_bounding_boxes(A, B, C, D))
     {

@@ -20,13 +20,13 @@ struct point
 struct segment
 {
     point a, b;
-    segment(const point &a, const point &b)
+    segment(point const &a, point const &b)
         : a(a), b(b)
     {}
 };
 
-int left_turn(const point &, const point &, const point &);
-bool segments_intersects(const segment &, const segment &);
-bool segments_intersects(const point &, const point &, const point &, const point &);
-
+int left_turn(point const &, point const &, point const &);
+bool segments_intersects(segment const &, segment const &);
+bool segments_intersects(point const &, point const &, point const &, point const &);
+//bool segments_intersects(const point &, const point &, const point &, const point &);
 #endif

@@ -11,7 +11,7 @@ namespace
     {
         interval x, y;
 
-        interval_point(interval x, interval y)
+        interval_point(interval const &x, interval const &y)
             : x(x), y(y)
         {}
     };
@@ -19,7 +19,7 @@ namespace
 
 }
 
-int interval_left_turn(const point &a, const point &b, const point &c)
+int interval_left_turn(point const &a, point const &b, point const &c)
 {
     using boost::numeric::interval_lib::cergt;
     typedef interval i;
