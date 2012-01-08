@@ -1,10 +1,8 @@
 #include <vector>
-//#include <iostream>
-#include <cstdio>
+//#include <cstdio>
+#include <iostream>
 #include "geometry.h"
 
-//#include <memory>
-//#include "common.h"
 /* copy-paste from sample */
 
 class random_input
@@ -33,12 +31,12 @@ public:
 
 int main()
 {
-    //using std::cin;
-    //using std::cout;
+    using std::cin;
+    using std::cout;
     int n, t;
     
-    scanf("%d%d", &n, &t);
-    //cin >> n >> t;
+    //scanf("%d%d", &n, &t);
+    cin >> n >> t;
 
     if (!t)
     {
@@ -46,47 +44,51 @@ int main()
         double x3, y3, x4, y4;
         int res = 0;
         int p = 1;
+        point A, B, C, D;
         for (int i = 0; i < n; ++i, p *= 239)
         {
-            scanf("%lf%lf%lf%lf%lf%lf%lf%lf", &x1, &y1, &x2, &y2, &x3, &y3, &x4, &y4);
+            //scanf("%lf%lf%lf%lf%lf%lf%lf%lf", &x1, &y1, &x2, &y2, &x3, &y3, &x4, &y4);
             //cin >> x1 >> y1 >> x2 >> y2 >> x3 >> y3 >> x4 >> y4;
-            point A(x1, y1);
-            point B(x2, y2);
-            point C(x3, y3);
-            point D(x4, y4);
+            //point A(x1, y1), B(x2, y2), C(x3, y3), D(x4, y4);
+            cin >> A.x >> A.y
+                >> B.x >> B.y
+                >> C.x >> C.y
+                >> D.x >> D.y;
             if (segments_intersects(A, B, C, D))
             {
                 res += p;
             }
         }
-        printf("%d\n", res);
-        //cout << res << '\n';
+        //printf("%d\n", res);
+        cout << res << '\n';
         return 0;
     }
     int seed;
-    scanf("%d", &seed);
-    //cin >> seed;
+    //scanf("%d", &seed);
+    cin >> seed;
     random_input gen(seed);
     double x1, y1, x2, y2;
     double x3, y3, x4, y4;
     int res = 0;
     int p = 1;
+    point A, B, C, D;
     for (int i = 0; i < n; ++i, p *= 239)
-    {
-        x1 = gen.get_double(); y1 = gen.get_double();
+    {   
+        A.x = gen.get_double(); A.y = gen.get_double();
+        B.x = gen.get_double(); B.y = gen.get_double();
+        C.x = gen.get_double(); C.y = gen.get_double();
+        D.x = gen.get_double(); D.y = gen.get_double();
+        /*x1 = gen.get_double(); y1 = gen.get_double();
         x2 = gen.get_double(); y2 = gen.get_double();
         x3 = gen.get_double(); y3 = gen.get_double();
-        x4 = gen.get_double(); y4 = gen.get_double();
-        point A(x1, y1);
-        point B(x2, y2);
-        point C(x3, y3);
-        point D(x4, y4);
+        x4 = gen.get_double(); y4 = gen.get_double();*/
+        // point A(x1, y1), B(x2, y2), C(x3, y3), D(x4, y4);
         if (segments_intersects(A, B, C, D))
         {
             res += p;
         }
     }
-    printf("%d\n", res);
-    //cout << res << '\n';
+    //printf("%d\n", res);
+    cout << res << '\n';
     return 0;
 }
