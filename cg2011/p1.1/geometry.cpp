@@ -44,15 +44,7 @@ bool segments_intersects(segment const &AB, segment const &CD)
         return false;
     }
 
-    int abc = left_turn(A, B, C);
-    int abd = left_turn(A, B, D);
-    int ab =  abc * abd;
-        
-    int cda = left_turn(C, D, A);
-    int cdb = left_turn(C, D, B);
-    int cd =  cda * cdb;
-    
-    if ((1 == ab) || (1 == cd))
+    if ((1 == left_turn(A, B, C) * left_turn(A, B, D)) || (1 ==  left_turn(C, D, A) * left_turn(C, D, B)))
         return false;
     return true;
 }
@@ -64,15 +56,7 @@ bool segments_intersects(point const &A, point const &B, point const &C, point c
         return false;
     }
 
-    int abc = left_turn(A, B, C);
-    int abd = left_turn(A, B, D);
-    int ab =  abc * abd;
-        
-    int cda = left_turn(C, D, A);
-    int cdb = left_turn(C, D, B);
-    int cd =  cda * cdb;
-    
-    if ((1 == ab) || (1 == cd))
+    if ((1 == left_turn(A, B, C) * left_turn(A, B, D)) || (1 ==  left_turn(C, D, A) * left_turn(C, D, B)))
         return false;
     return true;
 }
