@@ -1,11 +1,10 @@
 #include <vector>
-//#include <fstream>
-#include <iostream>
+//#include <iostream>
+#include <cstdio>
 #include "geometry.h"
 
-#include <memory>
+//#include <memory>
 //#include "common.h"
-
 /* copy-paste from sample */
 
 class random_input
@@ -34,10 +33,13 @@ public:
 
 int main()
 {
-    using std::cin;
-    using std::cout;
+    //using std::cin;
+    //using std::cout;
     int n, t;
-    cin >> n >> t;
+    
+    scanf("%d%d", &n, &t);
+    //cin >> n >> t;
+
     if (!t)
     {
         double x1, y1, x2, y2;
@@ -46,7 +48,8 @@ int main()
         int p = 1;
         for (int i = 0; i < n; ++i, p *= 239)
         {
-            cin >> x1 >> y1 >> x2 >> y2 >> x3 >> y3 >> x4 >> y4;
+            scanf("%lf%lf%lf%lf%lf%lf%lf%lf", &x1, &y1, &x2, &y2, &x3, &y3, &x4, &y4);
+            //cin >> x1 >> y1 >> x2 >> y2 >> x3 >> y3 >> x4 >> y4;
             point A(x1, y1);
             point B(x2, y2);
             point C(x3, y3);
@@ -56,11 +59,13 @@ int main()
                 res += p;
             }
         }
-        cout << res << '\n';
+        printf("%d\n", res);
+        //cout << res << '\n';
         return 0;
     }
     int seed;
-    cin >> seed;
+    scanf("%d", &seed);
+    //cin >> seed;
     random_input gen(seed);
     double x1, y1, x2, y2;
     double x3, y3, x4, y4;
@@ -81,6 +86,7 @@ int main()
             res += p;
         }
     }
-    cout << res << '\n';
+    printf("%d\n", res);
+    //cout << res << '\n';
     return 0;
 }
