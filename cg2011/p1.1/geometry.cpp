@@ -12,7 +12,7 @@ namespace
     {
         return !( (C.x > B.x) || (D.x < A.x) || (C.y > B.y) || (D.y < A.y) );
     }
-    bool check_bounding_boxes(point const &A, point const &B, point const &C, point const &D)
+    bool check_bounding_boxes2(point const &A, point const &B, point const &C, point const &D)
     {  
         using std::min;
         using std::max;
@@ -23,6 +23,14 @@ namespace
             point(min(C.x, D.x), min(C.y, D.y)),
             point(max(C.x, D.x), max(C.y, D.y))
         );
+    }
+
+    bool check_bounding_boxes(point const &A, point const &B, point const &C, point const &D)
+    {
+        return !(((A.x < C.x) && (A.x < D.x) && (D.x < C.x) && (D.x < D.x)) ||
+                 ((C.x < A.x) && (C.x < D.x) && (D.x < A.x) && (D.x < D.x)) ||
+                 ((A.y < C.y) && (A.y < D.y) && (D.y < C.y) && (D.y < D.y)) ||
+                 ((C.y < A.y) && (C.y < D.y) && (D.y < A.y) && (D.y < D.y)));
     }
 }
 
@@ -59,21 +67,6 @@ int left_turn(point const &a, point const &b, point const &c)
     return res;
 }
 
-bool segments_intersects(segment const &AB, segment const &CD)
-{
-    point A(AB.a);
-    point B(AB.b);
-    point C(CD.a);
-    point D(CD.b);
-    if (!check_bounding_boxes(A, B, C, D))
-    {
-        return false;
-    }
-
-    if ((1 == left_turn(A, B, C) * left_turn(A, B, D)) || (1 ==  left_turn(C, D, A) * left_turn(C, D, B)))
-        return false;
-    return true;
-}
 
 bool segments_intersects(point const &A, point const &B, point const &C, point const &D)
 {
@@ -82,7 +75,13 @@ bool segments_intersects(point const &A, point const &B, point const &C, point c
         return false;
     }
 
-    if ((1 == left_turn(A, B, C) * left_turn(A, B, D)) || (1 ==  left_turn(C, D, A) * left_turn(C, D, B)))
+    if (1 == left_turn(A, B, C) * left_turn(A, B, D))
+    {
         return false;
+    }
+    if (1 ==  left_turn(C, D, A) * left_turn(C, D, B))
+    {
+        return false;
+    }
     return true;
 }
