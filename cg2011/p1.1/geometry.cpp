@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <climits>
 #include <limits>
 #include <cmath>
 #include "geometry.h"
