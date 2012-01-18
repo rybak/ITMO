@@ -1,5 +1,9 @@
 cmake_minimum_required (VERSION 2.6)
+
 project (segment_intersection)
-add_definitions(-O3)
+
+add_definitions(-Wall -W)
+set(CMAKE_BUILD_TYPE RelWithDebInfo)
+
 add_executable (test test.cpp)
 add_executable (main main.cpp geometry.cpp interval.cpp adaptive.cpp)
