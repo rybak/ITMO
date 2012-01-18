@@ -1,4 +1,5 @@
 #include "boost/numeric/interval.hpp"
+//#include 
 #include "geometry.h"
 #include "interval.h"
 
@@ -22,17 +23,16 @@ namespace
 int interval_left_turn(point const &a, point const &b, point const &c)
 {
     using boost::numeric::interval_lib::cergt;
-    typedef interval i;
-    i iax(a.x), ibx(b.x), icx(c.x), iay(a.y), iby(b.y), icy(c.y);
-    i t = (ibx - iax) * (icy - iay) - (iby - iay) * (icx - iax);
-
-    /*if (cergt(t, interval_zero))
+    //typedef interval i;
+    interval iax(a.x), ibx(b.x), icx(c.x), iay(a.y), iby(b.y), icy(c.y);
+    interval t = (ibx - iax) * (icy - iay) - (iby - iay) * (icx - iax);
+    if (t.lower() > 0)
+    {
         return 1;
-    if (cergt(interval_zero, t))
-        return -1;*/
-    if (cergt(t, 0.0))
-        return 1;
-    if (cergt(0.0, t))
+    }
+    if (t.upper() < 0)
+    {
         return -1;
+    }
     return 0;
 }

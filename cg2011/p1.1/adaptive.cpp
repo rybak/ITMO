@@ -1,119 +1,99 @@
-#include <cstdlib>
 #include <cmath>
-#include <algorithm>
-#include <vector>
 #include <limits>
 #include "geometry.h"
 #include "adaptive.h"
 
-using std::pair;
-using std::make_pair;
-using std::vector;
-
 namespace
 {
-    double sum(double a, double b, double &roundoff)
+    double sum(double a, double b, double& r)
     {
-        double x = a + b;
-        double bv = x - a;
-        double av = x - bv;
-        double br = b - bv;
-        double ar = a - av;
-        roundoff = ar + br;
-        return x;
+        double res = a + b;
+        double b_v = res - a;
+        double a_v = res - b_v;
+        double b_r = b - b_v;
+        double a_r = a - a_v;
+        r = a_r + b_r;
+        return res;
     }
-
-    void split(double a, size_t s, double& hi, double& lo)
+    
+    void split(double a, double& ah, double& al)
     {
+        static size_t s = std::numeric_limits<double>::digits - std::numeric_limits<double>::digits / 2;
         double c = ((1LL << s) + 1LL) * a;
-        double ab = c - a ;
-        hi = c - ab ;
-        lo = a - hi ;
+        double ab = c - a;
+        ah = c - ab;
+        al = a - ah;
     }
 
     double mul(double a, double b, double& roundoff)
     {
-        double x = a * b;
-        static size_t s = std::numeric_limits<double>::digits / 2
-            + std::numeric_limits<double>::digits % 2;
-        
-        double a_hi, a_lo, b_hi, b_lo;
-        split(a, s, a_hi, a_lo);
-        split(b, s, b_hi, b_lo);
-        
-        double e1 = x - (a_hi * b_hi);
-        double e2 = e1 - (a_lo * b_hi);
-        double e3 = e2 - (b_lo * a_hi);
-        
-        roundoff = (a_lo * b_lo) - e3;
-        return x;
+        double res = a * b;
+        double ah, al, bh, bl;
+        split(a, ah, al);
+        split(b, bh, bl);
+        double e1 = res - (ah * bh);
+        double e2 = e1 - (al * bh);
+        double e3 = e2 - (bl * ah);
+        roundoff = (al * bl) - e3;
+        return res;
     }
 
     template <size_t N>
-    struct grow_expansion_f
+    int get_sign(double * e)
     {
-        static void calc(double const *e, double b, double *r)
+        for (int i = N - 1; i >= 0; i--)
         {
-            b = sum(*e, b, *r);
-            grow_expansion_f<N - 1>::calc(e + 1, b, r + 1);
+            if (e[i] > 0)
+            {
+                return 1;
+            }
+            if (e[i] < 0)
+            {
+                return -1;
+            }
         }
-    };
-
-    template <>
-    struct grow_expansion_f<0>
+        return 0;
+    }
+    
+    template <size_t N>
+    void grow_expansion(double* e, double b, double* h)
     {
-        static void calc(double const *e, double b, double *r)
+        double q = b;
+        for(size_t i = 0; i < N; i++)
         {
-            *r = b;
+            q = sum(e[i], q, h[i]);
         }
-    };
+        h[N] = q;
+    }
 
     template <size_t N1, size_t N2>
-    struct expand_sum_f
+    void expansion_sum(double* e, double* f)
     {
-        static void calc(double const *e, double const *f, double *r)
+        for(size_t i = 0; i < N2; i++)
         {
-            grow_expansion_f<N1>::calc(e, *f, r);
-            expand_sum_f<N1, N2 - 1>::calc(r + 1, f + 1, r + 1);
+            grow_expansion<N1>(e + i, f[i], e + i);
         }
-    };
-
-    template <size_t N1>
-    struct expand_sum_f<N1, 0>
-    {
-        static void calc(double const *e, double const *f, double *r) { }
-    };
-
+    }
 };
 
 int adaptive_left_turn(point const &a, point const &b, point const &c)
-{       
-    double sa[12];
-    sa[1] = mul(b.x, c.y, sa[0]);
-    sa[3] = mul(-b.x, a.y, sa[2]);
-    sa[5] = mul(-a.x, c.y, sa[4]);
-    sa[7] = mul(-b.y, c.x, sa[6]);
-    sa[9] = mul(b.y, a.x, sa[8]);
-    sa[11] = mul(a.y, c.x, sa[10]);
+{ 
+    double p[12];
     
-    double sb[12];
-    expand_sum_f<2, 2>::calc(sa + 0, sa + 2, sb);
-    expand_sum_f<2, 2>::calc(sa + 4, sa + 6, sb + 4);
-    expand_sum_f<2, 2>::calc(sa + 8, sa + 10, sb + 8);
+    p[0] = mul(b.x, c.y, p[1]);
+    p[2] = mul(-b.x, a.y, p[3]);
+    p[4] = mul(-a.x, c.y, p[5]);
+    p[6] = mul(-b.y, c.x, p[7]);
+    p[8] = mul(b.y, a.x, p[9]);
+    p[10] = mul(a.y, c.x, p[11]);
+    
+    expansion_sum<2, 2>(p, p + 2);
+    expansion_sum<2, 2>(p + 4, p + 6);
+    expansion_sum<2, 2>(p + 8, p + 10);
 
-    double sc[8];
-    expand_sum_f<4, 4>::calc(sb, sb + 4, sc);
+    expansion_sum<4, 4>(p, p + 4);
 
-    double sd[12];
-    expand_sum_f<8, 4>::calc(sb, sb + 8, sd);
+    expansion_sum<8, 4>(p, p + 8);
     
-    for (int i = 11; i >= 0; i--)
-    {
-        if (sd[i] > 0)
-            return 1;
-        else if (sd[i] < 0)
-            return -1;
-    }
-    
-    return 0;
+    return get_sign<12>(p);
 }

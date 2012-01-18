@@ -15,29 +15,39 @@ namespace
     {  
         using std::min;
         using std::max;
-        return intersect_axis_rectangles
+        double ax, bx, ay, by, cx, dx, cy, dy;
+        if (A.x < B.x) { ax = A.x; bx = B.x; }
+        else           { ax = B.x; bx = A.x; }
+        if (A.y < B.y) { ay = A.y; by = B.y; }
+        else           { ay = B.y; by = A.y; }
+        if (C.x < D.x) { cx = C.x; dx = D.x; }
+        else           { cx = D.x; dx = C.x; }
+        if (C.y < D.y) { cy = C.y; dy = D.y; }
+        else           { cy = D.y; dy = C.y; }
+
+        /*return intersect_axis_rectangles
         (
             point(min(A.x, B.x), min(A.y, B.y)),
             point(max(A.x, B.x), max(A.y, B.y)),
             point(min(C.x, D.x), min(C.y, D.y)),
             point(max(C.x, D.x), max(C.y, D.y))
+        );*/
+        return intersect_axis_rectangles
+        (
+            point(ax, ay),
+            point(bx, by),
+            point(cx, cy),
+            point(dx, dy)
         );
-    }
-
-    bool check_bounding_boxes2(point const &A, point const &B, point const &C, point const &D)
-    {
-        return !(((A.x < C.x) && (A.x < D.x) && (D.x < C.x) && (D.x < D.x)) ||
-                 ((C.x < A.x) && (C.x < D.x) && (D.x < A.x) && (D.x < D.x)) ||
-                 ((A.y < C.y) && (A.y < D.y) && (D.y < C.y) && (D.y < D.y)) ||
-                 ((C.y < A.y) && (C.y < D.y) && (D.y < A.y) && (D.y < D.y)));
     }
 }
 
 int epsilon_left_turn(const point& a, const point& b, const point& c)
 {
     double res = (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
-    static double eps1 = 8 * std::numeric_limits<double>::epsilon();
-    double eps = eps1 * std::abs((b.x - a.x) * (c.y - a.y)) + std::abs((b.y - a.y) * (c.x - a.x));
+    static double eps1 = std::numeric_limits<double>::epsilon();
+    double t = std::abs((b.x - a.x) * (c.y - a.y)) + std::abs((b.y - a.y) * (c.x - a.x));
+    double eps = 8 * eps1 * t;
     if (res > eps)
     {
         return 1;
