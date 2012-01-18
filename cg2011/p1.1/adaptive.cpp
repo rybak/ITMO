@@ -18,7 +18,7 @@ namespace
     
     void split(double a, double& ah, double& al)
     {
-        static size_t s = std::numeric_limits<double>::digits - std::numeric_limits<double>::digits / 2;
+        static int s = std::numeric_limits<double>::digits - std::numeric_limits<double>::digits / 2;
         double c = ((1LL << s) + 1LL) * a;
         double ab = c - a;
         ah = c - ab;
@@ -38,7 +38,7 @@ namespace
         return res;
     }
 
-    template <size_t N>
+    template <int N>
     int get_sign(double * e)
     {
         for (int i = N - 1; i >= 0; i--)
@@ -55,21 +55,21 @@ namespace
         return 0;
     }
     
-    template <size_t N>
+    template <int N>
     void grow_expansion(double* e, double b, double* h)
     {
         double q = b;
-        for(size_t i = 0; i < N; i++)
+        for(int i = 0; i < N; i++)
         {
             q = sum(e[i], q, h[i]);
         }
         h[N] = q;
     }
 
-    template <size_t N1, size_t N2>
+    template <int N1, int N2>
     void expansion_sum(double* e, double* f)
     {
-        for(size_t i = 0; i < N2; i++)
+        for(int i = 0; i < N2; i++)
         {
             grow_expansion<N1>(e + i, f[i], e + i);
         }
