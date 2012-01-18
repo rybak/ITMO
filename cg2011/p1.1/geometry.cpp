@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <climits>
 #include <limits>
+#include <cmath>
 #include "geometry.h"
 #include "interval.h"
 #include "adaptive.h"
