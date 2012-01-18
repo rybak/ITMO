@@ -15,6 +15,7 @@ namespace
     {  
         using std::min;
         using std::max;
+        /*
         double ax, bx, ay, by, cx, dx, cy, dy;
         if (A.x < B.x) { ax = A.x; bx = B.x; }
         else           { ax = B.x; bx = A.x; }
@@ -24,21 +25,21 @@ namespace
         else           { cx = D.x; dx = C.x; }
         if (C.y < D.y) { cy = C.y; dy = D.y; }
         else           { cy = D.y; dy = C.y; }
-
-        /*return intersect_axis_rectangles
+        */
+        return intersect_axis_rectangles
         (
             point(min(A.x, B.x), min(A.y, B.y)),
             point(max(A.x, B.x), max(A.y, B.y)),
             point(min(C.x, D.x), min(C.y, D.y)),
             point(max(C.x, D.x), max(C.y, D.y))
-        );*/
+        );/*
         return intersect_axis_rectangles
         (
             point(ax, ay),
             point(bx, by),
             point(cx, cy),
             point(dx, dy)
-        );
+        );*/
     }
 }
 
