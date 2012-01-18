@@ -23,8 +23,9 @@ int interval_left_turn(point const &a, point const &b, point const &c)
 {
     using boost::numeric::interval_lib::cergt;
     typedef interval i;
-    interval t = (i(b.x) - i(a.x)) * (i(c.y) - i(a.y)) - (i(b.y) - i(a.y)) * (i(c.x) - i(a.x));
-    
+    i iax(a.x), ibx(b.x), icx(c.x), iay(a.y), iby(b.y), icy(c.y);
+    i t = (ibx - iax) * (icy - iay) - (iby - iay) * (icx - iax);
+
     /*if (cergt(t, interval_zero))
         return 1;
     if (cergt(interval_zero, t))
