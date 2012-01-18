@@ -87,15 +87,15 @@ namespace
 
 };
 
-int adaptive_left_turn(point const &A, point const &B, point const &C)
+int adaptive_left_turn(point const &a, point const &b, point const &c)
 {       
     double sa[12];
-    sa[1] = mul(B.x, C.y, sa[0]);
-    sa[3] = mul(-B.x, A.y, sa[2]);
-    sa[5] = mul(-A.x, C.y, sa[4]);
-    sa[7] = mul(-B.y, C.x, sa[6]);
-    sa[9] = mul(B.y, A.x, sa[8]);
-    sa[11] = mul(A.y, C.x, sa[10]);
+    sa[1] = mul(b.x, c.y, sa[0]);
+    sa[3] = mul(-b.x, a.y, sa[2]);
+    sa[5] = mul(-a.x, c.y, sa[4]);
+    sa[7] = mul(-b.y, c.x, sa[6]);
+    sa[9] = mul(b.y, a.x, sa[8]);
+    sa[11] = mul(a.y, c.x, sa[10]);
     
     double sb[12];
     expand_sum_f<2, 2>::calc(sa + 0, sa + 2, sb);

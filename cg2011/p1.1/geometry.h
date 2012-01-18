@@ -25,7 +25,6 @@ struct segment
     {}
 };
 
-int left_turn(point const &, point const &, point const &);
 bool segments_intersects(segment const &, segment const &);
 bool segments_intersects(point const &, point const &, point const &, point const &);
 //bool segments_intersects(const point &, const point &, const point &, const point &);

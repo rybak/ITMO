@@ -40,8 +40,8 @@ int main()
 
     if (!t)
     {
-        double x1, y1, x2, y2;
-        double x3, y3, x4, y4;
+        //double x1, y1, x2, y2;
+        //double x3, y3, x4, y4;
         int res = 0;
         int p = 1;
         point A, B, C, D;
@@ -67,8 +67,8 @@ int main()
     //scanf("%d", &seed);
     cin >> seed;
     random_input gen(seed);
-    double x1, y1, x2, y2;
-    double x3, y3, x4, y4;
+    //double x1, y1, x2, y2;
+    //double x3, y3, x4, y4;
     int res = 0;
     int p = 1;
     point A, B, C, D;
