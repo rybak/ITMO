@@ -20,10 +20,10 @@ namespace
 
 }
 
-int interval_left_turn(point const &a, point const &b, point const &c)
+int interval_left_turn(const point &a, const point &b, const point &c)
 {
     using boost::numeric::interval_lib::cergt;
-    //typedef interval i;
+
     interval iax(a.x), ibx(b.x), icx(c.x), iay(a.y), iby(b.y), icy(c.y);
     interval t = (ibx - iax) * (icy - iay) - (iby - iay) * (icx - iax);
     if (t.lower() > 0)

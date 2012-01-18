@@ -17,14 +17,6 @@ struct point
     {}
 };
 
-struct segment
-{
-    point a, b;
-    segment(point const &a, point const &b)
-        : a(a), b(b)
-    {}
-};
-
-bool segments_intersects(point const &, point const &, point const &, point const &);
+bool segments_intersects(const point &, const point &, const point &, const point &);
 
 #endif
