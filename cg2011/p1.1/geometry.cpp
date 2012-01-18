@@ -12,7 +12,7 @@ namespace
     {
         return !( (C.x > B.x) || (D.x < A.x) || (C.y > B.y) || (D.y < A.y) );
     }
-    bool check_bounding_boxes2(point const &A, point const &B, point const &C, point const &D)
+    bool check_bounding_boxes(point const &A, point const &B, point const &C, point const &D)
     {  
         using std::min;
         using std::max;
@@ -25,7 +25,7 @@ namespace
         );
     }
 
-    bool check_bounding_boxes(point const &A, point const &B, point const &C, point const &D)
+    bool check_bounding_boxes2(point const &A, point const &B, point const &C, point const &D)
     {
         return !(((A.x < C.x) && (A.x < D.x) && (D.x < C.x) && (D.x < D.x)) ||
                  ((C.x < A.x) && (C.x < D.x) && (D.x < A.x) && (D.x < D.x)) ||
