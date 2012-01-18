@@ -13,133 +13,108 @@ using std::vector;
 
 namespace
 {
-    /***************************************************
-        Adaptive Precision Floating-Point Arithmetic
-        and Fast Robust Geometric Predicates
-        Jonathan Richard Shewchuk
-    ****************************************************/
-
-    pair<double, double> sum(double a, double b)
+    double sum(double a, double b, double &roundoff)
     {
         double x = a + b;
         double bv = x - a;
         double av = x - bv;
-        double ar = a - av;
         double br = b - bv;
-        double y = ar + br;
-        return make_pair<double, double>(x, y);
+        double ar = a - av;
+        roundoff = ar + br;
+        return x;
     }
 
-    
-    vector<double> grow_expansion(vector<double> const &e, double b)
+    void split(double a, size_t s, double& hi, double& lo)
     {
-        int m = e.size();
-        vector<double> q(m + 1);
-        vector<double> h(m + 1);
-        q[0] = b;
-        pair<double, double> tmp;
-        for (int i = 0; i < m; ++i)
-        {
-            tmp = sum(q[i], e[i]);
-            q[i + 1] = tmp.first;
-            h[i] = tmp.second;
-        }
-        h[m] = q[m];
-        return h;
+        double c = ((1LL << s) + 1LL) * a;
+        double ab = c - a ;
+        hi = c - ab ;
+        lo = a - hi ;
     }
 
-    vector<double> grow_expansion(vector<double> const &e, double b, int start, int finish)
+    double mul(double a, double b, double& roundoff)
     {
-        int m = finish - start + 1;
-        vector<double> q(m + 1);
-        vector<double> h(m + 1);
-        q[0] = b;
-        pair<double, double> tmp;
-        for (int i = 0; (i + start) <= finish; ++i)
-        {
-            tmp = sum(q[i], e[i + start]);
-            q[i + 1] = tmp.first;
-            h[i] = tmp.second;
-        }
-        h[m] = q[m];
-        return h;
-    }
-
-    /*
-    vector<double> sum_expansion(const vector<double> &e, const vector<double> &f)
-    {
-        int m = e.size();
-        int n = f.size();
-        vector<double> h(n + m);
-        vector<double> tmp(m + 1);
-        for (int i = 0; i < n; ++i)
-            h[i] = e[i];
-        for (int i = 0; i < n; ++i)
-        {
-            tmp = grow_expansion(h, f[i], i, i + m - 1);
-            for (int j = 0; j < m + 1; ++j)
-                h[i + j] = tmp[j];
-        }
-        return h;
-    }*/
-    pair<double, double> split(double a)
-    {
-        static size_t d = std::numeric_limits<double>::digits - std::numeric_limits<double>::digits / 2;
-        double c = ((1LL << d) + 1LL) * a;
-        double a_big = c - a;
-        double a_hi = c - a_big;
-        double a_lo = a - a_hi;
-        return make_pair(a_hi, a_hi);
-    }
-
-    pair<double, double> mul(double a, double b)
-    {
-        std::pair<double, double> sa = split(a), sb = split(b);
-        double al = sa.first, ah = sa.second;
-        double bl = sb.first, bh = sb.second;
         double x = a * b;
-        double err1 = x - (ah * bh);
-        double err2 = err1 - (al * bh);
-        double err3 = err2 - (ah * bl);
-        double y = al * bl - err3; // - (err3-(al * bl))
-        return std::make_pair(x, y);
+        static size_t s = std::numeric_limits<double>::digits / 2
+            + std::numeric_limits<double>::digits % 2;
+        
+        double a_hi, a_lo, b_hi, b_lo;
+        split(a, s, a_hi, a_lo);
+        split(b, s, b_hi, b_lo);
+        
+        double e1 = x - (a_hi * b_hi);
+        double e2 = e1 - (a_lo * b_hi);
+        double e3 = e2 - (b_lo * a_hi);
+        
+        roundoff = (a_lo * b_lo) - e3;
+        return x;
     }
-}
 
-int adaptive_left_turn(point const &a, point const &b, point const &c)
-{
-    // (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)
-    std::pair<double, double> p[6] =
+    template <size_t N>
+    struct grow_expansion_f
     {
-        mul(b.x, c.y),
-        mul(-a.x, c.y),
-        mul(-b.x, a.y),
-        mul(-b.y, c.x),
-        mul(a.y, c.x),
-        mul(b.y, a.x)
+        static void calc(double const *e, double b, double *r)
+        {
+            b = sum(*e, b, *r);
+            grow_expansion_f<N - 1>::calc(e + 1, b, r + 1);
+        }
     };
 
-    vector<double> res;
-    for (int i = 0; i < 6; i++)
+    template <>
+    struct grow_expansion_f<0>
     {
-        res = grow_expansion(res, p[i].first);
-        res = grow_expansion(res, p[i].second);
-    }
-    /*
-    for (vector<double>::const_iterator it = res.end(); it != res.begin(); --it)
+        static void calc(double const *e, double b, double *r)
+        {
+            *r = b;
+        }
+    };
+
+    template <size_t N1, size_t N2>
+    struct expand_sum_f
     {
-        if (*it > 0)
+        static void calc(double const *e, double const *f, double *r)
+        {
+            grow_expansion_f<N1>::calc(e, *f, r);
+            expand_sum_f<N1, N2 - 1>::calc(r + 1, f + 1, r + 1);
+        }
+    };
+
+    template <size_t N1>
+    struct expand_sum_f<N1, 0>
+    {
+        static void calc(double const *e, double const *f, double *r) { }
+    };
+
+};
+
+int adaptive_left_turn(point const &A, point const &B, point const &C)
+{       
+    double sa[12];
+    sa[1] = mul(B.x, C.y, sa[0]);
+    sa[3] = mul(-B.x, A.y, sa[2]);
+    sa[5] = mul(-A.x, C.y, sa[4]);
+    sa[7] = mul(-B.y, C.x, sa[6]);
+    sa[9] = mul(B.y, A.x, sa[8]);
+    sa[11] = mul(A.y, C.x, sa[10]);
+    
+    double sb[12];
+    expand_sum_f<2, 2>::calc(sa + 0, sa + 2, sb);
+    expand_sum_f<2, 2>::calc(sa + 4, sa + 6, sb + 4);
+    expand_sum_f<2, 2>::calc(sa + 8, sa + 10, sb + 8);
+
+    double sc[8];
+    expand_sum_f<4, 4>::calc(sb, sb + 4, sc);
+
+    double sd[12];
+    expand_sum_f<8, 4>::calc(sb, sb + 8, sd);
+    
+    for (int i = 11; i >= 0; i--)
+    {
+        if (sd[i] > 0)
             return 1;
-        if (*it < 0)
+        else if (sd[i] < 0)
             return -1;
     }
-    */
-    for (int i = res.size() - 1; i >= 0; --i)
-    {
-        if (res[i] > 0)
-            return 1;
-        if (res[i] < 0)
-            return -1;
-    }
+    
     return 0;
 }
