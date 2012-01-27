@@ -30,7 +30,7 @@ int epsilon_left_turn(const point &a, const point &b, const point &c)
     double res = (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
     static double eps1 = std::numeric_limits<double>::epsilon();
     double t = std::abs((b.x - a.x) * (c.y - a.y)) + std::abs((b.y - a.y) * (c.x - a.x));
-    double eps = 8 * eps1 * t;
+    double eps = 4 * eps1 * t;
     if (res > eps)
     {
         return 1;
