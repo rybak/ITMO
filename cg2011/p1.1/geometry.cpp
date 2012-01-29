@@ -50,11 +50,11 @@ int left_turn(const point &a, const point &b, const point &c)
     {
         return res;
     }
-    res = interval_left_turn(a, b, c);
+    /*res = interval_left_turn(a, b, c);
     if (res != 0)
     {
         return res;
-    }
+    }*/
     res = adaptive_left_turn(a, b, c);
     return res;
 }
