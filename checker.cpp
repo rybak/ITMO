@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <vector>
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
@@ -14,23 +15,34 @@ bool isInChull(const Point_2 &p, const std::vector<Point_2> &chull) {
     return true; 
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+    if (argc != 3) {
+        std::cerr << "Usage: convexhull-checker inputfile outputfile" << std::endl;
+        return -1;
+    }
+    
+    std::ifstream input(argv[1]);
     int n;
-    std::cin >> n;
+    input >> n;
     std::vector<Point_2> points(n);
     for (int i = 0; i < n; i++) {
         double x, y;
-        std::cin >> x >> y;
+        input >> x >> y;
         points[i] = Point_2(x, y);
     }
+    input.close();
+
+
+    std::ifstream output(argv[2]);
     int k;
-    std::cin >> k;
+    output >> k;
     std::vector<Point_2> chull(k);
     for (int i = 0; i < k; i++) {
-        double x, y;
-        std::cin >> x >> y;
-        chull[i] = Point_2(x, y);
+        int index;
+        output >> index;
+        chull[i] = points[index - 1];
     }
+    output.close();
 
     bool allToLeft = true;
     for (int i = 0; i < n && allToLeft; i++) {
@@ -38,7 +50,5 @@ int main() {
             allToLeft = false;
         }
     }
-    std::cout << (allToLeft ? 1 : 0) << std::endl;
-
-    return 0;
+    return allToLeft ? 0 : 1;
 }

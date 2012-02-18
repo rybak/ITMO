@@ -1,3 +1,5 @@
-Компиляем:
-g++ main.cpp -o convexhull-checker -O2 -lCGAL -lgmp -DCGAL_DISABLE_ROUNDING_MATH_CHECK
-Todo: разобраться с последним флагом
+$ mkdir bin
+$ cd bin
+$ cmake ..
+$ ./convexhull-checker infile outputfile
+Вернет 0, если ответ правильный и 1, если ответ неправильный.
