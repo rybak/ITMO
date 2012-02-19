@@ -1,3 +1,7 @@
-Welcome to My First Repo
--------------------------------
-This repo is a practice repo I am using to learn Bitbucket.
+Инструкции как у Димы Гесимова
+Идем в корень репозитория
+$ mkdir bin
+$ cd bin
+$ cmake ..
+$ ./convexhull-checker infile outputfile
+Вернет 0, если ответ правильный и 1, если ответ неправильный.
