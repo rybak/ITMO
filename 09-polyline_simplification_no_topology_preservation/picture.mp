@@ -36,6 +36,13 @@ beginfig(1)
 		draw A[i]--(xpart A[i], 0) dashed evenly withcolor(.5white);
 		draw A[i]--(0, ypart A[i]) dashed evenly withcolor(.5white);
 	endfor;
+
+	label.lft(btex 1 etex, A[0]);
+	label.lrt(btex 2 etex, A[1]);
+	label.rt(btex 3 etex, A[2]);
+	label.llft(btex 4 etex, A[3]);
+	label.lft(btex 5 etex, A[4]);
+
 	
     draw A[1]--H withcolor (red) withpen pencircle scaled 2bp;
 	draw A[3]--T withcolor (red) withpen pencircle scaled 2bp;
