@@ -44,8 +44,8 @@ beginfig(1)
 	label.lft(btex 5 etex, A[4]);
 
 	
-    draw A[1]--H withcolor (red) withpen pencircle scaled 2bp;
-	draw A[3]--T withcolor (red) withpen pencircle scaled 2bp;
+    draw A[1]--H withcolor (red) withpen pencircle scaled 1.3bp dashed evenly;
+	draw A[3]--T withcolor (red) withpen pencircle scaled 1.3bp dashed evenly;
 	draw A[0]--A[1]--A[2]--A[3]--A[4] withpen pencircle scaled 2bp;
   	draw A[0]--A[2]--A[4] dashed evenly withpen pencircle scaled 1.5bp;
 
