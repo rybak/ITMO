@@ -69,10 +69,10 @@
 % -- End of setup margins --
 
 %---------- From package "lastpage" ------------------
-\def\lastpage@putlabel{\addtocounter{page}{-1}%
-   \immediate\write\@auxout{\string\newlabel{LastPage}{{}{\thepage}}}%
-   \addtocounter{page}{1}}
-\AtEndDocument{\clearpage\lastpage@putlabel}%
+%\def\lastpage@putlabel{\addtocounter{page}{-1}%
+%   \immediate\write\@auxout{\string\newlabel{LastPage}{{}{\thepage}}}%
+%   \addtocounter{page}{1}}
+%\AtEndDocument{\clearpage\lastpage@putlabel}%
 %---------- end of "lastpage" ------------------
 
 % -- Setup sizes --
@@ -296,12 +296,12 @@
 \end{center}}%
 }
 
-\renewcommand{\@oddfoot}{%
-\parbox{\textwidth}{%
-\hrule%
-\vspace{6pt}%
-\sffamily{{\hfil}\kw@page\ \thepage\ \kw@of\ \pageref{LastPage}\hfil}}%
-}%
+%\renewcommand{\@oddfoot}{%
+%\parbox{\textwidth}{%
+%\hrule%
+%\vspace{6pt}%
+%\sffamily{{\hfil}\kw@page\ \thepage\ \kw@of\ \pageref{LastPage}\hfil}}%
+%}%
 
 \makeatother
  
