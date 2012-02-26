@@ -2,5 +2,5 @@
 $ mkdir bin
 $ cd bin
 $ cmake ..
-$ ./convexhull-checker infile outputfile
+$ ./convexhull-checker infile outfile
 Вернет 0, если ответ правильный и 1, если ответ неправильный.
