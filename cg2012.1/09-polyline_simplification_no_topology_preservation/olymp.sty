@@ -69,10 +69,10 @@
 % -- End of setup margins --
 
 %---------- From package "lastpage" ------------------
-%\def\lastpage@putlabel{\addtocounter{page}{-1}%
-%   \immediate\write\@auxout{\string\newlabel{LastPage}{{}{\thepage}}}%
-%   \addtocounter{page}{1}}
-%\AtEndDocument{\clearpage\lastpage@putlabel}%
+\def\lastpage@putlabel{\addtocounter{page}{-1}%
+   \immediate\write\@auxout{\string\newlabel{LastPage}{{}{\thepage}}}%
+   \addtocounter{page}{1}}
+\AtEndDocument{\clearpage\lastpage@putlabel}%
 %---------- end of "lastpage" ------------------
 
 % -- Setup sizes --
@@ -201,10 +201,7 @@
 \fi
 % -- End of default memory limit --
 
-{\noindent\refstepcounter{problem}\textbf{\problemheadfont\textsf{
-%\kw@Problem\
-%\if@arabic\arabic{problem}.\else\Alph{problem}.\fi\ 
-#1}}
+{\noindent\refstepcounter{problem}\textbf{\problemheadfont\textsf{#1}}
 \nopagebreak\par\vspace{\afterproblemhead}
 \problemtextfont\parindent=6.5mm
 \vbox{

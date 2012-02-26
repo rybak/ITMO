@@ -45,11 +45,11 @@ beginfig(1)
   	draw A[0]--A[2]--A[4] dashed evenly withpen pencircle scaled 1.5bp;
 
 	% Подписи вершин
-	label.lft(btex 0 etex, A[0]);
-	label.lrt(btex 1 etex, A[1]);
-	label.rt(btex 2 etex, A[2]);
-	label.llft(btex 3 etex, A[3]);
-	label.lft(btex 4 etex, A[4]);
+	label.lft	(btex 1 etex, A[0]);
+	label.lrt	(btex 2 etex, A[1]);
+	label.rt	(btex 3 etex, A[2]);
+	label.llft	(btex 4 etex, A[3]);
+	label.lft	(btex 5 etex, A[4]);
 
 endfig;
 end;
