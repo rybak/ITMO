@@ -201,8 +201,10 @@
 \fi
 % -- End of default memory limit --
 
-{\noindent\refstepcounter{problem}\textbf{\problemheadfont\textsf{\kw@Problem\
-\if@arabic\arabic{problem}.\else\Alph{problem}.\fi\ #1}}
+{\noindent\refstepcounter{problem}\textbf{\problemheadfont\textsf{
+%\kw@Problem\
+%\if@arabic\arabic{problem}.\else\Alph{problem}.\fi\ 
+#1}}
 \nopagebreak\par\vspace{\afterproblemhead}
 \problemtextfont\parindent=6.5mm
 \vbox{
