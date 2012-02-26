@@ -1,7 +1,6 @@
-Инструкции как у Димы Гесимова, за исключением имени проекта
 Идем в корень репозитория
 $ mkdir bin
 $ cd bin
 $ cmake ..
-$ ./polygonalchain-checker infile outputfile
+$ ./polygonalchain-checker infile outfile
 Вернет 0, если ответ правильный и 1, если ответ неправильный.
