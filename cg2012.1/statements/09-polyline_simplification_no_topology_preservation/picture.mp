@@ -10,6 +10,7 @@ beginfig(1)
 	A[4] := (0u, 8u);
 
 	% Линии от точек к осям
+	pickup pencircle scaled 1.2;
 	for i=0 step 1 until 4:
 		draw A[i]--(xpart A[i], 0) dashed evenly withcolor(.5white);
 		draw A[i]--(0, ypart A[i]) dashed evenly withcolor(.5white);
@@ -18,8 +19,10 @@ beginfig(1)
     % Координатные оси
 	xmax := 7u;
 	ymax := 9u;
+	pickup pencircle scaled 1.4;
 	drawarrow (0,0)--(xmax, 0);
 	drawarrow (0,0)--(0, ymax);
+	pickup pencircle scaled 1.2;
 	for i=0 step u until xmax-u:
 		draw (i,u/20)--(i,-u/20);
 	endfor;
@@ -36,13 +39,13 @@ beginfig(1)
 	C := A[3] + (A[2] - A[4]) rotated 90;
 	T = whatever [C, A[3]];
 	T = whatever [A[4], A[2]];
-    draw A[1]--H withcolor (red) withpen pencircle scaled 1.3bp dashed evenly;
-	draw A[3]--T withcolor (red) withpen pencircle scaled 1.3bp dashed evenly;
+    draw A[1]--H withcolor (red) withpen pencircle scaled 1.5 dashed evenly;
+	draw A[3]--T withcolor (red) withpen pencircle scaled 1.5 dashed evenly;
 
 	% Цепь
-	draw A[0]--A[1]--A[2]--A[3]--A[4] withpen pencircle scaled 2bp;
+	draw A[0]--A[1]--A[2]--A[3]--A[4] withpen pencircle scaled 2;
 	% Упрощенная цепь
-  	draw A[0]--A[2]--A[4] dashed evenly withpen pencircle scaled 1.5bp;
+  	draw A[0]--A[2]--A[4] dashed evenly withpen pencircle scaled 2;
 
 	% Подписи вершин
 	label.lft	(btex 1 etex, A[0]);
