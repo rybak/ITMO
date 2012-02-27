@@ -1,0 +1,84 @@
+% Автор разбора: Павел Кротков
+
+\begin{frame}
+  \frametitle{Задача <<Различные числа>>}
+  \begin{center}
+    \includegraphics{differ.eps}
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Над задачей работали}
+  \begin{itemize}
+    \item Идея задачи: Виталий Аксенов
+    \item Текст условия: Антон Банных
+    \item Тесты, проверяющая программа и др: Сергей Мельников
+    \item Решения: Сергей Мельников, Сергей Поромов, Андрей Комаров
+    \item Текст разбора: Павел Кротков
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Формулировка задачи}
+  \begin{itemize}
+    \item Даны два целых числа: $a$ и $b$
+    \item Требуется определить количество различных чисел среди следующих:
+      \begin{itemize}
+        \item $a + b$, $b + a$
+        \item $a - b$, $b - a$
+        \item $a * b$, $b * a$
+        \item $\frac{a}{b}$, $\frac{b}{a}$
+        \item $a ^ b$, $b ^ a$
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Идея решения}
+  \begin{itemize}
+    \item Проверим все эти числа и посчитаем различные
+    \item Если какое-то число не считается --- не будем его вычислять, мы сможем сравнить это число с другими и не зная его точного значения
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Что значит не вычисляется?}
+  \begin{itemize}
+    \item Модуль числа слишком большой
+    \item Модуль числа слишком маленький
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Что делать с очень маленьким числом?}
+  \begin{itemize}
+    \item Очень маленьким(меньше $10^{-18}$) может получиться только число $a ^ b$ или $b ^ a$
+    \item Если $a ^ b$ или $b ^ a$ очень мало и одно из чисел $a$ и $b$ меньше нуля, а другое больше, то $a ^ b$ и $b ^ a$ различны
+    \item Если $a ^ b$ или $b ^ a$ очень мало и числа $a$ и $b$ меньше нуля, то $a ^ b = b ^ a$ только в случае равенства $a$ и $b$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Что делать с очень большим числом?}
+  \begin{itemize}
+    \item Очень большим(больше $10^{18}$) может получиться только число $a ^ b$ или $b ^ a$
+    \item Если $a ^ b$ или $b ^ a$ очень велико, то $a ^ b = b ^ a$ только в случае равенства $a$ и $b$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Итого}
+  \begin{itemize}
+    \item Считаем значения, которые мы можем посчитать, и ищем количество различных.
+    \item Если мы получили очень большие или маленькие числа, то скажем, сколько их
+    \item Складываем ответы
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Спасибо за внимание}
+  \begin{itemize}
+    \item Вопросы?
+  \end{itemize}
+\end{frame}
+
