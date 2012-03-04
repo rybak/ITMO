@@ -1,30 +1,30 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <iterator>
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/convex_hull_2.h>
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel::Point_2 Point_2;
 
 
-bool isInChull(const Point_2 &p, const std::vector<Point_2> &chull) {
-    for (int i = 0; i < chull.size(); i++) {
-        if (CGAL::orientation(chull[i], chull[(i + 1) % chull.size()], p) == CGAL::RIGHT_TURN)
-            return false;
-    }
-    return true; 
-}
-
 int main(int argc, char* argv[]) {
+    using std::vector;
+    using std::cin;
+    using std::cout;
+    using std::cerr;
+    using std::ifstream;
+
     if (argc != 3) {
-        std::cerr << "Usage: convexhull-checker inputfile outputfile" << std::endl;
+        cerr << "Usage: convexhull-checker inputfile outputfile" << std::endl;
         return -1;
     }
     
-    std::ifstream input(argv[1]);
+    ifstream input(argv[1]);
     int n;
     input >> n;
-    std::vector<Point_2> points(n);
+    vector<Point_2> points(n);
     for (int i = 0; i < n; i++) {
         double x, y;
         input >> x >> y;
@@ -33,22 +33,36 @@ int main(int argc, char* argv[]) {
     input.close();
 
 
-    std::ifstream output(argv[2]);
+    ifstream output(argv[2]);
     int k;
     output >> k;
-    std::vector<Point_2> chull(k);
+    vector<Point_2> chull(k);
     for (int i = 0; i < k; i++) {
-        int index;
-        output >> index;
-        chull[i] = points[index - 1];
+        double x, y;
+        output >> x >> y;
+        chull[i] = Point_2(x, y);
     }
     output.close();
 
-    bool allToLeft = true;
-    for (int i = 0; i < n && allToLeft; i++) {
-        if (!isInChull(points[i], chull)) {
-            allToLeft = false;
+    vector<Point_2> tmp(points.size());
+    vector<Point_2>::iterator end = convex_hull_2(points.begin(), points.end(), tmp.begin()); 
+    vector<Point_2> result(tmp.begin(), end);
+   
+    if (chull.size() != result.size())
+        return 1;
+
+    for (int i = 0; i < chull.size(); i++) {
+        if (chull[i] == result.front()) {
+            std::rotate(chull.begin(), chull.begin() + i, chull.end());
+            break;
         }
     }
-    return allToLeft ? 0 : 1;
+
+    for (int i = 0; i < chull.size(); i++) {
+        if (chull[i] != result[i]) {
+            return 1;
+        }
+    }
+
+    return 0;
 }
