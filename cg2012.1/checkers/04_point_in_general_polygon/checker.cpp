@@ -90,12 +90,15 @@ int main(int argc, char* argv[])
     {
         if (answer == right_answer)
         {
+            std::cerr << "AC\n";
             return 0; // AC
         }
+        std::cerr << "WA solution " << answer << " ideal " << right_answer << "\n";
         return 1; // WA   
     }
     else
     {
-        // PE
+        std::cerr << "PE\n";
+        return 1;// PE
     }    
 }
