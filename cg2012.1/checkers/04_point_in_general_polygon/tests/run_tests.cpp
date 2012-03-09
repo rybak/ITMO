@@ -11,6 +11,15 @@ const std::string int2str(int a)
 	return std::string(buffer);
 }
 
+int str2int(std::string s)
+{
+    std::stringstream stream(std::stringstream::in | std::stringstream::out);
+    stream << s;
+    int a;
+    stream >> a;
+	return a;
+}
+
 void system(std::string cmd)
 {
 	system(cmd.c_str());
@@ -21,7 +30,7 @@ int main()
 	using std::cerr;
 	using std::string;
 
-	const size_t ACtests = 5;
+	const size_t ACtests = 7;
 	const size_t PEtests = 3;
 	const size_t WAtests = 5;
 	string start = "checker.exe test";
