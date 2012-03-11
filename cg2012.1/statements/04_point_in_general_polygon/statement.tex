@@ -1,35 +1,32 @@
-\begin{problem}{04. Принадлежность точки произвольному многоугольнику}{standard
-input}{standard output}{2 секунды}{256 мегабайт}
+\documentclass[11pt,a4paper,oneside]{article}
 
-Задан некоторый многоугольник и точка. Необходимо определить, принадлежит ли она
-этому многоугольнику.
+\usepackage[T2A]{fontenc}
+\usepackage[cp1251]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage[russian]{olymp}
+\usepackage{graphics}
+\usepackage{wrapfig}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{epigraph}
+\usepackage{lastpage}
 
-\InputFile
-
-На первой строке входного файла --- координаты точки. На второй --- $n$,
-количество вершин многоугольника. В последующих $n$ строчках --- координаты
-вершин многоугольника. Затем $m$ --- количество дырок в многоугольнике. В
-последующих $m$ строчках сперва записано количество вершин в дырках, а затем
-координаты этих вершин. Порядок вершин многоугольника - против часовой стрелки,
-порядок вершин дырок - по часовой стрелке.
-
-\OutputFile
-
-Выведите 1, если точка внутри прямоугольника, 0 --- на границе, -1 --- снаружи.
-
-\Examples
-
-\begin{example}%
-\exmp{
-10 4
-4
-0 0 
-10 0
-10 10
-0 10
-0
+\contest{
+Вычислительная геометрия
 }{
-0
-}%
-\end{example}
-\end{problem}
+НИУ ИТМО
+}{
+2011/2012 учебный год
+}    
+
+\binoppenalty=10000
+\relpenalty=10000
+\exhyphenpenalty=10000
+
+\renewcommand{\t}{\texttt}
+
+\begin{document}
+
+\input statement.tex
+
+\end{document}

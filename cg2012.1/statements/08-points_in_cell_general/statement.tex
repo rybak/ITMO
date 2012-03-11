@@ -1,36 +1,32 @@
-\begin{problem}{08. Поиск множества точек d-мерного пространства, попавших в
-ячейку пространства}{standard input}{standard output}{2 секунды}{256 мегабайт}
+\documentclass[11pt,a4paper,oneside]{article}
 
-Задана ячейка и точки $d$-мерного пространства. Необходимо определить, какие
-из них лежат внутри данной ячейки.
+\usepackage[T2A]{fontenc}
+\usepackage[cp1251]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage[russian]{olymp}
+\usepackage{graphics}
+\usepackage{wrapfig}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{epigraph}
+\usepackage{lastpage}
 
-\InputFile
-
-На первой строке входного файла $d$ --- размерность пространства. На второй -
-координаты вершин ячейки. В оставшихся строчках записаны координаты
-точек.
-
-\OutputFile
-
-На первой строке выходного файла выведите $n$ --- количество точек, попавших в
-ячейку.
-В следующей строке укажите номера этих точек. Нумерация начинается с единицы.
-
-\Examples
-
-\begin{example}%
-\exmp{
-2
-0 0 0 2 2 2 2 0
-0 8
-1 6
-1.5 1.5
-0.5 0.5
-10 10
-0 0
+\contest{
+Вычислительная геометрия
 }{
-3
-3 4 6
-}%
-\end{example}
-\end{problem}
+НИУ ИТМО
+}{
+2011/2012 учебный год
+}    
+
+\binoppenalty=10000
+\relpenalty=10000
+\exhyphenpenalty=10000
+
+\renewcommand{\t}{\texttt}
+
+\begin{document}
+
+\input statement.tex
+
+\end{document}
