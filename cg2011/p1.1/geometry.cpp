@@ -2,7 +2,6 @@
 #include <limits>
 #include <cmath>
 #include "geometry.h"
-#include "interval.h"
 #include "adaptive.h"
 
 namespace
@@ -28,9 +27,9 @@ namespace
 int epsilon_left_turn(const point &a, const point &b, const point &c)
 {
     double res = (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
-    static double eps1 = std::numeric_limits<double>::epsilon();
+    static double eps1 = 4 * std::numeric_limits<double>::epsilon();
     double t = std::abs((b.x - a.x) * (c.y - a.y)) + std::abs((b.y - a.y) * (c.x - a.x));
-    double eps = 4 * eps1 * t;
+    double eps = eps1 * t;
     if (res > eps)
     {
         return 1;
@@ -50,11 +49,6 @@ int left_turn(const point &a, const point &b, const point &c)
     {
         return res;
     }
-    /*res = interval_left_turn(a, b, c);
-    if (res != 0)
-    {
-        return res;
-    }*/
     res = adaptive_left_turn(a, b, c);
     return res;
 }
