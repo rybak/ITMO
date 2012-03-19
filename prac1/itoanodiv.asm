@@ -47,8 +47,7 @@ debug_print_ecx:
 	ret
 
 
-itoa: ; void itoa(char *buffer = [esp+4], int number = [esp+8])   // REVERSED!!!
-	; pushda
+itoa: ; void itoa(char *buffer = [esp+4], int number = [esp+8])
 	push ebp ; for %10
 	push ebx ; for /10
 	push edi ; buffer - destination
@@ -57,7 +56,7 @@ itoa: ; void itoa(char *buffer = [esp+4], int number = [esp+8])   // REVERSED!!!
 		mov esi, [esp + 16 + 8]	; number
 		mov ebp, 10 ; for %10
 		mov ebx, 429496730 ; for /10
-	    mov ecx, 10; counter init : 10 digits in 4 bytes integer
+	    mov ecx, 10 ; counter init : 10 digits in 4 bytes integer
 		itoa_while:;			edx		eax			esi
 			mov eax, esi ;		-		n			n
 			mul ebx ;			n/10	-
@@ -69,25 +68,26 @@ itoa: ; void itoa(char *buffer = [esp+4], int number = [esp+8])   // REVERSED!!!
 				add edx, '0' ;	c		=			n
 				mov [edi + ecx], dl ; add to buffer
 			dec ecx
-			pop	esi			;	=		=			n/10
+			pop	esi			;	=		=			n/10 ; stack []
 			cmp esi, 0
 		jnz itoa_while
+	; Used registers
 	pop esi
 	pop edi
 	pop ebx
 	pop ebp
-	ret 8; sizeof(char *) + sizeof(int) == sizeof(buffer) + sizeof(number)
+	ret 8 ; sizeof(char *) + sizeof(int) == sizeof(buffer) + sizeof(number)
 
 _main:
 	push 8
 	call factorial ; result in eax
-
+	
 	push eax
 	push buffer
 	call itoa
 
 	push MB_ICONINFORMATION
-	push hello_title
+	push factorial_title
 	push buffer
 	push 0
 	call [__imp__MessageBoxA@16]
@@ -100,7 +100,7 @@ section .data
 	debug_buffer	db	"               ",0
 
 section .rdata
-	hello_title	db	"Factorial",0
+	factorial_title	db	"Factorial",0
 	debug_title db	"debug    ",0
 	debug_eax	db	"debug eax",0
 	debug_ecx	db	"debug ecx",0

@@ -16,27 +16,27 @@ factorial:
 	ret 4
 
 itoa: ; void itoa(char *buffer = [esp+4], int number = [esp+8])   // REVERSED!!!
-	push edx; TODO change for push stack
+	push edx
 	push ebp
 	push ebx
-	xor edx, edx;
+	xor edx, edx
 	mov eax, [esp + 12 + 8] ; number
 	mov ebp, [esp + 12 + 4] ; buffer
-	mov ecx, 10;
-	mov ebx, 10;
+	mov ecx, 10 ; counter
+	mov ebx, 10 ; base
 	itoa_while:
-		div ebx;
-		add edx, '0';
+		div ebx ; edx = eax % 10 ; eax = eax / 10
+		add edx, '0'; char
 		mov [ebp + ecx], dl; one digit
-		dec ecx;
+		dec ecx ; 
 		xor edx, edx ; clean
 		cmp eax, 0
 		jnz itoa_while
-	;I use it in itoa 
+	; used registers
 	pop ebx
 	pop ebp
 	pop edx
-	ret 8; sizeof(char *) + sizeof(int)
+	ret 8 ; sizeof(char *) + sizeof(int)
 
 _main:
 	push 5
