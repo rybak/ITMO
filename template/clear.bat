@@ -1,0 +1,11 @@
+del *.log
+del *.eps
+del *.mpx
+del *.nav
+del *.toc
+del *.aux
+del *.snm
+del *.out
+del *.vrb
+del .log
+del *.dvi

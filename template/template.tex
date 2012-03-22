@@ -1,102 +1,88 @@
+%\documentclass{beamer}
 \documentclass[hyperref={pdfpagelabels=false}]{beamer}
-\let\Tiny=\tiny
-\usepackage[T2A]{fontenc}
+
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsfonts}
-\usepackage{textcomp}
 \usepackage{amsthm}
-\usepackage{xspace}
-\usepackage[english,russian]{babel}
-\usepackage[cp1251]{inputenc}
-\usepackage{cite,enumerate,float,indentfirst}
-\usepackage{tikz}
-\usetikzlibrary{calc}
-\usepackage{hyperref}
-\usepackage{listings}
-\usepackage[all]{xy}
-\hypersetup{
-    colorlinks=true,
-    urlcolor=blue
-}
 
-\setbeamertemplate{navigation symbols}{}
+\usepackage{url}
+\usepackage{graphics}
+
+\usepackage{textcomp}
+\usepackage{xspace}
+\usepackage{tikz}
+
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage[cp1251]{inputenc}
+
 \setbeamertemplate{headline}{}
 
-\theoremstyle{definition}
-\newtheorem{mydefinition}{Определение}
-\newtheorem{remark}{Замечание}[section]
-\newtheorem{idea}{Идея}
-\newtheorem{noticement}{Наблюдение}
-\newtheorem{statement}{Утверждение}
-
-\title[Presentation template for computational geometry]{Шаблон для презентаций вычислительной геометрии}
+\title[Шаблон для презентаций]{Шаблон для презентаций \\ по вычислительной геометрии}
+\author[Андрей Рыбак]{Андрей Рыбак}
+\institute{НИУ ИТМО}
 \date{март 2012}
-\author[А. Рыбак]{Андрей Рыбак}
-\institute[ИТМО]{НИУ ИТМО}
 
-\usetheme{Darmstadt}
-\usecolortheme{dolphin}
-\useoutertheme{infolines}
+\usetheme{Madrid}
+\usecolortheme{default}
 
 \begin{document}
-% code style
-\lstset{language=[Visual]C++, commentstyle=\color{olive!100}, basicstyle=\small, frame=trBL}
 
-\maketitle
-
-\begin{frame}
+% outline style
+\AtBeginSection[]
+{
+ \begin{frame}
   \frametitle{Содержание}
+  \tableofcontents[currentsection]
+ \end{frame}
+}
 
-  \begin{itemize}
-    \item Мотивация
-    \item Определения
-    \item Использование
-    \item Проблемы и ограничения
-  \end{itemize}
+% sub-outline style
+\AtBeginSubsection[]
+{
+ \begin{frame}
+  \frametitle{Содержание}
+  \tableofcontents[currentsection,currentsubsection]
+ \end{frame}
+}
 
-\end{frame}
-
-\begin{frame}[fragile]
-   \frametitle{Вычисление предиката $Turn$}
-   \framesubtitle{Числа с плавающей точкой}
-
-   Двоичное число с плавающей точкой: $a = \pm 1.a_1a_2a_3\dots a_{p - 1} \times 2^\gamma, a_i \in \{0, 1\}.$
-   
-   \pause
-   \begin{mydefinition}
-      $ulp(a) = 2^{-p+1+\gamma}$
-   \end{mydefinition}
-
-   \pause
-   $\mathit{D}$ --- множество всех чисел c плавающей точкой c операциями $\oplus, \ominus, \otimes$.
-   
-   \pause
-
-   $\forall a, b \in \mathit{D},\ \varepsilon = 2^{-p}$:
-   \begin{itemize}
-      \item $a \oplus b = (a + b)(1 + \delta),\ |\delta| \leq \varepsilon$
-      \item $a \ominus b = (a - b)(1 + \delta),\ |\delta| \leq \varepsilon$
-      \item $a \otimes b = a b (1 + \delta),\ |\delta| \leq \varepsilon$
-   \end{itemize}
-
-   \pause
-   \begin{statement}
-      $\forall a, b, c \in \mathit{D}^2,\ \tilde{v} = (b_x \ominus a_x) \otimes (c_y \ominus a_y) \ominus (b_y \ominus a_y) \otimes (c_x \ominus a_x)$
-      $\exists \tilde{\epsilon} \in \mathit{D}:
-      \begin{cases}
-         \tilde{v} > \tilde{\epsilon} \Rightarrow (b - a)  \times (c - a) > 0\\
-         \tilde{v} < -\tilde{\epsilon} \Rightarrow (b - a) \times (c - a) < 0 
-      \end{cases}$
-   \end{statement}
+\begin{frame}
+	\titlepage
 \end{frame}
 
 \begin{frame}
-   \frametitle{Алгоритм Бентли-Оттмана}
+	\frametitle{Содержание}
+	\tableofcontents % [pausesections]
+\end{frame}
 
-   Все хорошо?
-   \pause
-   Вот, что будет, если добавлять в очередь событий координаты точек пересечений отрезков:
+\section{Введение}
+
+\subsection{Мотивация}
+\begin{frame}
+	\frametitle{Мотивация}
+	\begin{figure}
+		\centering
+		\includegraphics[height = 150pt, keepaspectratio = true]{motivate.jpg} % для template.pdf
+		\\ Ура! Можно вставлять jpg. % для template.pdf
+		%Печаль, latex + dvips + ps2pdf не умеет вставлять jpg. % для template2.pdf
+	\end{figure}
+\end{frame}
+
+\subsection{Матрица}
+\begin{frame}
+	\frametitle{Матрица}
+	\begin{theorem}
+		Ложки нет.
+	\end{theorem}
+\end{frame}
+
+\section{Работа с графикой}
+
+\subsection{tikz}
+
+\begin{frame}
+   \frametitle{Картинка из презентации Антона}
    \begin{figure}[htb]
      \begin{minipage}[b]{1.0\linewidth}
        \begin{tikzpicture} 
@@ -138,21 +124,65 @@
    \end{figure}
 \end{frame}
 
+\subsection{METAPOST}
+
 \begin{frame}
-   \frametitle{Ссылки}
-   \begin{thebibliography}{10}
-      \beamertemplatearticlebibitems
-      \bibitem{Goldberg}
-         D.~Goldberg.
-         \newblock {\em What every computer scientist should know about floating-point arithmetic}.
-         \newblock ACM Comput. Surv., March, 1991.
-   \end{thebibliography}
+	\frametitle{Картинка из условия}
+	\begin{center}
+		\begin{figure}[htb]
+			\includegraphics[height = 150pt]{picture.eps}
+		\end{figure}
+		%Обратите внимание на подписи точек (команда label в METAPOST).
+	\end{center}
+\end{frame}
+
+\section{Проблемы и ограничения}
+\begin{frame}
+	\frametitle{Проблемы}
+	\pause
+	\begin{itemize}
+		\item beamer не поддерживает использование latex + dvipdfmx, а pdfLatex не умеет рисовать label в картинках сделанных в METAPOST
+		\pause
+		\item Как решить эту проблему?
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
-   \begin{center}
-      \LARGE Спасибо за внимание!
-   \end{center}
+	\frametitle{Простое решение}
+	Использовать TikZ для рисунков и pdflatex для сборки презентации.
+\end{frame}
+
+\begin{frame}
+	\frametitle{Сложное решение}
+	\begin{itemize}
+		\item Использовать latex + dvips + ps2pdf, если нужны подписи в METAPOST
+		\pause \item Но появляется вторая проблема: latex + dvips + ps2pdf не поддерживает вставку jpeg
+	\end{itemize}
+\end{frame}
+
+\section{Заключение}
+\begin{frame}
+	\frametitle{Ссылки}
+	\begin{thebibliography}{10}
+		\beamertemplatearticlebibitems
+			\bibitem{Introduction to Beamer}
+				\href{http://www.math-linux.com/spip.php?article77}{How to make a presentation with Latex - Introduction to Beamer}
+			\bibitem{Tutorial on Beamer}
+				\href{http://www.rennes.enst-bretagne.fr/~gbertran/pages/tutorials_latex.html}{Tutorials on LaTeX, BibTeX and Beamer}
+	\end{thebibliography}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Вопросы}
+	\begin{center}
+		\resizebox{\linewidth}{!}{???}
+	\end{center}
+\end{frame}
+
+\begin{frame}
+	\begin{center}
+		\LARGE Спасибо за внимание!
+	\end{center}
 \end{frame}
 
 \end{document}
