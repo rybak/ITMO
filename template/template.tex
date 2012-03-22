@@ -1,0 +1,158 @@
+\documentclass[hyperref={pdfpagelabels=false}]{beamer}
+\let\Tiny=\tiny
+\usepackage[T2A]{fontenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{textcomp}
+\usepackage{amsthm}
+\usepackage{xspace}
+\usepackage[english,russian]{babel}
+\usepackage[cp1251]{inputenc}
+\usepackage{cite,enumerate,float,indentfirst}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage[all]{xy}
+\hypersetup{
+    colorlinks=true,
+    urlcolor=blue
+}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{headline}{}
+
+\theoremstyle{definition}
+\newtheorem{mydefinition}{Определение}
+\newtheorem{remark}{Замечание}[section]
+\newtheorem{idea}{Идея}
+\newtheorem{noticement}{Наблюдение}
+\newtheorem{statement}{Утверждение}
+
+\title[Presentation template for computational geometry]{Шаблон для презентаций вычислительной геометрии}
+\date{март 2012}
+\author[А. Рыбак]{Андрей Рыбак}
+\institute[ИТМО]{НИУ ИТМО}
+
+\usetheme{Darmstadt}
+\usecolortheme{dolphin}
+\useoutertheme{infolines}
+
+\begin{document}
+% code style
+\lstset{language=[Visual]C++, commentstyle=\color{olive!100}, basicstyle=\small, frame=trBL}
+
+\maketitle
+
+\begin{frame}
+  \frametitle{Содержание}
+
+  \begin{itemize}
+    \item Мотивация
+    \item Определения
+    \item Использование
+    \item Проблемы и ограничения
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+   \frametitle{Вычисление предиката $Turn$}
+   \framesubtitle{Числа с плавающей точкой}
+
+   Двоичное число с плавающей точкой: $a = \pm 1.a_1a_2a_3\dots a_{p - 1} \times 2^\gamma, a_i \in \{0, 1\}.$
+   
+   \pause
+   \begin{mydefinition}
+      $ulp(a) = 2^{-p+1+\gamma}$
+   \end{mydefinition}
+
+   \pause
+   $\mathit{D}$ --- множество всех чисел c плавающей точкой c операциями $\oplus, \ominus, \otimes$.
+   
+   \pause
+
+   $\forall a, b \in \mathit{D},\ \varepsilon = 2^{-p}$:
+   \begin{itemize}
+      \item $a \oplus b = (a + b)(1 + \delta),\ |\delta| \leq \varepsilon$
+      \item $a \ominus b = (a - b)(1 + \delta),\ |\delta| \leq \varepsilon$
+      \item $a \otimes b = a b (1 + \delta),\ |\delta| \leq \varepsilon$
+   \end{itemize}
+
+   \pause
+   \begin{statement}
+      $\forall a, b, c \in \mathit{D}^2,\ \tilde{v} = (b_x \ominus a_x) \otimes (c_y \ominus a_y) \ominus (b_y \ominus a_y) \otimes (c_x \ominus a_x)$
+      $\exists \tilde{\epsilon} \in \mathit{D}:
+      \begin{cases}
+         \tilde{v} > \tilde{\epsilon} \Rightarrow (b - a)  \times (c - a) > 0\\
+         \tilde{v} < -\tilde{\epsilon} \Rightarrow (b - a) \times (c - a) < 0 
+      \end{cases}$
+   \end{statement}
+\end{frame}
+
+\begin{frame}
+   \frametitle{Алгоритм Бентли-Оттмана}
+
+   Все хорошо?
+   \pause
+   Вот, что будет, если добавлять в очередь событий координаты точек пересечений отрезков:
+   \begin{figure}[htb]
+     \begin{minipage}[b]{1.0\linewidth}
+       \begin{tikzpicture} 
+       
+         \coordinate[label=left:$s_1$]  (s1) at (0, 0.4);
+         \coordinate[label=left:$s_2$]  (s2) at (2, 1);
+         \coordinate[label=left:$s_3$]  (s3) at (1, 2);
+       
+         \draw[->] (-0.5, 2.8) -- (11.3, 2.8);
+       
+         \draw[-] (0, 0.4)--(10:11);
+         \draw[-] (2, 1)--(1:10);
+         \draw[-] (1, 2)--(-2:11);
+         
+         \draw[dotted, red] (0, -1) -- (0, 2.5);
+         \draw[dotted, red] (1, -1) -- (1, 2.5);
+         \draw[dotted, red] (2, -1) -- (2, 2.5);
+
+         \draw[dashed, green] (3.33, -1) -- (3.33, 2.5);
+         \draw[dashed, green] (4.87, -1) -- (4.87, 2.5);
+         \draw[dotted, green] (7.64, -1) -- (7.64, 2.5);
+
+         \draw[-, green] (4, -1)   -- (4, 2.5);
+         \draw[-, green] (4.3, -1) -- (4.3, 2.5);
+
+         \draw[dotted, blue] (10.83, -1) -- (10.83, 2.5);
+         \draw[dotted, blue] (10.99, -1) -- (10.99, 2.5);
+         \draw[dotted, blue] (10, -1) -- (10, 2.5);
+         
+         \draw[->, gray] (3.33, 2.4) to[out=45, in=135] (4.3, 2.4);
+         \draw[->, gray] (4.87, 2.4) to[out=-135, in=-45] (4, 2.4);
+
+         \node[circle, draw, fill=black!20, minimum size=0.01, outer sep=0.1, inner sep=0.5] at (4, 1.2) {};
+         \node[circle, draw, fill=black!20, minimum size=0.01, outer sep=0.1, inner sep=0.5] at (4.3, 0.7) {};
+         \node[circle, draw, fill=black!20, minimum size=0.01, outer sep=0.1, inner sep=0.5] at (5.8, 1) {};
+
+       \end{tikzpicture}
+     \end{minipage}
+   \end{figure}
+\end{frame}
+
+\begin{frame}
+   \frametitle{Ссылки}
+   \begin{thebibliography}{10}
+      \beamertemplatearticlebibitems
+      \bibitem{Goldberg}
+         D.~Goldberg.
+         \newblock {\em What every computer scientist should know about floating-point arithmetic}.
+         \newblock ACM Comput. Surv., March, 1991.
+   \end{thebibliography}
+\end{frame}
+
+\begin{frame}
+   \begin{center}
+      \LARGE Спасибо за внимание!
+   \end{center}
+\end{frame}
+
+\end{document}
