@@ -66,7 +66,13 @@ _main:
 		dec eax
 		jnz for1_2
 
-
+	; for(uint eax = 4; eax >= 0; eax--) // uint is good there for asm
+    mov eax, 4
+	for2:
+		; code
+		sub eax, 1; "dec eax" doesn't work! because it doesn't setup CF
+		jnc for2 ; check for carry-flag
+	
 
 	push 0
 	call [__imp__ExitProcess@4]
