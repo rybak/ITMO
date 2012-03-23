@@ -19,17 +19,16 @@ itoa: ; void itoa(char *buffer = [esp+4], int number = [esp+8])   // REVERSED!!!
 	push edx
 	push ebp
 	push ebx
-	xor edx, edx
 	mov eax, [esp + 12 + 8] ; number
 	mov ebp, [esp + 12 + 4] ; buffer
 	mov ecx, 10 ; counter
 	mov ebx, 10 ; base
 	itoa_while:
+		xor edx, edx
 		div ebx ; edx = eax % 10 ; eax = eax / 10
 		add edx, '0'; char
 		mov [ebp + ecx], dl; one digit
 		dec ecx ; 
-		xor edx, edx ; clean
 		cmp eax, 0
 		jnz itoa_while
 	; used registers

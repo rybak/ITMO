@@ -17,7 +17,7 @@ factorial:
 	ret 4
 
 debug_print_eax:
-	pushad		
+	pushad
 		push eax
 		push format
 		push debug_buffer
@@ -32,7 +32,7 @@ debug_print_eax:
 	ret
 
 debug_print_ecx:
-	pushad		
+	pushad
 		push ecx
 		push format
 		push debug_buffer
@@ -56,7 +56,7 @@ itoa: ; void itoa(char *buffer = [esp+4], int number = [esp+8])
 		mov esi, [esp + 16 + 8]	; number
 		mov ebp, 10 ; for %10
 		mov ebx, 429496730 ; == round((2^32)/10)  //for /10 
-	    mov ecx, 10 ; counter init : 10 digits in 4 bytes integer
+	    mov ecx, 9 ; counter init : 10 digits in 4 bytes integer
 		itoa_while:;			edx		eax			esi
 			mov eax, esi ;		-		n			n
 			mul ebx ;			n/10	-
@@ -67,7 +67,7 @@ itoa: ; void itoa(char *buffer = [esp+4], int number = [esp+8])
 				sub edx, eax ;	c-'0'	=			n
 				add edx, '0' ;	c		=			n
 				mov [edi + ecx], dl ; add to buffer
-			dec ecx
+				dec ecx
 			pop	esi			;	=		=			n/10 ; stack []
 			cmp esi, 0
 		jnz itoa_while
