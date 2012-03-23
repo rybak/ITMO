@@ -70,9 +70,16 @@ _main:
     mov eax, 4
 	for2:
 		; code
-		sub eax, 1; "dec eax" doesn't work! because it doesn't setup CF
+		sub eax, 1; "dec eax" doesn't work! because `dec` doesn't setup CF
 		jnc for2 ; check for carry-flag
 	
+	; for(uint eax = -5; eax != 0; eax++)
+	mov eax, -5
+	for3:
+		
+		
+		inc eax ; `inc` setups ZF
+		jnz for3
 
 	push 0
 	call [__imp__ExitProcess@4]
