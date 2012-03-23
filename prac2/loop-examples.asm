@@ -34,7 +34,6 @@ _main:
 	after1:
 
 	; modified while v 2.0
-
 	mov eax, 10 ; @before
 	jmp while2cmp
 	while2loop:
@@ -43,8 +42,7 @@ _main:
 	cmp eax, 3
 	ja while2loop
 
-	; for
-
+	; for(uint eax = 0; eax < 5; eax++)
 	xor eax, eax
 	for0:
 		; code
@@ -52,8 +50,24 @@ _main:
 		cmp eax, 5
 		jb for0
 
+	; for(uint eax = 5; eax > 0; eax--)
+	; ver 1.0
+	mov eax, 5
+	for1_1:
+		; code
+		dec eax
+		test eax, eax
+		jnz for1_1
 
-	;
+	; ver 2.0
+	mov eax, 5
+	for1_2:
+		; code
+		dec eax
+		jnz for1_2
+
+
+
 	push 0
 	call [__imp__ExitProcess@4]
 
