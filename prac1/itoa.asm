@@ -23,14 +23,14 @@ itoa: ; void itoa(char *buffer = [esp+4], int number = [esp+8])   // REVERSED!!!
 	mov ebp, [esp + 12 + 4] ; buffer
 	mov ecx, 10 ; counter
 	mov ebx, 10 ; base
-	itoa_while:
+	itoa_loop:
 		xor edx, edx
 		div ebx ; edx = eax % 10 ; eax = eax / 10
 		add edx, '0'; char
 		mov [ebp + ecx], dl; one digit
 		dec ecx ; 
 		cmp eax, 0
-		jnz itoa_while
+		jnz itoa_loop
 	; used registers
 	pop ebx
 	pop ebp
