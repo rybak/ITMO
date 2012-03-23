@@ -10,10 +10,10 @@ section .text
 factorial:
 	mov ecx, [esp+4]
 	mov eax, 1
-	factorial_for:
+	factorial_loop:
 		mul ecx;
 		dec ecx;
-		jnz factorial_for
+		jnz factorial_loop
 	ret 4
 
 itoa: ; void itoa(char *buffer = [esp+4], int number = [esp+8])   // REVERSED!!!
@@ -23,7 +23,7 @@ itoa: ; void itoa(char *buffer = [esp+4], int number = [esp+8])   // REVERSED!!!
 		mov ebp, 10 ; for %10
 		mov ebx, 429496730 ; for /10
 	    mov ecx, 10; counter init : 10 digits in 4 bytes integer
-		itoa_while:;			edx		eax			esi
+		itoa_loop: ;			edx		eax			esi
 			mov eax, esi ;		-		n			n
 			mul ebx ;			n/10	-
 			mov eax, edx ;		n/10	n/10
@@ -36,14 +36,14 @@ itoa: ; void itoa(char *buffer = [esp+4], int number = [esp+8])   // REVERSED!!!
 			dec ecx
 			pop	esi			;	=		=			n/10
 			cmp esi, 0
-		jnz itoa_while
+		jnz itoa_loop
 	popad
 	ret 8; sizeof(char *) + sizeof(int) == sizeof(buffer) + sizeof(number)
 
 _main:
 	mov edi, 9
 	mov esi, 1 ; i = 1
-	main_for:
+	main_loop:
 		push esi
 		call factorial ; result in eax ; trash in ecx
 
@@ -69,7 +69,7 @@ _main:
 		call [__imp__MessageBoxA@16]
 	inc esi
 	cmp esi, edi
-	jnz main_for
+	jnz main_loop
 	push 0
 	call [__imp__ExitProcess@4]
 

@@ -9,10 +9,10 @@ section .text
 factorial:
 	mov ecx, [esp+4]
 	mov eax, 1
-	factorial_for:
+	factorial_loop:
 		mul ecx;
 		dec ecx;
-		jnz factorial_for
+		jnz factorial_loop
 	ret 4
 
 print_int_to_buffer:

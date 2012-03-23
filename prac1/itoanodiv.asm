@@ -57,7 +57,7 @@ itoa: ; void itoa(char *buffer = [esp+4], int number = [esp+8])
 		mov ebp, 10 ; for %10
 		mov ebx, 429496730 ; == round((2^32)/10)  //for /10 
 	    mov ecx, 9 ; counter init : 10 digits in 4 bytes integer
-		itoa_while:;			edx		eax			esi
+		itoa_loop:;			edx		eax			esi
 			mov eax, esi ;		-		n			n
 			mul ebx ;			n/10	-
 			mov eax, edx ;		n/10	n/10
@@ -70,7 +70,7 @@ itoa: ; void itoa(char *buffer = [esp+4], int number = [esp+8])
 				dec ecx
 			pop	esi			;	=		=			n/10 ; stack []
 			cmp esi, 0
-		jnz itoa_while
+		jnz itoa_loop
 	; Used registers
 	pop esi
 	pop edi
