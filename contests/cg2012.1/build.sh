@@ -13,7 +13,7 @@ cmake_build() {
 }
 
 DST_DIR=`pwd`
-SRC_DIR=`pwd`/../src/cg2012.1/
+SRC_DIR=`pwd`/../../cg2012.1/
 
 for p in ${ok}
 do
