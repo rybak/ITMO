@@ -13,7 +13,7 @@ _main:
 	while0:
 		cmp eax, 3
 		jbe after0
-    		dec eax; loop
+			dec eax; loop
 		jmp while0
 	after0:
 
@@ -27,7 +27,7 @@ _main:
 	; modified while v 1.0
 	cmp eax, 3
 	jbe after1
-    while1:
+	while1:
 		dec eax
 		cmp eax, 3
 		ja while1
@@ -67,7 +67,7 @@ _main:
 		jnz for1_2
 
 	; for(uint eax = 4; eax >= 0; eax--) // uint is good there for asm
-    mov eax, 4
+	mov eax, 4
 	for2:
 		; code
 		sub eax, 1; "dec eax" doesn't work! because `dec` doesn't setup CF
@@ -76,8 +76,6 @@ _main:
 	; for(uint eax = -5; eax != 0; eax++)
 	mov eax, -5
 	for3:
-		
-		
 		inc eax ; `inc` setups ZF
 		jnz for3
 
@@ -86,6 +84,6 @@ _main:
 
 section .data
 	hello_title	db	"Factorial",0
-	buffer	db	"               ",0
+	buffer	db	"                  ",0
 
 end
