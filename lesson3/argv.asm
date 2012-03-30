@@ -72,22 +72,65 @@ _main:
 
 	push ecx
 	call print_int
-	
+
 	mov ebx, ecx ; length
 	xor ecx, ecx ; counter
-	xor edi, edi ; spaces
-	calc_spaces_loop:
+	xor edi, edi
+	calc_args_loop:
 		movzx eax, byte[esi + ecx]
 		inc ecx
-		cmp eax, ' '
-		jnz calc_spaces_not_space
+		xor eax, ' '
+		jnz calc_args_not_space
 			inc edi
-		calc_spaces_not_space:
+			calc_args_skip_spaces:
+				cmp ecx, ebx
+				jz calc_args_loop_brake;
+				movzx eax, byte[esi + ecx]
+				inc ecx
+				xor eax, ' '
+				jz calc_args_skip_spaces
+		calc_args_not_space:
 		cmp ecx, ebx
-		jnz calc_spaces_loop;
+		jnz calc_args_loop;
+	calc_args_loop_brake:
 
-	push edi
+	push edi ; argc
 	call print_int
+
+	xor ebp, ebp;
+	xor ecx, ecx
+	print_args_loop:
+		movzx eax, byte[esi + ecx]
+		cmp eax, ' '
+		jnz print_args_print_arg
+		jz print_args_skip_spaces
+		print_args_skip_spaces:
+			cmp ecx, ebx ; length
+			jz print_args_loop_brake
+			movzx eax, byte[esi + ecx]
+			inc ecx
+			cmp eax, ' '
+			jz print_args_skip_spaces
+		print_args_print_arg:
+			push ebp
+			call print_int ; print arg number
+			inc ebp
+			push esi
+				add esi, ecx
+				push esi
+				call print_str
+			pop esi
+		print_args_print_arg_loop:
+			cmp ecx, ebx ; length
+			jz print_args_loop_brake
+			movzx eax, byte[esi + ecx]
+			inc ecx
+			cmp eax, ' '
+			jnz print_args_print_arg_loop
+		;inc ecx
+		cmp ecx, ebx
+		jnz print_args_loop;
+	print_args_loop_brake:
 
 	push 0
 	call [__imp__ExitProcess@4]
