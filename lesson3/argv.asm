@@ -98,6 +98,7 @@ _main:
 	push edi ; argc
 	call print_int
 
+	; TODO '"' processing
 	xor ebp, ebp;
 	xor ecx, ecx
 	print_args_loop:
