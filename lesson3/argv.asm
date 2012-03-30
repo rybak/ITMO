@@ -79,15 +79,16 @@ _main:
 	calc_args_loop:
 		movzx eax, byte[esi + ecx]
 		inc ecx
-		xor eax, ' '
+		cmp eax, ' '
 		jnz calc_args_not_space
 			inc edi
+			mov byte[esi + ecx - 1], 0
 			calc_args_skip_spaces:
 				cmp ecx, ebx
 				jz calc_args_loop_brake;
 				movzx eax, byte[esi + ecx]
 				inc ecx
-				xor eax, ' '
+				cmp eax, ' '
 				jz calc_args_skip_spaces
 		calc_args_not_space:
 		cmp ecx, ebx
@@ -101,15 +102,15 @@ _main:
 	xor ecx, ecx
 	print_args_loop:
 		movzx eax, byte[esi + ecx]
-		cmp eax, ' '
+		cmp eax, 0
 		jnz print_args_print_arg
-		jz print_args_skip_spaces
+		;jmp print_args_skip_spaces
 		print_args_skip_spaces:
 			cmp ecx, ebx ; length
 			jz print_args_loop_brake
 			movzx eax, byte[esi + ecx]
 			inc ecx
-			cmp eax, ' '
+			cmp eax, 0
 			jz print_args_skip_spaces
 		print_args_print_arg:
 			push ebp
@@ -125,7 +126,7 @@ _main:
 			jz print_args_loop_brake
 			movzx eax, byte[esi + ecx]
 			inc ecx
-			cmp eax, ' '
+			cmp eax, 0
 			jnz print_args_print_arg_loop
 		;inc ecx
 		cmp ecx, ebx
