@@ -11,7 +11,6 @@ print_int:
 	pushad
 		mov eax, [esp + 20h + 4];
 		push eax
-		;push word[esp + 20h + 4];
 		push int_format
 		push buffer
 		call [__imp__wsprintfA]
@@ -31,14 +30,14 @@ print_char:
 		push char_format
 		push buffer
 		call [__imp__wsprintfA]
-		add esp, 12 ; __cdecl
+		add esp, 8 + 4 ; __cdecl
 		push MB_ICONINFORMATION
 		push strtitle
 		push buffer
 		push 0
 		call [__imp__MessageBoxA@16] ; WINAPI == stdcall
 	popad
-	ret 1
+	ret 4
 
 print_str:
 	pushad
@@ -57,33 +56,38 @@ print_str:
 	ret 4
 
 _main:
-	call [__imp__GetCommandLineA@0]
 
-	;mov ebx, 1
-	;push ebx
-	;call print_int
+	call [__imp__GetCommandLineA@0]
 
 	push eax
 	call print_str
-
 	mov esi, eax ; source
 
 	xor ecx, ecx ;
-	main_loop:
+	calc_length_loop:
 		mov al, byte[esi + ecx]
 		inc ecx;
 		cmp al, 0
-		jnz main_loop
+		jnz calc_length_loop
+
 	push ecx
 	call print_int
 	
-	mov 
-	xor ecx, ecx ;
+	mov ebx, ecx ; length
+	xor ecx, ecx ; counter
+	xor edi, edi ; spaces
 	calc_spaces_loop:
-		mov al, byte[esi + ecx]
-	;mov ebx, 2
-	;push ebx
-	;call print_int
+		movzx eax, byte[esi + ecx]
+		inc ecx
+		cmp eax, ' '
+		jnz calc_spaces_not_space
+			inc edi
+		calc_spaces_not_space:
+		cmp ecx, ebx
+		jnz calc_spaces_loop;
+
+	push edi
+	call print_int
 
 	push 0
 	call [__imp__ExitProcess@4]
