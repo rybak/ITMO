@@ -129,6 +129,6 @@ int main()
     cout << m << '\n';
     for (size_t i = 0; i < m; ++i)
     {
-        cout << hull[i] + 1 << ' ';
+		cout << points[hull[i]].x << ' ' << points[hull[i]].y << '\n';
     }
 }
