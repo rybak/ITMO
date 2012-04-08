@@ -31,11 +31,11 @@ int main(int argc, char* argv[]) {
         Point_2 a(ax, ay), b(bx, by), c(cx, cy);
         CGAL::Orientation o = CGAL::orientation(a, b, c);
         if (o == CGAL::LEFT_TURN) {
-            expected[i] = -1;
+            expected[i] = 1;
         } else if (o == CGAL::COLLINEAR) {
             expected[i] = 0;
         } else {
-            expected[i] = 1;
+            expected[i] = -1;
         }
     }
 

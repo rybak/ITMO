@@ -180,7 +180,7 @@ vector<Triple<Point, Point, Point> > adaptiveTests(int n) {
             do {
                 count++;
                 double dx = generateMove() * meps, dy = generateMove() * meps;
-                cerr << std::fixed << "dx = " << dx << " dy = " << dy << endl;
+                //cerr << std::fixed << "dx = " << dx << " dy = " << dy << endl;
                 c = d.shifted(dx, dy);
                 //bool needs = needsAdaptive(a, b, c);
                 //cerr << (needs ? "Needs adaptive precision" : "Does not need adaptive precision") << endl;
