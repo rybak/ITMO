@@ -4,13 +4,14 @@
 #include <random>
 #include <functional>
 #include <sstream>
+#include <fstream>
 #include <cmath>
 
 using namespace std;
 
 
 const double meps = numeric_limits<double>::epsilon() / 2; //machine epsilon
-const int seed = time(NULL);
+const int seed = 534;
 
 template<typename A, typename B, typename C>
 class Triple {
@@ -113,26 +114,23 @@ vector<Triple<Point, Point, Point> > simpleTests(int n) {
 
 
 /*
- * Uniformly generates starting and ending points for the lines.
+ * Uniformly generates starting and ending point.
  * Guarantees that starting and ending points will be distinct.
  */
-vector<Triple<Point, Point, Point> > aandbGenerator(int n) {
+Triple<Point, Point, Point> generateaandb() {
     double range = 1 << 10;
     uniform_real_distribution<double> distribution(-range, range);
     mt19937 engine(seed ^ 213);
     auto generate = bind(distribution, engine);
     
-    vector<Triple<Point, Point, Point> > ans(n);
-    for (int i = 0; i < n; i++) {
-        Point a(0, 0), b(0, 0);
-        while (a == b) {
-            a.x = generate();
-            a.y = generate();
-            b.x = generate();
-            b.y = generate();
-        }
-        ans[i] = makeTriple(a, b, Point(0.0, 0.0));
+    Point a(0, 0), b(0, 0);
+    while (a == b) {
+       a.x = generate();
+       a.y = generate();
+       b.x = generate();
+       b.y = generate();
     }
+    auto ans = makeTriple(a, b, Point(0.0, 0.0));
     return ans;
 }
 
@@ -143,7 +141,7 @@ bool needsAdaptive(const Point &a, const Point &b, const Point &c) {
     double M = abs((b.x - a.x) * (c.y - a.y)) + abs((b.y - a.y) * (c.x - a.x));
     double det = (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
     double eps = 4 * M * meps;
-    cerr << std::fixed << "Det = " << det << " Eps = " << eps << endl;
+    //cerr << std::fixed << "Det = " << det << " Eps = " << eps << endl;
     return abs(det) < eps;
 }
 
@@ -156,47 +154,69 @@ bool needsAdaptive(const Point &a, const Point &b, const Point &c) {
  * is small.
  */
 vector<Triple<Point, Point, Point> > adaptiveTests(int n) {
-    auto points = aandbGenerator(n);
+    vector<Triple<Point, Point, Point> > ans(n);
 
     mt19937 shiftEngine(seed ^ 543);
     uniform_real_distribution<double> shiftDistribution(0, 10);
     auto generateShift = bind(shiftDistribution, shiftEngine);
 
-    for (int i = 0; i < points.size(); i++) {
-        Point a = points[i].first, b = points[i].second, c;
+    for (int i = 0; i < n; i++) {
         cerr << "Generating point " << i << endl;
-        
-        double shift = generateShift();
-        Point d = b.shifted((b.x - a.x) * shift, (b.y - a.y) * shift);
-        
-        double distance = sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
-        cerr << "Distance is " << distance << endl;
+        while (true) {
+            auto tr = generateaandb();
+            Point a = tr.first, b = tr.second, c;
+            
+            double shift = generateShift();
+            Point d = b.shifted((b.x - a.x) * shift, (b.y - a.y) * shift);
+            
+            double distance = sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+            //cerr << "Distance is " << distance << endl;
 
-        uniform_real_distribution<double> moveDistribution(2 * distance, 16 * distance);
-        mt19937 moveEngine(seed ^ 123);
-        auto generateMove = bind(moveDistribution, moveEngine);
-        
-        do {
-            double dx = generateMove() * meps, dy = generateMove() * meps;
-            cerr << std::fixed << "dx = " << dx << " dy = " << dy << endl;
-            c = d.shifted(dx, dy);
-            //bool needs = needsAdaptive(a, b, c);
-            //cerr << (needs ? "Needs adaptive precision" : "Does not need adaptive precision") << endl;
-        } while (false && !needsAdaptive(a, b, c));
-        points[i].third = c;
+            uniform_real_distribution<double> moveDistribution(distance, 2 * distance);
+            mt19937 moveEngine(seed ^ 123);
+            auto generateMove = bind(moveDistribution, moveEngine);
+            
+            int count = 0;
+            do {
+                count++;
+                double dx = generateMove() * meps, dy = generateMove() * meps;
+                cerr << std::fixed << "dx = " << dx << " dy = " << dy << endl;
+                c = d.shifted(dx, dy);
+                //bool needs = needsAdaptive(a, b, c);
+                //cerr << (needs ? "Needs adaptive precision" : "Does not need adaptive precision") << endl;
+            } while (count < 100 && !needsAdaptive(a, b, c));
+            
+            if (count < 100) {
+                tr.third = c;
+                ans[i] = tr;
+                break;
+            }
+        } 
     }
-    return points;
+    return ans;
 }
 
 int main() {
-    cerr.precision(30);
-
-    auto points = adaptiveTests(10);
-    for (int i = 0; i < points.size(); i++) {
-        cout.precision(100);
-        cout << points[i].first << endl << points[i].second << endl << points[i].third << endl << endl;
+    cerr.precision(50);
+    
+    auto simple = simpleTests(10);
+    auto adaptive = adaptiveTests(50);
+   
+    auto tests = simple;
+    tests.insert(tests.end(), adaptive.begin(), adaptive.end());
+    "asdasd" + 1;
+    for (int i = 0; i < tests.size(); i++) {
+        string testN = to_string(i);
+        testN = string(3 - testN.length(), '0') + testN;
+        ofstream testfile(testN + ".test");
+        testfile << 1 << endl;
+        testfile.precision(50);
+        testfile << std::fixed;
+        testfile << tests[i].first.x << " " << tests[i].first.y << endl;
+        testfile << tests[i].second.x << " " << tests[i].second.y << endl;
+        testfile << tests[i].third.x << " " << tests[i].third.y << endl;
+        testfile.close();
     }
-        
     return 0;
 }
 
