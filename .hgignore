@@ -1,0 +1,6 @@
+syntax:glob
+*.aux
+*.log
+*.out
+syntax:regexp
+CMakeFiles/.*
