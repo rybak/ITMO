@@ -48,8 +48,12 @@ int main(int argc, char* argv[]) {
     vector<Point_2>::iterator end = convex_hull_2(points.begin(), points.end(), tmp.begin()); 
     vector<Point_2> result(tmp.begin(), end);
    
-    if (chull.size() != result.size())
+    if (chull.size() != result.size()) {
+        #ifdef DEBUG
+        std::cerr << "WRONG" << std::endl;
+        #endif        
         return 1;
+    }
 
     for (int i = 0; i < chull.size(); i++) {
         if (chull[i] == result.front()) {
@@ -60,9 +64,14 @@ int main(int argc, char* argv[]) {
 
     for (int i = 0; i < chull.size(); i++) {
         if (chull[i] != result[i]) {
+            #ifdef DEBUG
+            std::cerr << "WRONG" << std::endl;
+            #endif        
             return 1;
         }
     }
-
+    #ifdef DEBUG
+    std::cerr << "CORRECT" << std::endl;
+    #endif        
     return 0;
 }
