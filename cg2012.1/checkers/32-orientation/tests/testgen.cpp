@@ -161,7 +161,7 @@ vector<Triple<Point, Point, Point> > adaptiveTests(int n) {
     auto generateShift = bind(shiftDistribution, shiftEngine);
 
     for (int i = 0; i < n; i++) {
-        cerr << "Generating point " << i << endl;
+        //cerr << "Generating point " << i << endl;
         while (true) {
             auto tr = generateaandb();
             Point a = tr.first, b = tr.second, c;
@@ -204,7 +204,6 @@ int main() {
    
     auto tests = simple;
     tests.insert(tests.end(), adaptive.begin(), adaptive.end());
-    "asdasd" + 1;
     for (int i = 0; i < tests.size(); i++) {
         string testN = to_string(i);
         testN = string(3 - testN.length(), '0') + testN;
