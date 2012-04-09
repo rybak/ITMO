@@ -1,4 +1,4 @@
-import subprocess
+#!/usr/bin/python
 from random import randint, uniform
 from os.path import exists
 
@@ -23,11 +23,13 @@ print sizes
 print bounds
 
 for i in xrange(len(sizes)):
-    f = open("test" + str(i + 1), "w")
+    fname = str(i + 1)
+    fname = "0" * (3 - len(fname)) + fname
+    f = open(fname + ".test", "w")
     points = []
     for j in xrange(sizes[i]):
         points.append(randPoint(bounds[i]))
     f.write(str(len(points)) + "\n")
     for x, y in points:
-        f.write("%f %f\n" % (x, y))
+        f.write("{:.5f} {:.5f}\n".format(x, y))
     f.close()

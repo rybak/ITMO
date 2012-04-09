@@ -3,11 +3,11 @@ from random import *
 
 tests = 3
 
-n = 600000
+n = 700000
 bound = 1000.0
 
 for test in range(tests):
-    f = open("test{}".format(test), "w")
+    f = open("perf{}.test".format(test), "w")
     f.write("{}\n".format(n))
     for i in xrange(n):
         x = uniform(-bound, bound)

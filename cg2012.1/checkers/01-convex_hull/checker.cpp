@@ -50,7 +50,15 @@ int main(int argc, char* argv[]) {
    
     if (chull.size() != result.size()) {
         #ifdef DEBUG
-        std::cerr << "WRONG" << std::endl;
+        std::cerr << "WRONG (size)" << std::endl;
+        std::cerr << "Your answer:" << std::endl;
+        for (int j = 0; j < chull.size(); j++) {
+            std::cerr << chull[j] << std::endl;
+        }
+        std::cerr << "Expected answer:" << std::endl;
+        for (int j = 0; j < result.size(); j++) {
+            std::cerr << result[j] << std::endl;
+        }
         #endif        
         return 1;
     }
@@ -66,6 +74,14 @@ int main(int argc, char* argv[]) {
         if (chull[i] != result[i]) {
             #ifdef DEBUG
             std::cerr << "WRONG" << std::endl;
+            std::cerr << "Your answer:" << std::endl;
+            for (int j = 0; j < chull.size(); j++) {
+                std::cerr << chull[j] << std::endl;
+            }
+            std::cerr << "Expected answer:" << std::endl;
+            for (int j = 0; j < result.size(); j++) {
+                std::cerr << result[j] << std::endl;
+            }
             #endif        
             return 1;
         }
