@@ -31,6 +31,7 @@
 \title[Бентли-Оттман]{Пересечение множества отрезков, алгоритм Бентли-Оттмана}
 \author[Андрей Шулаев]{Андрей Шулаев}
 \institute[НИУ ИТМО]{Национальный исследовательский университет ИТ, механики и оптики}
+\date{}
 
 \begin{document}
 
@@ -56,7 +57,7 @@
   % надписи на координатных осях
   \foreach \x in {1, 2, 3, 4, 5, 6}
     \draw (\x cm,1pt) -- (\x cm,-1pt) node[anchor=north] {\tiny{\x}};
-  \foreach \y in {1, 2, 3, 4}
+  \foreach \y in {0, 1, 2, 3, 4}
     \draw (1pt,\y cm) -- (-1pt,\y cm) node[anchor=west] {\tiny{\y}};
   
   % отрезки
@@ -82,7 +83,7 @@
 \item Конец отрезка
 \item Пересечение множества отрезков
 \end{itemize}
-\pause \item События сортируются по абсциссе
+\pause \item События обрабатываются по увеличению абсциссы
 \pause \item В каждый момент времени поддерживается \emph{статус}: множество отрезков, которые пересекает сканирующая прямая, упорядоченное по ординате точки пересечения
 \end{itemize}
 \end{frame}
@@ -97,7 +98,7 @@
   % надписи на координатных осях
   \foreach \x in {1, 2, 3, 4, 5, 6, 7, 8}
     \draw (\x cm,1pt) -- (\x cm,-1pt) node[anchor=north] {\tiny{\x}};
-  \foreach \y in {1, 2, 3, 4, 5}
+  \foreach \y in {0, 1, 2, 3, 4, 5}
     \draw (1pt,\y cm) -- (-1pt,\y cm) node[anchor=west] {\tiny{\y}};
   
   % отрезки
@@ -113,7 +114,7 @@
   \only<5> { \draw[color=red,dashed] (2.666,-0.5) node[anchor=north] {\scriptsize B, A} -- +(0, 6); }
   \only<6> { \draw[color=red,dashed] (3.0,-0.5) node[anchor=north] {\scriptsize C, B, A} -- +(0, 6); }
   \only<7> { \draw[color=red,dashed] (3.8,-0.5) node[anchor=north] {\scriptsize B, C, A} -- +(0, 6); }
-  \only<8> { \draw[color=red,dashed] (4.0,-0.5) node[anchor=north] {\scriptsize B, C} -- +(0, 6); }
+  \only<8> { \draw[color=red,dashed] (5.0,-0.5) node[anchor=north] {\scriptsize B, C} -- +(0, 6); }
   \only<9-10> { \draw[color=red,dashed] (5.0,-0.5) node[anchor=north] {\scriptsize
     \only<9>{C}
     \only<10>{C, D}
@@ -127,6 +128,23 @@
   \only<7-> { \fill[red] (intersection of B1--B2 and C1--C2) circle(2.0pt); }
 \end{tikzpicture}
 \end{center}
+\end{frame}
+
+\begin{frame}{Хранение статуса}
+\begin{itemize}
+\item Статус требует поддержания следующих операций:
+\begin{itemize}
+\item Вставка в произвольную позицию
+\item Переворот подотрезка
+\end{itemize}
+\pause
+\item Как реализовать?
+\pause
+\begin{itemize}
+\item Просто: список, операции за $O(n)$
+\item Быстро: декартово дерево по неявному ключу, операции за $O(\log n)$
+\end{itemize}
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Проблемы и решения}
@@ -145,7 +163,7 @@
   % надписи на координатных осях
   \foreach \x in {1, 2, 3, 4, 5, 6, 7, 8}
     \draw (\x cm,1pt) -- (\x cm,-1pt) node[anchor=north] {\tiny{\x}};
-  \foreach \y in {1, 2, 3, 4, 5}
+  \foreach \y in {0, 1, 2, 3, 4, 5}
     \draw (1pt,\y cm) -- (-1pt,\y cm) node[anchor=west] {\tiny{\y}};
   
   % отрезки
@@ -184,7 +202,7 @@
   % надписи на координатных осях
   \foreach \x in {1, 2, 3, 4, 5, 6, 7, 8}
     \draw (\x cm,1pt) -- (\x cm,-1pt) node[anchor=north] {\tiny{\x}};
-  \foreach \y in {1, 2, 3, 4, 5}
+  \foreach \y in {0, 1, 2, 3, 4, 5}
     \draw (1pt,\y cm) -- (-1pt,\y cm) node[anchor=west] {\tiny{\y}};
   
   % отрезки
@@ -206,6 +224,22 @@
   \fill[red] (intersection of A1--A2 and B1--B2) circle(2.0pt);
 \end{tikzpicture}
 \end{center}
+\end{frame}
+
+\begin{frame}{Оценки времени работы и используемой памяти}
+\begin{itemize}
+\item Упорядочение событий — $O(n\log n)$ времени, $O(n)$ памяти
+\item Хранение статуса — $O(n\log n)$ времени, $O(n)$ памяти
+\item Вывод ответа — $O(k)$ времени ($k$ — размер ответа).
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Ссылки}
+\begin{itemize}
+\item Кормен, Лейзерсон, Ривест, Штайн. <<Алгоритмы: построение и анализ>>, раздел <<Вычислительная геометрия>>.
+\item Bentley, Ottman. <<Algorithms for Reporting and Counting Geometric Intersections>>.
+\item Препарата, Шеймос. <<Вычислительная геометрия: введение>>.
+\end{itemize}
 \end{frame}
 
 \begin{frame}
