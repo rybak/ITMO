@@ -55,9 +55,10 @@
   \draw[->] (-1, 0) -- (7, 0);
   
   % надписи на координатных осях
+  \fill[black] (-0.2cm, -1pt) node[anchor=north] {\tiny 0};
   \foreach \x in {1, 2, 3, 4, 5, 6}
     \draw (\x cm,1pt) -- (\x cm,-1pt) node[anchor=north] {\tiny{\x}};
-  \foreach \y in {0, 1, 2, 3, 4}
+  \foreach \y in {1, 2, 3, 4}
     \draw (1pt,\y cm) -- (-1pt,\y cm) node[anchor=west] {\tiny{\y}};
   
   % отрезки
@@ -96,10 +97,12 @@
   \draw[->] (-1.2, 0) -- (9, 0);
   
   % надписи на координатных осях
+  \fill[black] (-0.2cm, -1pt) node[anchor=north] {\tiny 0};
   \foreach \x in {1, 2, 3, 4, 5, 6, 7, 8}
     \draw (\x cm,1pt) -- (\x cm,-1pt) node[anchor=north] {\tiny{\x}};
-  \foreach \y in {0, 1, 2, 3, 4, 5}
+  \foreach \y in {1, 2, 3, 4, 5}
     \draw (1pt,\y cm) -- (-1pt,\y cm) node[anchor=west] {\tiny{\y}};
+  
   
   % отрезки
   \path[draw] (1,2) coordinate(A1) node[anchor=north] {\scriptsize A} -- (4, 3) coordinate(A2);
@@ -114,7 +117,7 @@
   \only<5> { \draw[color=red,dashed] (2.666,-0.5) node[anchor=north] {\scriptsize B, A} -- +(0, 6); }
   \only<6> { \draw[color=red,dashed] (3.0,-0.5) node[anchor=north] {\scriptsize C, B, A} -- +(0, 6); }
   \only<7> { \draw[color=red,dashed] (3.8,-0.5) node[anchor=north] {\scriptsize B, C, A} -- +(0, 6); }
-  \only<8> { \draw[color=red,dashed] (5.0,-0.5) node[anchor=north] {\scriptsize B, C} -- +(0, 6); }
+  \only<8> { \draw[color=red,dashed] (4.0,-0.5) node[anchor=north] {\scriptsize B, C} -- +(0, 6); }
   \only<9-10> { \draw[color=red,dashed] (5.0,-0.5) node[anchor=north] {\scriptsize
     \only<9>{C}
     \only<10>{C, D}
@@ -161,9 +164,10 @@
   \draw[->] (-1.2, 0) -- (9, 0);
   
   % надписи на координатных осях
+  \fill[black] (-0.2cm, -1pt) node[anchor=north] {\tiny 0};
   \foreach \x in {1, 2, 3, 4, 5, 6, 7, 8}
     \draw (\x cm,1pt) -- (\x cm,-1pt) node[anchor=north] {\tiny{\x}};
-  \foreach \y in {0, 1, 2, 3, 4, 5}
+  \foreach \y in {1, 2, 3, 4, 5}
     \draw (1pt,\y cm) -- (-1pt,\y cm) node[anchor=west] {\tiny{\y}};
   
   % отрезки
@@ -200,9 +204,10 @@
   \draw[->] (-1.2, 0) -- (9, 0);
   
   % надписи на координатных осях
+  \fill[black] (-0.2cm, -1pt) node[anchor=north] {\tiny 0};
   \foreach \x in {1, 2, 3, 4, 5, 6, 7, 8}
     \draw (\x cm,1pt) -- (\x cm,-1pt) node[anchor=north] {\tiny{\x}};
-  \foreach \y in {0, 1, 2, 3, 4, 5}
+  \foreach \y in {1, 2, 3, 4, 5}
     \draw (1pt,\y cm) -- (-1pt,\y cm) node[anchor=west] {\tiny{\y}};
   
   % отрезки
@@ -229,7 +234,7 @@
 \begin{frame}{Оценки времени работы и используемой памяти}
 \begin{itemize}
 \item Упорядочение событий — $O(n\log n)$ времени, $O(n)$ памяти
-\item Хранение статуса — $O(n\log n)$ времени, $O(n)$ памяти
+\item Поддержание статуса — $O(n\log n)$ времени, $O(n)$ памяти
 \item Вывод ответа — $O(k)$ времени ($k$ — размер ответа).
 \end{itemize}
 \end{frame}
