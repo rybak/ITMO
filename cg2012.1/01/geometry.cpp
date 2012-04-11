@@ -26,7 +26,7 @@ namespace
 
 bool operator != (const point &a, const point &b)
 {
-    return !((a.x == b.x) && (a.y == b.y));
+    return (a.x != b.x) || (a.y != b.y);
 }
 
 int epsilon_left_turn(const point &a, const point &b, const point &c)

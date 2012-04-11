@@ -100,7 +100,7 @@ void quick_hull(const std::vector<point> &points, std::vector<size_t> &hull)
     {
         quick_hull(points, hull, right, left, below);
     }
-    if ((points[left].x != points[right].x) || (points[left].y != points[right].y))
+    if (points[left] != points[right])
     {
         hull.push_back(right);
     }
