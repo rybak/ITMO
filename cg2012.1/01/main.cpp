@@ -100,8 +100,13 @@ void quick_hull(const std::vector<point> &points, std::vector<size_t> &hull)
     {
         quick_hull(points, hull, right, left, below);
     }
-    hull.push_back(right);
+    if ((points[left].x != points[right].x) || (points[left].y != points[right].y))
+    {
+        hull.push_back(right);
+    }
 }
+
+const bool debug = false;
 
 int main()
 {
@@ -109,6 +114,12 @@ int main()
     using std::cin;
     using std::cout;
     using std::vector;
+    if (debug)
+    {
+        freopen("input.txt", "r", stdin);		
+	    freopen("output.txt", "w", stdout);
+        cout << "DEBUG MODE\n";
+    }
     
     size_t n;
     cin >> n;

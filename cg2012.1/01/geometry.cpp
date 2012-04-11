@@ -32,7 +32,7 @@ bool operator != (const point &a, const point &b)
 int epsilon_left_turn(const point &a, const point &b, const point &c)
 {
     double res = (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
-    static double eps1 = 4 * std::numeric_limits<double>::epsilon();
+    static double const eps1 = 4 * std::numeric_limits<double>::epsilon();
     double t = std::abs((b.x - a.x) * (c.y - a.y)) + std::abs((b.y - a.y) * (c.x - a.x));
     double eps = eps1 * t;
     if (res > eps)
