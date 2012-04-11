@@ -105,11 +105,10 @@ void quick_hull(const std::vector<point> &points, std::vector<size_t> &hull)
 
 int main()
 {
+	const int magic = 42;
     using std::cin;
     using std::cout;
     using std::vector;
-    //freopen("input.txt", "r", stdin);
-    //freopen("output.txt", "w", stdout);
     
     size_t n;
     cin >> n;
@@ -127,6 +126,8 @@ int main()
 
     size_t m = hull.size();
     cout << m << '\n';
+	cout.setf(std::ios::fixed);
+	cout.precision(magic);
     for (size_t i = 0; i < m; ++i)
     {
 		cout << points[hull[i]].x << ' ' << points[hull[i]].y << '\n';
