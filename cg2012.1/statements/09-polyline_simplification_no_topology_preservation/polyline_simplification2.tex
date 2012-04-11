@@ -35,18 +35,22 @@
 \Note
 Пояснение к примеру:
 	\begin{center}
-	\tikzstyle{segment}=[draw,line width=2,-,black]
-	\tikzstyle{simple}=[draw,line width=2,dashed,-,black!50]
-	\tikzstyle{vertex}=[circle,fill=black,minimum size=5,inner sep=0pt]
 	\begin{figure}[htb]
-		\begin{minipage}[b]{1.0\linewidth}
+%		\begin{minipage}[b]{1.0\linewidth}
 		\begin{tikzpicture}
-			\node(A1) at (0,0) 		[left] {$1$}; % label.lft (btex 1 etex, A[0]);
-			\node(A2) at (3cm, 2cm) [below right] {$2$}; % label.lrt (btex 2 etex, A[1]);
-			\node(A3) at (5cm, 4cm) [right] {$3$}; % label.rt (btex 3 etex, A[2]);
-			\node(A4) at (2cm, 5cm) [below left] {$4$}; % label.llft (btex 4 etex, A[3]);
-			\node(A5) at (8cm, 0cm) [left] {$5$}; % label.lft (btex 5 etex, A[4]);
+			\tikzstyle{segment}=[draw,line width=2,-,black]
+			\tikzstyle{simple}=[draw,line width=2,dashed,-,black!50]
+			\tikzstyle{vertex}=[circle,fill=black,minimum size=5,inner sep=0pt]
+
+			\coordinate[label=left:$1$]			(A1) at (0, 0);
+			\coordinate[label=below right:$2$]	(A2) at (3cm, 2cm);
+			\coordinate[label=right:$3$]		(A3) at (5cm, 4cm);
+			\coordinate[label=below left:$4$]	(A4) at (2cm, 5cm);
+			\coordinate[label=left:$5$]			(A5) at (0, 8cm);
 			
+			\coordinate[label=above:$y$]		(yaxis) at (0, 9cm);
+			\coordinate[label=above:$x$]		(xaxis) at (6cm, 0cm);
+			\coordinate (zero) at (0cm, 0cm);
 % Опускаем перпендикуляр из точек A[1] и A[3] на A[0]--A[2] и A[2]--A[4] соответственно
 %	pair B, H, C, T;
 	% H и T - основания перпедикуляров
@@ -58,51 +62,32 @@
 %	T = whatever [A[4], A[2]];
 %   draw A[1]--H withcolor (red) withpen pencircle scaled 1.5 dashed evenly;
 %	draw A[3]--T withcolor (red) withpen pencircle scaled 1.5 dashed evenly;
+			% TODO use pgfmath to calc H and T
+			\draw[red] (A2) -- ($(A1)!(A2)!(A3)$);
+			\draw[red] (A4) -- ($(A3)!(A4)!(A5)$);
 
-	% Цепь
-%	draw A[0]--A[1]--A[2]--A[3]--A[4] withpen pencircle scaled 2;
-	% Упрощенная цепь
-%  	draw A[0]--A[2]--A[4] dashed evenly withpen pencircle scaled 2;
-
-	% Линии от точек к осям
-%	pickup pencircle scaled 1.2;
-%	for i=0 step 1 until 4:
-%		draw A[i]--(xpart A[i], 0) dashed evenly withcolor(.5white);
-%		draw A[i]--(0, ypart A[i]) dashed evenly withcolor(.5white);
-%	endfor;
-
-		    % Координатные оси
-			\def \xmax {7} % xmax := 7u;
-			\def \ymax {9} % ymax := 9u;
-			\draw [<->,thick] (0, \xmax) node (yaxis) [above] {$y$}
-				|- (\ymax,0) node (xaxis) [right] {$x$};
-			%\draw [->] (0, 0) -- (\xmax, 0) node[right] {$x$}; % drawarrow (0,0)--(xmax, 0);
-			%\draw [->] (0, 0) -- (0, \ymax) node[above] {$y$}; % drawarrow (0,0)--(0, ymax);
-			
 			\foreach \point in {A1, A2, A3, A4, A5}
 			{	
-				\draw[dashed, grey] (yaxis |- \point) node[left] {$y'$} -| (xaxis -| \point) node[below] {$x'$};
+				\draw[dashed, black!50] (yaxis |- \point) -| (xaxis -| \point);
 			}
-			\def \mark {0.3}
-			\foreach \x in {1,...,\xmax}
+			\draw [->,thick] (zero)--(yaxis);
+			\draw [->,thick] (zero)--(xaxis);
+			
+			\def \mark {0.1}
+			\foreach \x in {1,...,5}
 			{
 				\draw[-] (\x cm, -\mark cm) -- (\x cm, \mark cm); % draw (i,u/20)--(i,-u/20);
 			}
-			\foreach \y in {1, ...,\ymax} % for i=0 step u until ymax-u:
+			\foreach \y in {1,...,8} % for i=0 step u until ymax-u:
 			{
 				\draw[-] (-\mark cm, \y cm) -- (\mark cm, \y cm); % draw (u/20,i)--(-u/20,i);
 			} % endfor;
 
-			% SAMPLES
-
-			\draw[dashed, green] (3.33, -1) -- (3.33, 2.5);
-			\draw[-, green] (4.3, -1) -- (4.3, 2.5);
-			\draw[dotted, blue] (10, -1) -- (10, 2.5);
-			
-			\draw[->, gray] (4.87, 2.4) to[out=-135, in=-45] (4, 2.4);
+			\draw[-,black, very thick] (A1) -- (A2) -- (A3) -- (A4) -- (A5);
+			\draw[dashed, black, very thick] (A1) -- (A3) -- (A5);
 
 		 \end{tikzpicture}
-	  \end{minipage}
+%	  \end{minipage}
 	\end{figure}
 	\end{center}
 \end{problem}
