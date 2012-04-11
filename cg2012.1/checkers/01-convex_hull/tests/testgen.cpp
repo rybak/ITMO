@@ -14,7 +14,7 @@ using namespace std;
 const double meps = numeric_limits<double>::epsilon() / 2; //machine epsilon
 const double pi = atan(1.0) * 4;
 const int seed = 534;
-const int precision = 30;
+const int precision = 50;
 
 template<typename A, typename B, typename C>
 class Triple {
@@ -107,7 +107,7 @@ vector<Point> makeTest(int n, Distribution distribution, int seed)
 }
 
 /*
- * Simple uniform distributed human readable tests 
+ * Uniformly distributed tests.
  */
 vector<vector<Point>> randomTests(int smallCount, int mediumCount, int largeCount)
 {
@@ -185,10 +185,14 @@ vector<vector<Point>> specificTests()
     std::random_shuffle(testAllCollinear.begin(), testAllCollinear.end());
     tests.push_back(testAllCollinear);
     
+    /*
+     * cos fails :(
+     */
     int points = 50000;
     double R = 1024.0;
     vector<Point> testAllOnConvexHull;
-    for (double phi = 0; phi < 2 * pi; phi += (2 * pi) / points) {
+    for (double phi = 0; phi < 2 * pi; phi += (2 * pi) / points)
+    {
         testAllOnConvexHull.push_back(Point(R * cos(phi), R * sin(phi)));
     }
     std::random_shuffle(testAllOnConvexHull.begin(), testAllOnConvexHull.end());
@@ -198,7 +202,8 @@ vector<vector<Point>> specificTests()
     R = 1024.0;
     vector<Point> testAntiQuickHull;
     double phi = 2 * pi;
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 1000; i++)
+    {
         testAntiQuickHull.push_back(Point(R * cos(phi), R * sin(phi)));
         phi /= 2;
     }
@@ -208,87 +213,56 @@ vector<vector<Point>> specificTests()
     return tests;
 }
 
-/*
- * Uniformly generates starting and ending point.
- * Guarantees that starting and ending points will be distinct.
- */
-Triple<Point, Point, Point> generateaandb() {
-    double range = 1 << 10;
-    uniform_real_distribution<double> distribution(-range, range);
-    mt19937 engine(seed ^ 213);
-    auto generate = bind(distribution, engine);
+
+vector<vector<Point>> adaptiveTests(int count, int lowerBound, int upperBound)
+{
+    double range = 128.0;
+
+    mt19937 engine(seed ^ 493);
+    vector<vector<Point>> tests;
     
-    Point a(0, 0), b(0, 0);
-    while (a == b) {
-       a.x = generate();
-       a.y = generate();
-       b.x = generate();
-       b.y = generate();
+    uniform_int_distribution<int> testSize(lowerBound, upperBound);
+    auto generateSize = bind(testSize, engine);
+    uniform_real_distribution<double> distribution(-range, range);
+
+    auto generateShift = bind(distribution, engine);
+    for (int i = 0; i < count; i++)
+    {
+        auto test = makeTest(generateSize(), distribution, engine());
+        auto shifted = test;
+        for (int j = 0; j < shifted.size(); j++)
+        {
+            shifted[j] = shifted[j].shifted(generateShift() * meps, generateShift() * meps);
+        }
+        test.insert(test.end(), shifted.begin(), shifted.end());
+        tests.push_back(test);
     }
-    auto ans = makeTriple(a, b, Point(0.0, 0.0));
-    return ans;
+    return tests;
 }
 
-/*
- * Checks if adaptive precision arithmetics should be performed to correctly calculate orientation predicate value.
- */
-bool needsAdaptive(const Point &a, const Point &b, const Point &c) {
-    double M = abs((b.x - a.x) * (c.y - a.y)) + abs((b.y - a.y) * (c.x - a.x));
-    double det = (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
-    double eps = 4 * M * meps;
-    //cerr << std::fixed << "Det = " << det << " Eps = " << eps << endl;
-    return abs(det) < eps;
-}
+vector<vector<Point>> performanceTests()
+{
+    vector<vector<Point> > tests;
+    
+    mt19937 engine(seed ^ 8329);
+    
+    uniform_real_distribution<double> largeDistribution(-10000.0, 10000.0);
+    tests.push_back(makeTest(400000, largeDistribution, engine()));
 
-/*
- * Generates points c such that orientation predicate should be
- * calculated using adaptive precision arithmetics.
- * Uses the following method: point c is the point b shifted by
- * the direction of ab and a little shifted by x and y (independently).
- * This should yield such a point, that the ange between ab and ac
- * is small.
- */
-vector<Triple<Point, Point, Point> > adaptiveTests(int n) {
-    vector<Triple<Point, Point, Point> > ans(n);
+    auto adaptive = adaptiveTests(1, 100000, 100000);
+    tests.push_back(adaptive[0]);
 
-    mt19937 shiftEngine(seed ^ 543);
-    uniform_real_distribution<double> shiftDistribution(0, 10);
-    auto generateShift = bind(shiftDistribution, shiftEngine);
-
-    for (int i = 0; i < n; i++) {
-        //cerr << "Generating point " << i << endl;
-        while (true) {
-            auto tr = generateaandb();
-            Point a = tr.first, b = tr.second, c;
-            
-            double shift = generateShift();
-            Point d = b.shifted((b.x - a.x) * shift, (b.y - a.y) * shift);
-            
-            double distance = sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
-            //cerr << "Distance is " << distance << endl;
-
-            uniform_real_distribution<double> moveDistribution(distance, 2 * distance);
-            mt19937 moveEngine(seed ^ 123);
-            auto generateMove = bind(moveDistribution, moveEngine);
-            
-            int count = 0;
-            do {
-                count++;
-                double dx = generateMove() * meps, dy = generateMove() * meps;
-                //cerr << std::fixed << "dx = " << dx << " dy = " << dy << endl;
-                c = d.shifted(dx, dy);
-                //bool needs = needsAdaptive(a, b, c);
-                //cerr << (needs ? "Needs adaptive precision" : "Does not need adaptive precision") << endl;
-            } while (count < 100 && !needsAdaptive(a, b, c));
-            
-            if (count < 100) {
-                tr.third = c;
-                ans[i] = tr;
-                break;
-            }
-        } 
+    int points = 100000;
+    double R = 1024.0;
+    vector<Point> testAllOnConvexHull;
+    for (double phi = 0; phi < 2 * pi; phi += (2 * pi) / points)
+    {
+        testAllOnConvexHull.push_back(Point(R * cos(phi), R * sin(phi)));
     }
-    return ans;
+    std::random_shuffle(testAllOnConvexHull.begin(), testAllOnConvexHull.end());
+    tests.push_back(testAllOnConvexHull);
+
+    return tests;
 }
 
 int main()
@@ -297,11 +271,11 @@ int main()
     
     auto simple = randomTests(10, 10, 10);
     auto specific = specificTests();
-
+    auto adaptive = adaptiveTests(10, 5, 50);
     
     auto tests = simple;
     tests.insert(tests.end(), specific.begin(), specific.end());
-
+    tests.insert(tests.end(), adaptive.begin(), adaptive.end());
 
     for (int i = 0; i < tests.size(); i++)
     {
@@ -313,6 +287,21 @@ int main()
         for (int j = 0; j < tests[i].size(); j++)
         {
             testfile << tests[i][j].x << " " << tests[i][j].y << endl;
+        }
+        testfile.close();
+    }
+
+    auto performance = performanceTests();
+    for (int i = 0; i < performance.size(); i++)
+    {
+        string testN = to_string(i);
+        testN = string(3 - testN.length(), '0') + testN;
+        ofstream testfile("./performance_tests/" + testN + ".test");
+        testfile << performance[i].size() << endl;
+        testfile.precision(precision);
+        for (int j = 0; j < performance[i].size(); j++)
+        {
+            testfile << performance[i][j].x << " " << performance[i][j].y << endl;
         }
         testfile.close();
     }
