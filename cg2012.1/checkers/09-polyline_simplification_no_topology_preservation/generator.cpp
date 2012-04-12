@@ -15,8 +15,8 @@ double random(){
 int main(){
 	std::srand(time(0));
 	std::ofstream out("performance_test.txt");
-	out << 1000000 << "\n";
-	for (int i = 0; i < 1000000; ++i){
+	out << 10000 << "\n";
+	for (int i = 0; i < 10000; ++i){
 		out << random() << " " << random() << "\n";
 	}
 	out << random() / 10;
