@@ -13,6 +13,24 @@ class Point {
 	public String toString() {
 		return x + " " + y;
 	}
+	
+	public boolean equals(Object o) {
+		Point other = (Point) o;
+		return x == other.x || y == other.y;
+	}
+}
+
+class Rectangle {
+	final Point a, b;
+	
+	public Rectangle(Point a, Point b) {
+		this.a = new Point(Math.min(a.x, b.x), Math.min(a.y, b.y));
+		this.b = new Point(Math.max(a.x, b.x), Math.max(a.y, b.y));
+	}
+	
+	public String toSting() {
+		return a + " " + b;
+	}
 }
 
 class RandomPoint extends Random {
@@ -30,7 +48,24 @@ class PointArrayList extends ArrayList<Point> {
 		String result = "";
 		
 		for (Iterator<Point> i = this.iterator(); i.hasNext(); ) {
-			result += i.next();
+			result += i.next().toString();
+			
+			if (i.hasNext()) {
+				result += "\n";
+			}
+		}
+			
+		return result;
+	}
+}
+
+class RectangleArrayList extends ArrayList<Rectangle> {
+	
+	public String toString() {
+		String result = "";
+		
+		for (Iterator<Rectangle> i = this.iterator(); i.hasNext(); ) {
+			result += i.next().toSting();			
 			
 			if (i.hasNext()) {
 				result += "\n";
@@ -58,6 +93,27 @@ public class PerformanceTestGenerator {
 		return result;
 	}
 	
+	private static RectangleArrayList generateRectangles(int count) {
+		RectangleArrayList result = new RectangleArrayList();
+		
+		while (result.size() < count) {
+			Point a = rp.nextPoint();
+			Point b = rp.nextPoint();
+			
+			while (a.equals(b)) {
+				b = rp.nextPoint();
+			}
+			
+			Rectangle rectangle = new Rectangle(a, b);
+			
+			if (!result.contains(rectangle)) {
+				result.add(rectangle);				
+			}
+		}
+		
+		return result;
+	}
+	
 	public static void main(String[] args) throws FileNotFoundException {
 		if (args.length != 2) {
 			System.out.println("unexpected parameters");
@@ -73,7 +129,7 @@ public class PerformanceTestGenerator {
 		
 		int m = Integer.parseInt(args[1]);
 		pw.println(m);
-		PointArrayList q = generatePoints(m);
+		RectangleArrayList q = generateRectangles(m);
 		pw.println(q);			
 		
 		pw.close();

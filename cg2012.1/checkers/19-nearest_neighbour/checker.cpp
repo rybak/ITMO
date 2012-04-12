@@ -11,7 +11,7 @@ typedef CGAL::Exact_predicates_inexact_constructions_kernel::Point_2 Point;
 typedef std::vector<Point> Vector;
 typedef std::set<Point> Set;
 
-Set closest_point(const Vector& points, const Point query) {
+Set closest_points(const Vector& points, const Point query) {
 	Set result;
 	Point result_point;
 	if (!points.empty()) {
@@ -39,23 +39,24 @@ int main(int argc, char* argv[]) {
 	std::ifstream in(argv[1]);
 	std::ifstream out(argv[2]);
 	
-	size_t n, m;
-	double x, y;
-	
+	size_t n;
 	in >> n;	
 	Vector s(n);
 	
 	for (size_t i = 0; i < n; i++) {
+		double x, y;
 		in >> x >> y;
 		s[i] = Point(x, y);
 	}
 	
+	size_t m;
 	in >> m;
 	bool is_correct = true;
 		
-	for (int i = 0; i < m; i++) {		
+	for (size_t i = 0; i < m; i++) {
+		double x, y;
 		in >> x >> y;
-		Set correct_answer = closest_point(s, Point(x, y));
+		Set correct_answer = closest_points(s, Point(x, y));
 		
 		out >> x >> y;
 		if (correct_answer.find(Point(x, y)) == correct_answer.end()) {
