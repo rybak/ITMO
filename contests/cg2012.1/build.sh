@@ -17,18 +17,35 @@ SRC_DIR=`pwd`/../../cg2012.1/
 
 for p in ${ok}
 do
-    echo $p
-    cd $SRC_DIR/checkers/${p}*
-    bin=`pwd`/bin
-    cmake_build
-    mkdir $DST_DIR/$p || true
+    echo "TASK: $p"
+    pdir=$DST_DIR/$p
+    mkdir $pdir || true
+    mkdir $pdir/performance_tests || true
+    mkdir $pdir/correctness_tests || true
+    cp task.properties $pdir
 
-    pushd $DST_DIR/$p
-    cp $bin/*check* check
+    pushd $SRC_DIR/${p}*/
+
+    cd checker
+    cmake_build
+    cp bin/*check* $pdir/check
+
+    cd ../statement
+    cp statement.pdf $pdir/$p.pdf
+
     popd
 
-    cd ../../statements/${p}*
-    cp statement.pdf $DST_DIR/$p
+#    if [ -x ../testgen ]; then
+#        cd ../testgen
+#        bin=`pwd`/bin
+#        cmake_build
+#
+#        pushd $DST_DIR/$p
+#        cp $bin/*testgen* testgen
+#        mkdir performance_tests
+#        popd
+#    fi
+
 
 done
 
