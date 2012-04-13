@@ -21,7 +21,7 @@ itoa: ; void itoa(char *buffer = [esp+4], int number = [esp+8])   // REVERSED!!!
 	push ebx
 	mov eax, [esp + 12 + 8] ; number
 	mov ebp, [esp + 12 + 4] ; buffer
-	mov ecx, 10 ; counter
+	mov ecx, 9 ; counter
 	mov ebx, 10 ; base
 	itoa_loop:
 		xor edx, edx

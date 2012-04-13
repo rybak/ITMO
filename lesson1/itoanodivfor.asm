@@ -22,7 +22,7 @@ itoa: ; void itoa(char *buffer = [esp+4], int number = [esp+8])   // REVERSED!!!
 		mov esi, [esp + 32 + 8]	; number
 		mov ebp, 10 ; for %10
 		mov ebx, 429496730 ; for /10
-	    mov ecx, 10; counter init : 10 digits in 4 bytes integer
+	    mov ecx, 9; counter init : 10 digits in 4 bytes integer
 		itoa_loop: ;			edx		eax			esi
 			mov eax, esi ;		-		n			n
 			mul ebx ;			n/10	-
