@@ -207,7 +207,7 @@ int main() {
     for (int i = 0; i < tests.size(); i++) {
         string testN = to_string(i);
         testN = string(3 - testN.length(), '0') + testN;
-        ofstream testfile(testN + ".test");
+        ofstream testfile("./correctness_tests/" + testN + ".test");
         testfile << 1 << endl;
         testfile.precision(50);
         testfile << std::fixed;
