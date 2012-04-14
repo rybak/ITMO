@@ -14,6 +14,8 @@ struct Point
 	Point(double x, double y)
 		: x(x), y(y)
 	{}
+	
+	friend std::ostream& operator<< (std::ostream&, const Point&);
 };
 
 typedef std::vector<Point> Polygon;
