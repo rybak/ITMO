@@ -281,7 +281,7 @@ int main()
     {
         string testN = to_string(i);
         testN = string(3 - testN.length(), '0') + testN;
-        ofstream testfile(testN + ".test");
+        ofstream testfile("./correctness_tests/" + testN + ".in");
         testfile << tests[i].size() << endl;
         testfile.precision(precision);
         for (int j = 0; j < tests[i].size(); j++)
@@ -296,7 +296,7 @@ int main()
     {
         string testN = to_string(i);
         testN = string(3 - testN.length(), '0') + testN;
-        ofstream testfile("./performance_tests/" + testN + ".test");
+        ofstream testfile("./performance_tests/" + testN + ".in");
         testfile << performance[i].size() << endl;
         testfile.precision(precision);
         for (int j = 0; j < performance[i].size(); j++)
