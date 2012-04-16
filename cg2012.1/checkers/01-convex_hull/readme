@@ -1,6 +1,0 @@
-Идем в папку с задачей
-$ mkdir bin
-$ cd bin
-$ cmake ..
-$ ./convexhull-checker infile outfile
-Вернет 0, если ответ правильный и 1, если ответ неправильный.
