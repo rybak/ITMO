@@ -7,13 +7,13 @@ extern 	__imp__printf
 global _main
 
 section .rdata
-	funcarg dq 0.4
+	funcarg dq 1.0
 	
 section .bss
-stdin: resb 4
-stdout: resb 4
-written: resb 4
-doublebuf: resb 8
+stdin: resd 1
+stdout: resd 1
+written: resd 1
+doublebuf: resq 1
 
 section .text
 
