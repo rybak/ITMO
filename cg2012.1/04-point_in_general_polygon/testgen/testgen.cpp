@@ -3,6 +3,8 @@
 #include <string>
 #include <sstream>
 
+#include <algorithm>
+#include <cmath>
 #include <random>
 #include <functional>
 
@@ -13,8 +15,11 @@ using std::bind;
 using std::string;
 using std::uniform_real_distribution;
 using std::mt19937;
+using namespace std::placeholders;
 
-const int seed = 2012;
+typedef uniform_real_distribution<double> double_distr;
+	
+const int seed = 1993;
 const int precision = 50;
 
 vector<test_case> get_hard_coded_tests()
@@ -42,41 +47,83 @@ vector<test_case> get_hard_coded_tests()
 	return tests;
 }
 
-
-test_case generate_triange_test()
-{
-	const double max_coord = 10e10;
-	const double min_coord = 10;
-
-	typedef uniform_real_distribution<double> double_distr;
-
-	mt19937 engine(seed);
-
-	double_distr point_distr(0, max_coord);
-	auto point_gen = bind(point_distr, engine);
-	Point q(point_gen(), point_gen());
-
-	double_distr triange_distr(min_coord, max_coord);
-	auto triange_gen = bind(triange_distr, engine);
-	Point A;
-	Point B( triange_gen(), triange_gen());
-	Point C(-triange_gen(), triange_gen());
-	Point holeA(min_coord, 0.0);
-	Point center = (1.0 / 3.0) * (A + B + C);
-	Point holeB  = 0.5 * (B + center);
-	Point holeC  = 0.5 * (C + center);
+const double pi = atan(1.0) * 4;
+const double min_coord = 10;
+const vector<double> max_coords({100.0, 10.0e4, 10.0e10});
 	
-	return test_case(q, {A, B, C}, { {holeA, holeB, holeC} });
+vector<test_case> generate_triangle_tests()
+{
+	vector<test_case> tests;
+	mt19937 engine(seed);
+	
+	Point A(0.0, 0.0);
+	for (size_t i = 0; i < max_coords.size(); ++i)
+	{
+		double_distr point_distr(0, max_coords[i]);
+		double_distr triangle_distr(min_coord + 1, max_coords[i]);
+		auto point_gen = bind(point_distr, engine);
+		auto triangle_gen = bind(triangle_distr, engine);
+		for (size_t j = 0, m = 3; j < m; ++j)
+		{
+			Point q(point_gen(), point_gen());
+			Point B( triangle_gen(), triangle_gen());
+			Point C(-triangle_gen(), triangle_gen());
+			Point center = (1.0 / 3.0) * (A + B + C);
+			Point holeA = 0.5 * (A + center);
+			Point holeB = 0.5 * (B + center);
+			Point holeC = 0.5 * (C + center);
+			tests.push_back({q, {A, B, C}, { {holeA, holeC, holeB} }});
+		}
+	}
+	return tests;
 }
+
+vector<test_case> generate_star_tests()
+{
+	const size_t size = 4;
+	vector<test_case> tests;
+	
+	mt19937 engine(seed ^ 0x91BAC);
+	const double tiny = 1e-2;
+	const double angle_period = pi / size;
+	double_distr angle_distr(tiny, angle_period / 2 - tiny);
+	
+	double_distr factor_distr(0.3, 0.7);
+	
+	for (size_t i = 0; i < max_coords.size(); ++i)
+	{
+		double_distr radius_distr(0.8 * max_coords[i], max_coords[i]);
+		vector<Point> star;
+		for (size_t j = 0; j < 2 * size; ++j)
+		{
+			double angle = angle_period * j + angle_distr(engine);
+			double radius = radius_distr(engine) / ((j % 2) + 1);
+			double x = radius * cos(angle);
+			double y = radius * sin(angle);
+			star.push_back(Point(x, y));
+		}
+		vector<Point> hole(star);
+		reverse(hole.begin(), hole.end());
+		for (size_t j = 0; j < hole.size(); ++j)
+		{
+			hole[j] = factor_distr(engine) * hole[j];
+		}
+		double_distr point_distr(-max_coords[i], max_coords[i]);
+		auto point_gen = bind(point_distr, engine);
+		Point q(point_gen(), point_gen());
+		tests.push_back({q, star, { hole } });
+	}
+	return tests;
+}
+
 
 vector<test_case> generate_correctness_tests()
 {
 	vector<test_case> tests(get_hard_coded_tests());
-	const size_t trianges_count = 3;
-	for (size_t i = 0; i < trianges_count; ++i)
-	{
-		tests.push_back(generate_triange_test());
-	}
+	vector<test_case> triangle_tests(generate_triangle_tests());
+	tests.insert(tests.end(), triangle_tests.begin(), triangle_tests.end());
+	vector<test_case> star_tests(generate_star_tests());
+	tests.insert(tests.end(), star_tests.begin(), star_tests.end());
 	return tests;
 }
 
