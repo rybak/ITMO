@@ -10,10 +10,13 @@ using std::vector;
 struct test_case
 {
 	Point q;
-	Polygon p;
-	vector<Polygon> holes;
-	test_case(const Point q, const Polygon &p, const vector<Polygon> &holes)
+	vector<Point> p;
+	vector<vector<Point> > holes;
+	test_case(const Point q, const vector<Point> &p, const vector<vector<Point> > &holes)
 		: q(q), p(p), holes(holes)
+	{}
+	test_case()	
+		: p(0), holes(0)
 	{}
 	friend std::ostream& operator<< (std::ostream&, const test_case&);
 };

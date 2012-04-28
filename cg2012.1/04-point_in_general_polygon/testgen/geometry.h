@@ -16,8 +16,10 @@ struct Point
 	{}
 	
 	friend std::ostream& operator<< (std::ostream&, const Point&);
+	friend std::istream& operator>> (std::istream&, Point&);
+	
 };
 
-typedef std::vector<Point> Polygon;
-
+Point operator* (double, const Point&);
+Point operator+ (const Point&, const Point&);
 #endif
