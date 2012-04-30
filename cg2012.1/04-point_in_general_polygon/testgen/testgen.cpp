@@ -177,6 +177,70 @@ vector<test_case> generate_correctness_tests()
 	return tests;
 }
 
+vector<test_case> generate_performance_tests()
+{
+	const size_t skip = 3;
+	const double y_max = 100.0;
+	const double y_base = 50.0;
+	const double step = 50.0;
+	const double delta = 5.0;
+	
+	
+	const size_t size = 10000;
+	const size_t test_count = 2;
+	
+	double_distr point_x_distr(0.0, size * step);
+	double_distr point_y_distr(-y_max, y_max);
+	
+	double_distr y1_distr(y_base + delta, y_max);
+	double_distr y2_distr(0.0 + delta, y_base - delta);
+	
+	const double factor_min = 0.3;
+	const double factor_max = 0.7;
+	
+	double_distr factor_distr(factor_min, factor_max);
+	
+	mt19937 engine(seed ^ 0xBADA55);
+	auto y1_gen = bind(y1_distr, engine);
+	auto y2_gen = bind(y2_distr, engine);
+	
+	auto factor_gen = bind(factor_distr, engine);
+	
+	vector<test_case> tests;
+	for (size_t i = 0; i < test_count; ++i)
+	{
+		vector<Point> top_line;
+		vector<Point> bottom_line;
+		vector<vector<Point> > holes;
+		for (size_t j = 0; j < size; ++j)
+		{
+			double x1 = step * (2 * j);
+			double x2 = step * (2 * j + 1);
+			double top_y1 = y1_gen();
+			double top_y2 = y2_gen();
+			double bottom_y1 = -y2_gen();
+			double bottom_y2 = -y1_gen();
+			if ((j > skip) && (j < size - skip) && (j % 2 == 1))
+			{
+				Point top(x1 - step, 0.0);
+				Point bottom(x1 - step, factor_gen() * bottom_line.back().y);
+				Point left(x1 - 2 * step, factor_gen() * top_line[top_line.size() - 2].y);
+				Point right(x1, factor_gen() * top_y1);
+				holes.push_back({top, right, bottom, left});
+			}
+			top_line.push_back(Point(x1, top_y1));
+			top_line.push_back(Point(x2, top_y2));
+			bottom_line.push_back(Point(x1, bottom_y1));
+			bottom_line.push_back(Point(x2, bottom_y2));
+		}
+		reverse(top_line.begin(), top_line.end());
+		bottom_line.insert(bottom_line.end(), top_line.begin(), top_line.end());
+		Point q(point_x_distr(engine), point_y_distr(engine));
+		tests.push_back({q, bottom_line, holes});
+	}
+	return tests;
+}
+
 string to_string(size_t n)
 {
 	using std::ios_base;
@@ -207,8 +271,7 @@ void output_tests(std::string folder, const std::vector<test_case> &tests)
 
 int main()
 {
-	vector<test_case> correctness_tests(generate_correctness_tests());
-	output_tests("./correctness_tests/", correctness_tests);
-	output_tests("./performance_tests/", correctness_tests);
+	output_tests("./correctness_tests/", generate_correctness_tests());
+	output_tests("./performance_tests/", generate_performance_tests());
 	return 0;
 }
