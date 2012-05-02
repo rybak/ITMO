@@ -2,7 +2,7 @@
 
 set -e
 
-ok="01 04 09"
+ok=$@
 
 cmake_build() {
     mkdir bin || true
@@ -33,7 +33,22 @@ do
     cd ../statement
     cp statement.pdf $pdir/$p.pdf
 
-    popd
+    cd ../testgen
+    cmake_build
+
+    cd bin
+    for g in *
+    do
+        if [ -x $g -a -f $g ]
+        then
+            cp $g $pdir
+            pushd $pdir
+            echo Running $g
+            ./$g
+            popd
+        fi
+    done
+    cd -
 
 #    if [ -x ../testgen ]; then
 #        cd ../testgen
@@ -46,6 +61,7 @@ do
 #        popd
 #    fi
 
+    popd
 
 done
 
