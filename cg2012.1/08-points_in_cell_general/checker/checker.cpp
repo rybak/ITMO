@@ -6,7 +6,7 @@
 #include <CGAL/Gmpq.h>
 typedef CGAL::Gmpq gmp;
 
-void onedim(std::vector<std::vector<gmp>>& points, gmp val1, gmp val2){
+void onedim(std::vector<std::vector<gmp> >& points, gmp val1, gmp val2){
 	std::sort(points.begin(), points.end());
 	std::vector<gmp> current(points.size());
 	for(int i = 0; i < points.size(); i++){
@@ -28,7 +28,7 @@ int main(int argc, char* argv[]){
 	int d;
 	in >> d;
 
-	std::vector<std::pair<gmp, gmp>> dcels(d);
+	std::vector<std::pair<gmp, gmp> > dcels(d);
 	for(int i = 0; i < d; i++){
 		double a;
 		double b;
@@ -46,7 +46,7 @@ int main(int argc, char* argv[]){
 
 	int n;
 	in >> n;
-	std::vector<std::vector<gmp>> points;
+	std::vector<std::vector<gmp> > points;
 	for(int i = 0; i < n; i++){
 		std::vector<gmp> current(d);
 		double val;
@@ -57,7 +57,7 @@ int main(int argc, char* argv[]){
 		points.push_back(current);
 	}
 	
-	std::vector<std::vector<gmp>> pointsstart = points;
+	std::vector<std::vector<gmp> > pointsstart = points;
 	
 	int dim = d;
 	int i = 0;
