@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include "math.h"
 #include <ctime>
-#include <random>
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -14,7 +13,7 @@
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel::Point_2 Point;
 
-double random(){
+double double_random(){
 	double a = (double)((abs(rand())) % 10000);
 	int n = (abs(rand()) % 5);
 	for (int i = 0; i < n; ++i)
@@ -24,20 +23,19 @@ double random(){
 
 int main(int argc, char* argv[]){
 	std::srand(time(0));
-	std::string n = argv[1];
-	int k = atoi(n.c_str());
+	int k = 2;
 
 
 	for (int i = 0; i < k; ++i){
 		std::stringstream ss;
 		std::string name;
-		ss << "perfomance_tests\\" << i + 1 << ".in";
+		ss << "perfomance_tests/" << i + 1 << ".in";
 		ss >> name;
-		std::ofstream out(name);
+		std::ofstream out(name.c_str());
 		int lngth = abs(rand()) % 10000;
 		std::vector<Point> points(lngth);
 		for (int j = 0; j < lngth; ++j){
-			points[j] = Point(random(), random());
+			points[j] = Point(double_random(), double_random());
 		}
 
 		std::vector<Point> tmp(points.size());
@@ -50,7 +48,7 @@ int main(int argc, char* argv[]){
 		int size = abs(rand()) % 100000;
 		out << size << "\n";
 		for (int j = 0; j < size; ++j){
-			out << random() << " " << random() << "\n";
+			out << double_random() << " " << double_random() << "\n";
 		}
 	}
 }
