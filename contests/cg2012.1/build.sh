@@ -34,7 +34,7 @@ do
     cp statement.pdf $pdir/$p.pdf
 
     cd ../testgen
-    if [ -x CMakeLists.txt ]
+    if [ -f CMakeLists.txt ]
     then
         cmake_build
 
@@ -64,6 +64,7 @@ do
             echo $g
             pushd $pdir
             echo Running "java ${g/%.class/}"
+            
             java ${g/%.class/} || true
             popd
         done
