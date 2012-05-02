@@ -2,14 +2,14 @@
 #include <fstream>
 #include <vector>
 #include <stdio.h>
-#include "math.h"
+#include <cmath>
 #include <ctime>
-#include <random>
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <cstdlib>
 
-double random(){
+double double_random(){
 	double a = (double)((abs(rand())) % 10000);
 	int n = (abs(rand()) % 5);
 	for (int i = 0; i < n; ++i)
@@ -19,20 +19,19 @@ double random(){
 
 int main(int argc, char* argv[]){
 	std::srand(time(0));
-	std::string n = argv[1];
-	int k = atoi(n.c_str());
+	int k = 10;
 
 
 	for (int i = 0; i < k; ++i){
 		std::stringstream ss;
 		std::string name;
-		ss << "correctness_tests\\" << i + 1 << ".in";
+		ss << "correctness_tests/" << i + 1 << ".in";
 		ss >> name;
-		std::ofstream out(name);
+		std::ofstream out(name.c_str());
 		int lngth = abs(rand()) % 1000;
 		out << lngth << "\n";
 		for (int i = 0; i < lngth; ++i){
-			out << random() << " " << random() << "\n";
+			out << double_random() << " " << double_random() << "\n";
 		}
 		out << random();
 	}
