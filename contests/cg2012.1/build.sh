@@ -34,21 +34,41 @@ do
     cp statement.pdf $pdir/$p.pdf
 
     cd ../testgen
-    cmake_build
+    if [ -x CMakeLists.txt ]
+    then
+        cmake_build
 
-    cd bin
-    for g in *
-    do
-        if [ -x $g -a -f $g ]
-        then
-            cp $g $pdir
+        cd bin
+        for g in *
+        do
+            if [ -x $g -a -f $g ]
+            then
+                cp $g $pdir
+                pushd $pdir
+                echo Running $g
+                ./$g
+                popd
+            fi
+        done
+        cd -
+    else
+
+        echo "Java"
+        mkdir bin || true
+        javac *.java -d bin
+        cp -r bin/* $pdir
+
+        cd bin
+        for g in **.class
+        do
+            echo $g
             pushd $pdir
-            echo Running $g
-            ./$g
+            echo Running "java ${g/%.class/}"
+            java ${g/%.class/} || true
             popd
-        fi
-    done
-    cd -
+        done
+        cd -
+    fi
 
 #    if [ -x ../testgen ]; then
 #        cd ../testgen
