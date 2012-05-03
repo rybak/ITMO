@@ -1,7 +1,7 @@
 import random
 
-def write_test(num, points):
-  filename = "%02d.in" % num
+def write_test(prefix, num, points):
+  filename = prefix + ("%02d.in" % num)
   f = open(filename, "w")
   plist = list(points)
   hstring = "%d\n" % len(plist)
@@ -16,6 +16,6 @@ def small_test(start_num):
   for i in range(test_count):
     r = random.uniform(1.0, 2.0 + i)
     rget = lambda: random.uniform(-r, r)
-    write_test(i + start_num, ((rget(), rget()) for j in xrange(10 * (i + 1))))
+    write_test("./correctness_tests/", i + start_num, ((rget(), rget()) for j in xrange(10 * (i + 1))))
 
 small_test(1)
