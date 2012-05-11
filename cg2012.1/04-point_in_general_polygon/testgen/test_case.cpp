@@ -1,25 +1,31 @@
 #include <cstddef>
 #include "test_case.h"
 
+namespace
+{
+	std::ostream& operator<< (std::ostream& out, const vector<Point> &points)
+	{
+		size_t n = points.size();
+		out << n << '\n';
+		for (size_t i = 0; i < n; ++i)
+		{
+			out << points[i] << '\n';
+		}
+		return out;
+	}
+}
+
 std::ostream& operator<< (std::ostream& out, const test_case& test)
 {
-	out << test.q << '\n';
-	size_t n = test.p.size();
+	out << test.p;
+	size_t n = test.holes.size();
 	out << n << '\n';
 	for (size_t i = 0; i < n; ++i)
 	{
-		out << test.p[i] << '\n';
+		out << test.holes[i];
 	}
-	n = test.holes.size();
-	out << n << '\n';
-	for (size_t i = 0; i < n; ++i)
-	{
-		size_t m = test.holes[i].size();
-		out << m << '\n';
-		for (size_t j = 0; j < m; ++j)
-		{
-			out << test.holes[i][j] << '\n';
-		}
-	}
+	
+	out << test.q;
+
 	return out;
 }

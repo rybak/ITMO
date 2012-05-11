@@ -19,6 +19,7 @@ int main(int argc, char* argv[])
     using std::ifstream;
 
     ifstream input(argv[1]);
+	// TODO add multiple points tests
     double x, y;
     input >> x >> y;
     Point point(x, y); // point to check

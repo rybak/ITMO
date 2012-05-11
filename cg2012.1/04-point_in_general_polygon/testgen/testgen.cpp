@@ -9,7 +9,9 @@
 #include <functional>
 
 #include "test_case.h"
-
+/*
+TODO add multiple points tests
+*/
 using std::vector;
 using std::bind;
 using std::string;
@@ -52,7 +54,31 @@ vector<test_case> get_hard_coded_tests()
 const double pi = atan(1.0) * 4;
 const double min_coord = 10.0;
 const vector<double> max_coords({100.0, 1.0e4, 1.0e10});
-	
+
+double_distr coord_distr_fabric(double min, double max)
+{
+	if (max < min)
+	{
+		std::swap(min, max);
+	}
+	return double_distr(min, max);
+}
+
+vector<Point> generate_points_in_rect(Point a, Point b, size_t n)
+{
+	static mt19937 engine(seed ^ 0x10C);
+	auto x_distr = coord_distr_fabric(a.x, b.x);
+	auto y_distr = coord_distr_fabric(a.y, b.y);
+	vector<Point> points;
+	for (size_t i = 0; i < n; ++i)
+	{
+		points.push_back(Point(x_distr(engine), y_distr(engine)));
+	}
+	return points;
+}
+
+const size_t points_count_small_polygon = 1000;
+
 vector<test_case> generate_triangle_tests()
 {
 	vector<test_case> tests;
@@ -60,24 +86,34 @@ vector<test_case> generate_triangle_tests()
 	Point A(0.0, 0.0);
 	for (size_t i = 0; i < max_coords.size(); ++i)
 	{
-		double_distr coord_distr(0, max_coords[i]);
 		double_distr triangle_distr(min_coord + 1, max_coords[i]);
-		auto point_gen = bind(coord_distr, engine);
 		auto triangle_gen = bind(triangle_distr, engine);
 		for (size_t j = 0, m = 3; j < m; ++j)
 		{
-			Point q(point_gen(), point_gen());
+			double_distr coord_distr(0, max_coords[i]);
 			Point B( triangle_gen(), triangle_gen());
 			Point C(-triangle_gen(), triangle_gen());
 			Point center = (1.0 / 3.0) * (A + B + C);
 			Point holeA = 0.5 * (A + center);
 			Point holeB = 0.5 * (B + center);
 			Point holeC = 0.5 * (C + center);
-			tests.push_back({q, {A, B, C}, { {holeA, holeC, holeB} }});
+			tests.push_back
+			({
+				{A, B, C},
+				{ {holeA, holeC, holeB} },
+				generate_points_in_rect
+				(
+					Point(C.x, 0),
+					Point(B.x, std::max(C.y, B.y)),
+					points_count_small_polygon
+				)
+			});
 		}
 	}
 	return tests;
 }
+
+
 
 vector<test_case> generate_star_tests()
 {
@@ -112,10 +148,16 @@ vector<test_case> generate_star_tests()
 		{
 			hole[j] = factor_distr(engine) * hole[j];
 		}
-		double_distr point_distr(-max_coords[i], max_coords[i]);
-		auto point_gen = bind(point_distr, engine);
-		Point q(point_gen(), point_gen());
-		tests.push_back({q, star, { hole } });
+		tests.push_back
+		({
+			star, { hole },
+			generate_points_in_rect
+			(
+				Point(-max_coords[i], max_coords[i]),
+				Point(-max_coords[i], max_coords[i]),
+				points_count_small_polygon
+			)
+		});
 	}
 	return tests;
 }
@@ -131,19 +173,15 @@ vector<test_case> generate_adaptive_tests()
 	{
 		small_eps *= 2;
 	}
-	double_distr coord_distr(small_base - small_eps, small_base + small_eps);
-	mt19937 engine(seed ^ 0xFE11A5);
-	auto coord_gen = bind(coord_distr, engine);
-	
-	volatile const double big_base = 10e10;
-	volatile double big_eps = 1.0e-5;
+	const double big_base = 10e10;
+	double big_eps = 1.0e-5;
 	while (((big_base + big_eps) == big_base)
 		|| ((big_base - big_eps) == big_base))
 	{
 		big_eps *= 2;
 	}
 	vector<Point> polygon(
-	{// diamond along line y = x
+	{
 		Point(1, 1),
 		Point(big_base, big_base - big_eps),
 		Point(big_base, big_base),
@@ -153,16 +191,21 @@ vector<test_case> generate_adaptive_tests()
 	const size_t tests_count = 10;
 	for (size_t i = 0; i < tests_count; ++i)
 	{
-		Point q(coord_gen(), coord_gen());
-		tests.push_back({q, polygon, {/*no holes*/} });
+		auto points = generate_points_in_rect
+		(
+			Point(small_base - small_eps, small_base - small_eps),
+			Point(small_base + small_eps, small_base + small_eps),
+			points_count_small_polygon
+		);
+		tests.push_back({polygon, {/*no holes*/}, points});
 	}
 	return tests;
 }
 
 vector<test_case> generate_correctness_tests()
 {
-	vector<vector<test_case> > test_suit(
-	{
+	vector<vector<test_case> > test_suit
+	({
 		get_hard_coded_tests(),
 		generate_triangle_tests(),
 		generate_star_tests(),
@@ -173,7 +216,6 @@ vector<test_case> generate_correctness_tests()
 	{
 		tests.insert(tests.end(), (*it).begin(), (*it).end());
 	}
-	
 	return tests;
 }
 
@@ -185,12 +227,8 @@ vector<test_case> generate_performance_tests()
 	const double step = 50.0;
 	const double delta = 5.0;
 	
-	
 	const size_t size = 10000;
 	const size_t test_count = 2;
-	
-	double_distr point_x_distr(0.0, size * step);
-	double_distr point_y_distr(-y_max, y_max);
 	
 	double_distr y1_distr(y_base + delta, y_max);
 	double_distr y2_distr(0.0 + delta, y_base - delta);
@@ -235,8 +273,8 @@ vector<test_case> generate_performance_tests()
 		}
 		reverse(top_line.begin(), top_line.end());
 		bottom_line.insert(bottom_line.end(), top_line.begin(), top_line.end());
-		Point q(point_x_distr(engine), point_y_distr(engine));
-		tests.push_back({q, bottom_line, holes});
+		auto points = generate_points_in_rect(Point(0.0, -y_max), Point(size * step, y_max), points_count_small_polygon);
+		tests.push_back({bottom_line, holes, points});
 	}
 	return tests;
 }
