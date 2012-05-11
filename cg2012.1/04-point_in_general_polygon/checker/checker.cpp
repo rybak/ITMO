@@ -86,18 +86,20 @@ int main(int argc, char* argv[])
         output >> answer;
         if ((answer == -1) || (answer == 1) || (answer == 0))
         {
-            if (answer == right_answer)
+            if (answer != right_answer)
             {
-                return 0; // AC
+                return 1; // WA
             }
-            return 1; // WA   
+            
         }
         else
         {
             return 1; // PE
         }    
     }
-
+    
     input.close();
     output.close();
+    
+    return 0; // AC
 }
