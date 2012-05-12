@@ -2,7 +2,7 @@
 
 set -e
 
-ok="01 04 09"
+ok=$@
 
 cmake_build() {
     mkdir bin || true
@@ -33,7 +33,43 @@ do
     cd ../statement
     cp statement.pdf $pdir/$p.pdf
 
-    popd
+    cd ../testgen
+    if [ -f CMakeLists.txt ]
+    then
+        cmake_build
+
+        cd bin
+        for g in *
+        do
+            if [ -x $g -a -f $g ]
+            then
+                cp $g $pdir
+                pushd $pdir
+                echo Running $g
+                ./$g
+                popd
+            fi
+        done
+        cd -
+    else
+
+        echo "Java"
+        mkdir bin || true
+        javac *.java -d bin
+        cp -r bin/* $pdir
+
+        cd bin
+        for g in **.class
+        do
+            echo $g
+            pushd $pdir
+            echo Running "java ${g/%.class/}"
+            
+            java ${g/%.class/} || true
+            popd
+        done
+        cd -
+    fi
 
 #    if [ -x ../testgen ]; then
 #        cd ../testgen
@@ -46,6 +82,7 @@ do
 #        popd
 #    fi
 
+    popd
 
 done
 

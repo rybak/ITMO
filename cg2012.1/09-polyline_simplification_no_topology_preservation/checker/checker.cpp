@@ -3,7 +3,7 @@
 #include <fstream>
 #include <vector>
 #include <iostream>
-#include <CGAL\Gmpq.h>
+#include <CGAL/Gmpq.h>
 
 typedef CGAL::Gmpq gmp;
 

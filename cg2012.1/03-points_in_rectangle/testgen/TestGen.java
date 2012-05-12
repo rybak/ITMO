@@ -147,6 +147,6 @@ public class TestGen {
 	public static void main(String[] args) throws FileNotFoundException {
 		rp = new RandomPoint();
 		generateTests(0, 20);
-		generateTests(1, 100);
+		generateTests(1, 2);
 	}
 }
