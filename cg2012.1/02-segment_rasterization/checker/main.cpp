@@ -82,8 +82,7 @@ int main(int argc, char* argv[])
 
    if(correct_ans.size() != ans.size())
    {
-      cout << "WA\n";
-      cin >> n;
+      cerr << "WA\n";
       return 1;
    }
 
@@ -91,13 +90,11 @@ int main(int argc, char* argv[])
    {
       if(ans[i] != correct_ans[i])
       {
-         cout << "WA\n";
-         cin >> n;
+         cerr << "WA\n";
          return 1;
       }
    }
 
-   cout << "AC\n";
-   cin >> n;
+   cerr << "AC\n";
    return 0;
 }
