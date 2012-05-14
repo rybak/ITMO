@@ -9,18 +9,19 @@ using std::vector;
 
 struct test_case
 {
-	Point q;
-	vector<Point> p;
-	vector<vector<Point> > holes;
-	test_case(const Point q, const vector<Point> &p, const vector<vector<Point> > &holes)
-		: q(q), p(p), holes(holes)
-	{}
-	test_case()	
-		: p(0), holes(0)
-	{}
-	friend std::ostream& operator<< (std::ostream&, const test_case&);
+    vector<Point> p;
+    vector<vector<Point> > holes;
+    vector<Point> q;
+    
+    test_case(const vector<Point> &p, const vector<vector<Point> > &holes, const vector<Point> &q)
+        : p(p), holes(holes), q(q)
+    {}
+    
+    test_case()    
+        : p(0), holes(0), q(0)
+    {}
+    
+    friend std::ostream& operator<< (std::ostream&, const test_case&);
 };
-
-vector<test_case> generate_correctness_tests();
 
 #endif

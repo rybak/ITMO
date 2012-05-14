@@ -19,9 +19,7 @@ int main(int argc, char* argv[])
     using std::ifstream;
 
     ifstream input(argv[1]);
-    double x, y;
-    input >> x >> y;
-    Point point(x, y); // point to check
+    ifstream output(argv[2]);
     
     size_t n; // amount of vertexes in polygon
     input >> n;
@@ -48,57 +46,60 @@ int main(int argc, char* argv[])
             holes[i][j] = Point(x, y);
         }
     }
-    input.close();
-
-    int right_answer = 0;
-
-    switch (CGAL::bounded_side_2(polygon.begin(), polygon.end(), point, K()))
+    size_t L;
+    input >> L;
+    for (size_t i = 0; i < L; ++i)
     {
-    case CGAL::ON_BOUNDED_SIDE:
-        right_answer = 1; // inside polygon, but maybe in one of holes
-        break;
-    case CGAL::ON_BOUNDARY:
-        right_answer = 0; // on boundary of polygon
-        break;
-    case CGAL::ON_UNBOUNDED_SIDE:
-        right_answer = -1; // outside of polygon
-        break;
-    }
+        double x, y;
+        input >> x >> y;
+        Point point(x, y); // point to check
+        int right_answer = 0;
 
-    for (size_t i = 0; (i < m) && (right_answer == 1); ++i)
-    {
-        switch (CGAL::bounded_side_2(holes[i].begin(), holes[i].end(), point, K()))
+        switch (CGAL::bounded_side_2(polygon.begin(), polygon.end(), point, K()))
         {
-        case CGAL::ON_BOUNDED_SIDE: // inside holes[i]
-            right_answer = -1;
+        case CGAL::ON_BOUNDED_SIDE:
+            right_answer = 1; // inside polygon, but maybe in one of holes
             break;
-        case CGAL::ON_BOUNDARY: // on boundary of holes[i]
-            right_answer = 0;
+        case CGAL::ON_BOUNDARY:
+            right_answer = 0; // on boundary of polygon
             break;
-        case CGAL::ON_UNBOUNDED_SIDE: // outside of holes[i]
+        case CGAL::ON_UNBOUNDED_SIDE:
+            right_answer = -1; // outside of polygon
             break;
         }
-    }
 
-    ifstream output(argv[2]);
-    //std::string s;
-    int answer;
-    output >> answer;
+        for (size_t i = 0; (i < m) && (right_answer == 1); ++i)
+        {
+            switch (CGAL::bounded_side_2(holes[i].begin(), holes[i].end(), point, K()))
+            {
+            case CGAL::ON_BOUNDED_SIDE: // inside holes[i]
+                right_answer = -1;
+                break;
+            case CGAL::ON_BOUNDARY: // on boundary of holes[i]
+                right_answer = 0;
+                break;
+            case CGAL::ON_UNBOUNDED_SIDE: // outside of holes[i]
+                break;
+            }
+        }
+        int answer;
+        output >> answer;
+        if ((answer == -1) || (answer == 1) || (answer == 0))
+        {
+            if (answer != right_answer)
+            {
+                return 1; // WA
+            }
+            
+        }
+        else
+        {
+            return 1; // PE
+        }    
+    }
+    
+    input.close();
     output.close();
     
-    if ((answer == -1) || (answer == 1) || (answer == 0))
-    {
-        if (answer == right_answer)
-        {
-            std::cerr << "AC\n";
-            return 0; // AC
-        }
-        std::cerr << "WA solution " << answer << " ideal " << right_answer << "\n";
-        return 1; // WA   
-    }
-    else
-    {
-        std::cerr << "PE\n";
-        return 1;// PE
-    }    
+    return 0; // AC
 }

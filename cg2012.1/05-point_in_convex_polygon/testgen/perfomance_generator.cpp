@@ -29,7 +29,7 @@ int main(int argc, char* argv[]){
 	for (int i = 0; i < k; ++i){
 		std::stringstream ss;
 		std::string name;
-		ss << "perfomance_tests/" << i + 1 << ".in";
+		ss << "performance_tests/" << i + 1 << ".in";
 		ss >> name;
 		std::ofstream out(name.c_str());
 		int lngth = abs(rand()) % 10000;

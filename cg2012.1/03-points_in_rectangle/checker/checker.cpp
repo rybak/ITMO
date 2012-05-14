@@ -24,8 +24,8 @@ Vector points_in_rectangle(const Vector& points, Rectangle rectangle) {
 }
 
 int main(int argc, char* argv[]) {
-	std::ifstream in("test.in");
-	std::ifstream out("test.out");
+	std::ifstream in(argv[1]);
+	std::ifstream out(argv[2]);
 	
 	size_t n;	
 	in >> n;	
