@@ -1,9 +1,0 @@
-syntax:glob
-*.aux
-*.log
-*.out
-syntax:regexp
-CMakeFiles/.*
-.*/bin
-.*\.swp
-contests/cg2012\.1/..
