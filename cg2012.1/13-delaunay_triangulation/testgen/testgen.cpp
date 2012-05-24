@@ -47,7 +47,7 @@ int main()
    std::vector<Point> point_vector;
    for (int i = 0; i < n; i++)
    {
-      std::string testN = boost::lexical_cast<std::string>(i);
+      std::string testN = boost::lexical_cast<std::string>(i + 1);
       testN = std::string(3 - testN.length(), '0') + testN;
       std::ofstream out("correctness_tests/" + testN + ".in");
       out.precision(precision);
@@ -62,7 +62,7 @@ int main()
    point_vector = generate_points(1000, 1);
    for (int i = 0; i < m; i++)
    {
-      std::string testN = boost::lexical_cast<std::string>(i);
+      std::string testN = boost::lexical_cast<std::string>(i + 1);
       testN = std::string(3 - testN.length(), '0') + testN;
       std::ofstream out("performance_tests/" + testN + ".in");
       out.precision(precision);
