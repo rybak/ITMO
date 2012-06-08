@@ -1,8 +1,3 @@
-#include <boost/graph/dijkstra_shortest_paths.hpp>
-#include <boost/graph/graph_traits.hpp>
-#include <boost/graph/adjacency_list.hpp>
-
-
 #include <CGAL/Polygon_2_algorithms.h>
 #include <CGAL/Cartesian.h>
 #include <CGAL/Gmpq.h>
@@ -11,12 +6,14 @@
 #include <CGAL/intersection_2.h>
 #include <CGAL/Polygon_2.h>
 #include <CGAL/number_utils.h>
+#include <CGAL/CORE_Expr.h>
 
 #include <cmath>
 #include <limits.h>
 
+
 typedef CGAL::Gmpq gmp;
-typedef CGAL::Cartesian<gmp> Kernel;
+typedef CGAL::Cartesian<CORE::Expr> Kernel;
 typedef Kernel::Point_2 Point;
 typedef Kernel::Segment_2 Segment;
 typedef CGAL::Polygon_2<Kernel> Polygon;
@@ -50,7 +47,7 @@ struct Obstacle{
 	}
 	bool contain(const Segment& seg){
 		for(int i  = 0; i < segments.size(); i++){
-			if(segments[i] == seg){
+			if(segments[i] == seg || segments[i].opposite() == seg){
 				return true;
 			}
 		}
@@ -92,9 +89,9 @@ struct Obstacle{
 	}
 };
 
-gmp length(const Point& a, const Point& b){
+CORE::Expr length(const Point& a, const Point& b){
 	Segment seg(a, b);
-	return (gmp)(sqrt(seg.squared_length().to_double()));
+	return sqrt(seg.squared_length());
 }
 bool full_intersect(const Point& first, const Point& second, vector<Obstacle> obstacles){
 	int sum = 0;
@@ -105,10 +102,7 @@ bool full_intersect(const Point& first, const Point& second, vector<Obstacle> ob
 }
 
 int main(int argc, char* argv[]){
-	if (argc != 3){
-        std::cerr << "Usage: polygonalchain-checker inputfile outputfile" << std::endl;
-        return -1;
-    }
+	
 	vector<Point> points;
 
 	std::ifstream in(argv[1]);
@@ -143,7 +137,7 @@ int main(int argc, char* argv[]){
 	 in.close();
 
 	 vector<vector<int>> graph_edge(points.size());
-	 vector<std::pair<double, gmp>> graph_vertex(points.size());
+	 vector<std::pair<double, CORE::Expr>> graph_vertex(points.size());
 	 vector<int> parent(points.size());
 	 for(int i = 0; i < points.size(); i++){
 		 for(int j = 0; j < points.size(); j++){
@@ -161,7 +155,7 @@ int main(int argc, char* argv[]){
 	 for(int i = 1; i < graph_vertex.size(); i++){
 		 graph_vertex[i].first = (std::numeric_limits<double>::max());
 	 
-		 graph_vertex[i].second = (gmp)(std::numeric_limits<double>::max());
+		 graph_vertex[i].second = (CORE::Expr)(std::numeric_limits<double>::max());
 		 parent[i] = -1;
 	 }
 
@@ -169,7 +163,7 @@ int main(int argc, char* argv[]){
 		for(int j = 0; j < graph_edge[i].size(); j++){
 			if(graph_vertex[i].second + length(points[i], points[graph_edge[i][j]]) < graph_vertex[graph_edge[i][j]].second){
 				graph_vertex[graph_edge[i][j]].second = graph_vertex[i].second + length(points[i], points[graph_edge[i][j]]);
-				graph_vertex[graph_edge[i][j]].first = graph_vertex[graph_edge[i][j]].second.to_double();
+				graph_vertex[graph_edge[i][j]].first = graph_vertex[graph_edge[i][j]].second.doubleValue();
 				parent[graph_edge[i][j]] = i;
 			}
 		}
@@ -196,7 +190,7 @@ int main(int argc, char* argv[]){
 	input.close();
 
 	path.push_back(Point(xfin, yfin));
-	gmp distance = (gmp)0;
+	CORE::Expr distance = 0;
 
 	for(int i = 0; ((i < path.size() - 1) && (wrongpath == 1)); i++){
 		if(!full_intersect(path[i], path[i + 1], obstacles)){
@@ -210,9 +204,9 @@ int main(int argc, char* argv[]){
 	if(distance != graph_vertex[1].second){
 		wrongdistance--;
 	}
+	
 
-
-	if((wrongdistance + wrongpath) == 2){
+	if((wrongdistance + wrongpath) != 2){
 		return 1;
 	} else {
 		return 0;

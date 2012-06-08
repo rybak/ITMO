@@ -4,11 +4,15 @@
 #include <algorithm>
 #include <iterator>
 #include <map>
-
+#include <set>
 #include <CGAL/Polygon_2_algorithms.h>
 #include <CGAL/Cartesian.h>
 #include <CGAL/Gmpq.h>
+#include <CGAL/Quotient.h>
+#include <CGAL/MP_Float.h>
 #include <CGAL/intersection_2.h>
+
+typedef CGAL::Quotient<CGAL::MP_Float> quat;
 
 typedef CGAL::Gmpq gmp;
 typedef CGAL::Cartesian<gmp> Kernel;
@@ -16,15 +20,12 @@ typedef Kernel::Point_2 Point;
 typedef Kernel::Segment_2 Segment;
 typedef CGAL::Object Object;
 
-using std::vector;
-using std::cin;
-using std::cout;
-using std::cerr;
-using std::ifstream;
-using std::ofstream;
-
+using namespace std;
 int n;
-vector<Point> allintersections;
+
+set<Point> allpoints;
+map<Point, int> gans;
+
 vector<Segment> all;
 
 bool isSeg(const Object& obj){
@@ -41,10 +42,8 @@ bool isPoint(const Object& obj){
 	return false;
 }
 
-void fill(){
-	ofstream output1("seg.txt");
-	
-	ofstream output2("point.txt");
+//ищем все точки пересечения // looking for every points
+vector<Point> fill(){
 	for(int i = 0; i < n; i++){
 		for(int j = 0; j < i; j++){
 			if(i != j){
@@ -52,53 +51,47 @@ void fill(){
 					Object result = intersection(all[i], all[j]);
 					if(isSeg(result)){
 						Segment seg = CGAL::object_cast<CGAL::Segment_2<Kernel> >(result);
-						output1 << seg << "\n";
-						allintersections.push_back(seg.source());
-						allintersections.push_back(seg.target()); 
+						allpoints.insert(seg.source());
+						allpoints.insert(seg.target()); 
 					}
 					if(isPoint(result)){
 						Point p = CGAL::object_cast<CGAL::Point_2<Kernel> >(result);
-						output2 << p << "\n"; 
-						allintersections.push_back(p);
+						allpoints.insert(p);
 					}
 				}
 			}
 		}
 	}
+	return vector<Point>(allpoints.begin(), allpoints.end());
 }
 
-vector<std::pair<Point, vector<int>>> generate(){
-	vector<std::pair<Point, vector<int>>> result;
+
+//для каждой точки находим отрезки, которые через нее проходят
+map<Point, vector<int>> generate(){
+	vector<Point> allp = fill();
+	multimap<Point, int> result;
 	
-	for(int i = 0; i < allintersections.size(); i++){
-		vector<int> curresult;
+	for(int i = 0; i < allpoints.size(); i++){
 		for(int j = 0; j < all.size(); j++){
-			if(all[j].has_on(allintersections[i])){
-				curresult.push_back(j+1);
+			if(all[j].has_on(allp[i])){
+				result.insert(make_pair<Point, int>(allp[i], j+1));
 			}
-		}
-		std::sort(curresult.begin(), curresult.end());
-		if(!curresult.empty()){
-			result.push_back(std::make_pair<Point, vector<int>>(allintersections[i], curresult));
 		}
 	}
 
-	std::sort(result.begin(), result.end());
+	map<Point, vector<int>> mres;
 	
-	int i = 0;
-	while(i < result.size()){
-		int j = i;
-		while(result[i].first == result[j].first){
-			j++;
-			if(j >= result.size()){
-				break;
-			}
-		}
-		j--;
-		result.erase(result.begin() + i, result.begin() + j);
-		i = i + 1;
-	} 
-	return result; 
+	multimap<Point,int>::iterator it;
+	pair<multimap<Point,int>::iterator,multimap<Point,int>::iterator> ret;
+	for(int i = 0; i < allp.size(); i++){
+		ret = result.equal_range(allp[i]);
+		vector<int> cur;
+		for (it=ret.first; it!=ret.second; ++it)
+			cur.push_back((*it).second);
+		sort(cur.begin(), cur.end());
+		mres.insert(make_pair<Point, vector<int>>(allp[i], cur));
+	}
+	return mres; 
 }
 
 bool compare(const vector<int>& a, const vector<int>& b){
@@ -125,20 +118,19 @@ int main(int argc, char* argv[]){
 		all.push_back(Segment(Point(x, y), Point(x1, y1)));
 	}
 	
-	fill();
 	
-	vector<std::pair<Point, vector<int>>> trueanswer = generate();
+    map<Point, vector<int>> trueanswermap = generate();
+	
 	in.close();
 
-	ifstream input(argv[2]);
+    ifstream input(argv[2]);
 	int wronganswer = 0;
 
 	int count = 0;
 	input >> count;
-	if(count != trueanswer.size()){
+	if(count != trueanswermap.size()){
 		wronganswer++;
 	}
-
 	vector<vector<int>> answer(count);
 	for(int i = 0; i < count; i++){
 		int n = 0;
@@ -148,15 +140,17 @@ int main(int argc, char* argv[]){
 			input >> cur;
 			answer[i].push_back(cur);
 		}
-		std::sort(answer[i].begin(), answer[i].end());
+		sort(answer[i].begin(), answer[i].end());
 	}
 	
-	
+	map<Point, vector<int>>::iterator iter;
+	map<Point, vector<int>> temp = trueanswermap;
 	for(int i = 0; i < answer.size(); i++){
 		bool flag = true;
-		for(int j = 0; (j < trueanswer.size() && flag); j++){
-			if(compare(answer[i], trueanswer[j].second)){
-				trueanswer.erase(trueanswer.begin() + j);
+		trueanswermap = temp;
+		for(iter = trueanswermap.begin(); (iter != trueanswermap.end() && flag); iter++){
+			if(compare(answer[i], (*iter).second)){
+				temp.erase((*iter).first);
 				flag = false;
 			}
 		}
@@ -165,7 +159,7 @@ int main(int argc, char* argv[]){
 		}
 	}
 
-	if((wronganswer == 0) && (trueanswer.size() != 0)){
+	if((wronganswer == 0) && (temp.size() != 0)){
 		wronganswer++;
 	}
 	  
