@@ -1,11 +1,13 @@
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Partition_traits_2.h>
+#include <CGAL/Triangulation_2.h>
 #include <CGAL/Polygon_2.h>
 #include <CGAL/Triangle_2.h>
 #include <CGAL/Segment_2.h>
 #include <CGAL/Circle_2.h>
 #include <CGAL/squared_distance_2.h>
 #include <stdio.h>
+#include <string>
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef CGAL::Object Object;
@@ -13,6 +15,7 @@ typedef CGAL:: Partition_traits_2<K> Traits;
 typedef Traits::Point_2 Point;
 typedef Traits::Segment_2 Segment;
 typedef CGAL::Circle_2<K> Circle;
+typedef CGAL::Triangulation_2<K> Triangulation;
 
 class TriangleInCircle
 {
@@ -42,6 +45,12 @@ int main(int argc, char* argv[])
    used_points.resize(point_vector.size());
    int ammountOfTriangles = 0, a = 0, b = 0, c = 0;
    out >> ammountOfTriangles;
+
+   Triangulation td;
+   td.insert(point_vector.begin(), point_vector.end());
+
+   if (td.number_of_faces() != ammountOfTriangles)
+      return 1;
 
    for (int i = 0; i < ammountOfTriangles; i++)
    {
