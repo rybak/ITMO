@@ -2,30 +2,27 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
-#include <set>
 
 #include <CGAL\Segment_2.h>
 #include <CGAL\intersection_2.h>
 #include <CGAL\Point_2.h>
-#include <CGAL\Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL\Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL\Cartesian.h>
 #include <CGAL\Triangle_2.h>
-#include <CGAL\Circle_2.h>
 #include <CGAL\Triangulation_2.h>
+#include <CGAL\predicates_on_points_2.h>
 
 using namespace std;
 
-typedef CGAL::Exact_predicates_exact_constructions_kernel Kernel;
+typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
 typedef CGAL::Segment_2<Kernel> Segment;
 typedef CGAL::Point_2<Kernel> Point;
-typedef CGAL::Point_2<CGAL::Cartesian<double>> Cell;
 typedef CGAL::Triangle_2<Kernel> Triangle;
-typedef CGAL::Circle_2<Kernel> Circle;
 typedef CGAL::Triangulation_2<Kernel> Triangulation;
 
 bool isSegment(const CGAL::Object& obj)
 {
-   if(const CGAL::Segment_2<Kernel> *iseg = CGAL::object_cast<CGAL::Segment_2<Kernel> >(&obj))
+   if(const CGAL::Segment_2<Kernel> *iseg = CGAL::object_cast<CGAL::Segment_2<Kernel>>(&obj))
    {
       return true;
    }
@@ -34,7 +31,7 @@ bool isSegment(const CGAL::Object& obj)
 
 bool isPoint(const CGAL::Object& obj)
 {
-   if(const CGAL::Point_2<Kernel> *ipoint = CGAL::object_cast<CGAL::Point_2<Kernel> >(&obj))
+   if(const CGAL::Point_2<Kernel> *ipoint = CGAL::object_cast<CGAL::Point_2<Kernel>>(&obj))
    {
       return true;
    }
@@ -45,7 +42,8 @@ int main(int argc, char* argv[])
 {
    using namespace CGAL;
    ifstream input(argv[1]);
-   int nPoints, nSegments;
+   int nPoints = 0;
+   int nSegments = 0;
    input >> nPoints;
    vector<Point> aPoints(nPoints);
 
@@ -69,7 +67,7 @@ int main(int argc, char* argv[])
    input.close();
    ifstream output(argv[2]);
 
-   int nTriangles;
+   int nTriangles = 0;
 
    output >> nTriangles;
 
@@ -131,7 +129,7 @@ int main(int argc, char* argv[])
 
                for(int k = 0; k < 3; k++) // собс-но критерий
                {
-                  if(Circle(t1[0], t1[1], t1[2]).bounded_side(t2[k]) == CGAL::ON_BOUNDED_SIDE && !isSConstrained)
+                  if(CGAL::side_of_bounded_circle(t1[0], t1[1], t1[2], t2[k]) == CGAL::ON_BOUNDED_SIDE && !isSConstrained)
                   {
                      cerr << "WA\n";
                      return 1;
@@ -140,7 +138,7 @@ int main(int argc, char* argv[])
 
                for(int k = 0; k < 3; k++)
                {
-                  if(Circle(t2[0], t2[1], t2[2]).bounded_side(t1[k]) == CGAL::ON_BOUNDED_SIDE && !isSConstrained)
+                  if(CGAL::side_of_bounded_circle(t2[0], t2[1], t2[2], t1[k]) == CGAL::ON_BOUNDED_SIDE && !isSConstrained)
                   {
                      cerr << "WA\n";
                      return 1;
