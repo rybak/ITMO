@@ -130,9 +130,8 @@ public class TestGen {
 			stringFormat = "%03d";
 		}
 		
-		for (int i = 0; i < count; i++) {
-			String s = fileName + String.format(stringFormat, i + 1) + ".in";
-			pw = new PrintWriter(s);
+		for (int i = 0; i < count; i++) {			
+			pw = new PrintWriter(fileName + String.format(stringFormat, i + 1) + ".in");
 						
 			pw.println(n);
 			pw.println(generatePoints(n));
@@ -147,6 +146,6 @@ public class TestGen {
 	public static void main(String[] args) throws FileNotFoundException {
 		rp = new RandomPoint();
 		generateTests(0, 20);
-		generateTests(1, 2);
+		generateTests(1, 100);
 	}
 }

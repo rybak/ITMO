@@ -74,9 +74,8 @@ public class TestGen {
 			stringFormat = "%03d";
 		}
 		
-		for (int i = 0; i < count; i++) {
-			String s = fileName + String.format(stringFormat, i + 1) + ".in";
-			pw = new PrintWriter(s);
+		for (int i = 0; i < count; i++) {			
+			pw = new PrintWriter(fileName + String.format(stringFormat, i + 1) + ".in");
 						
 			pw.println(n);
 			pw.println(generatePoints(n));
