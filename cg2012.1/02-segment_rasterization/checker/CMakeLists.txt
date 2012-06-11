@@ -4,7 +4,7 @@ project(segment_rasterization-checker)
 
 set(CMAKE_BUILD_TYPE Release)
 
-set(sources checker.cpp)
+set(sources main.cpp)
 add_definitions(-frounding-math)
 #add_definitions(-DDEBUG)
 link_libraries(CGAL gmp)
