@@ -1,4 +1,3 @@
-
 import java.io.*;
 import java.util.*;
 
@@ -130,18 +129,16 @@ public class TestGen {
 	private static void generateTests(int task, int count) throws FileNotFoundException {
 		PrintWriter pw;
 		String fileName, stringFormat;
-		int n, m;
+		int n;
 		
 		if (task == 0) {
 			fileName = "correctness_tests/";
 			stringFormat = "%02d";			
 			n = rp.nextInt(50);
-			m = rp.nextInt(200);
 			
 		} else {
 			fileName = "performance_tests/";
-			n = rp.nextInt(300);
-			m = rp.nextInt(1000);
+			n = rp.nextInt(1000);
 			stringFormat = "%03d";
 		}
 		
@@ -161,6 +158,6 @@ public class TestGen {
 	public static void main(String[] args) throws FileNotFoundException {
 		rp = new RandomPoint();
 		generateTests(0, 20);
-		generateTests(1, 100);
+		generateTests(1, 5);
 	}
 }
