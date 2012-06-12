@@ -83,7 +83,7 @@ void makeFile(std::string subfolder, int num, vector<Point> aPoints, vector<pair
    fout << aSegments.size() << '\n';
    for(int i = 0; i < aSegments.size(); i++)
    {
-      fout << aSegments[i].first << ' ' << aSegments[i].second << '\n';
+      fout << aSegments[i].first + 1 << ' ' << aSegments[i].second + 1 << '\n';
    }
 
    fout.close();
