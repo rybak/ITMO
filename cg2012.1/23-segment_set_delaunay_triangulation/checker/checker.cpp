@@ -129,7 +129,8 @@ int main(int argc, char* argv[])
 
                for(int k = 0; k < 3; k++) // собс-но критерий
                {
-                  if(CGAL::side_of_bounded_circle(t1[0], t1[1], t1[2], t2[k]) == CGAL::ON_BOUNDED_SIDE && !isSConstrained)
+                  if(CGAL::side_of_bounded_circle(t1[0], t1[1], t1[2], t2[k]) == CGAL::ON_BOUNDED_SIDE && !isSConstrained ||
+                     t1.bounded_side(t2[k]) == CGAL::ON_BOUNDED_SIDE)
                   {
                      cerr << "WA\n";
                      return 1;
@@ -138,7 +139,8 @@ int main(int argc, char* argv[])
 
                for(int k = 0; k < 3; k++)
                {
-                  if(CGAL::side_of_bounded_circle(t2[0], t2[1], t2[2], t1[k]) == CGAL::ON_BOUNDED_SIDE && !isSConstrained)
+                  if(CGAL::side_of_bounded_circle(t2[0], t2[1], t2[2], t1[k]) == CGAL::ON_BOUNDED_SIDE && !isSConstrained ||
+                     t2.bounded_side(t1[k]) == CGAL::ON_BOUNDED_SIDE)
                   {
                      cerr << "WA\n";
                      return 1;
