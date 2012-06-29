@@ -1,40 +1,46 @@
 extern	__imp__SetConsoleTextAttribute@8
 extern	__imp__GetStdHandle@4
 extern	__imp__WriteConsoleA@20
+extern	__imp__WriteConsoleOutputA@20
 extern	__imp__ExitProcess@4
 extern	__imp__Sleep@4
+extern	__imp__GetMessageA@16
 
 extern	__imp__wsprintfA
 extern 	__imp__printf
 extern 	__imp__system
-extern	__imp___getch
 %assign MB_ICONINFORMATION 40h
 global _main
 
 section .rdata
 ;foreground:                  Irgb
 ;background:              Irgb
-attr dd           0000000011001001b
+attr dw           0000000011001001b
+space_attr dw     0000000000001111b
 
-cwidth dd 79
-_cwidth dd 81
-cheight dd 25
+cwidth dd 70 ; 70
+cheight dd 30 ; 0014h ; 20
+char_info_size dd 04h
 
-pausestr db "pause",0
-intformat db " %d ",0
+cleft	dw 0004h
+ctop	dw 000Eh
 
 section .bss
+
+padcoord: resd 1
+
 stdin: resd 1
 stdout: resd 1
 written: resd 1
 doublebuf: resq 1
-buffer: resb 2000 ; = 80 * 25
+buffer: resb 10000
+COORD_buffer_size: resd 1
 
 section .data
-padcoord dd 39
+
 padhwidth dd 5
 
-ballx dd 10.0
+ballx dd 40.0
 bally dd 10.0
 ; speed
 vx dd +1.0
@@ -43,6 +49,7 @@ vy dd -1.0
 section .bss
 ballxint: resd 1
 ballyint: resd 1
+msg: resb 10000
 
 section .text
 
@@ -54,27 +61,21 @@ _main:
 	push dword [cheight]
 	call print_int
 	call println
+
+	call init_vars
+
+;	jmp exit
 	call clean_buffer
 
 	call draw_pad
 	call draw_ball
-
+	
 	main_loop:
-		call println
+		
 		call print_buffer
-		call sleep
+		;call sleep
 		;cmp eax, 'h'
-		mov eax, 1
-		cmp eax, 0
 ;		jnz main_loop
-
-	_getch_testing:
-		call [__imp___getch]
-		push eax
-		push dword 5
-		push dword 15
-		call draw_char_xy
-		call print_buffer
 
 exit:
 	push 0
@@ -87,13 +88,12 @@ sleep:
 	popad
 	ret
 
-draw_pad:
+draw_pad: ; old
 	pushad
 		mov edi, [cheight] ; pad y
 		dec edi
 		mov ebx, [cwidth]
 		mov edx, [padhwidth]
-
 		mov ecx, [padcoord]
 		sub ecx, edx
 		cmp ecx, 0
@@ -108,7 +108,8 @@ draw_pad:
 			mov ebp, ebx
 		skip_cutting_right:
 		draw_pad_loop:
-			push dword '='
+			push word 0009h;
+			push word '='
 			push edi
 			push ecx
 			call draw_char_xy
@@ -118,7 +119,7 @@ draw_pad:
 	popad
 	ret
 
-draw_ball:
+draw_ball: ; old
 	pushad
 		fld dword[ballx]
 		frndint
@@ -128,119 +129,113 @@ draw_ball:
 		fistp dword[ballyint]
 		mov ecx, [ballxint]
 		mov edi, [ballyint]
-		push dword 'O'
+
+		push word 0004h; color of ball
+		push word 'O'; char
 		push edi
 		push ecx
 		call draw_char_xy
 	popad
 	ret
 
-draw_char_xy: ; (int x, int y, char c)
+draw_char_xy: ; (int x, int y, char c, color col)
 	pushad
-		mov ecx, [esp + 20h + 4]
-		mov eax, [esp + 20h + 8]
-		mov ebx, [esp + 20h + 0Ch]
-		mov ebp, [_cwidth]
+		mov ecx, [esp + 20h + 4] ; x
+		mov eax, [esp + 20h + 8] ; y
+		mov bx, word[esp + 20h + 0Ch] ; char
+		mov ebp, [cwidth]
 		mul ebp
 		add eax, ecx
-		mov byte[buffer + eax], bl
+		mov word[buffer + eax * 4], bx
+		mov bx, word[esp + 20h + 0Eh] ; color
+		mov word[buffer + eax * 4 + 2], bx
 	popad
 	ret 0Ch
 
-print_buffer:
+section .rdata
+tbuffer db "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",0
+section .bss
+write_region: resq 1
+
+section .text
+
+print_buffer: ; ~~~
 	pushad
-		call println
-		call println
-		xor ecx, ecx
-		mov ebp, [cheight]
-;		print_buffer_loop:
-;			push ecx
-;			call print_buffer_line
-;			inc ecx
-;			cmp ecx, ebp
-;			jnz print_buffer_loop
-		mov eax, [cheight]
-		mov ebx, [_cwidth]
-		mul ebx
-		mov ecx, buffer
-
-		push dword 0
-		push written
-		push eax
-		push ecx
-		push dword[stdout]
-		call [__imp__WriteConsoleA@20]
-
+		push 5
+		call print_int
+		push write_region ; PSMALL_RECT lpWriteRegion // pointer to small rect
+		push dword 00000000h; COORD dwBufferCoord upper left cell in the buffer
+		push dword[COORD_buffer_size]; COORD buffersize 
+		push buffer ; CHAR_INFO *lpBuffer  ;
+		push dword[stdout]; HANDLE
+		call [__imp__WriteConsoleOutputA@20]
+		call print_dot
 	popad
 	ret
-
-print_buffer_line:
-	pushad ; esp OFFSET
-		mov eax, [esp + 20h + 4]
-		mov ebx, [_cwidth]
-		mul ebx
-		add eax, buffer
-		push dword 0
-		push written
-		push dword [_cwidth]
-		push eax
-		push dword[stdout]
-		call [__imp__WriteConsoleA@20]
-		call println
-	popad
-	ret 4
+print_eax:
+	push eax
+	push eax
+	call print_int
+	pop eax
+ret
 
 clean_buffer:
 	pushad
-		mov eax, [cheight]
-		mov ebx, [_cwidth]
-		mul ebx
+		push dword 7
+		call print_int
 		xor ecx, ecx
-		test_loop:
-			mov byte[buffer + ecx], '.'
+		mov eax, 5600 ; 4 * 70 * 20
+		mov dx, word 65
+		clean_buffer_loop1:
+			mov word[buffer + ecx], dx
 			inc ecx
 			cmp ecx, eax
-			jnz test_loop
-		mov edi, [cheight]
+			jnz clean_buffer_loop1
 		xor ecx, ecx
-		mov eax, buffer
-		mov ebx, [cwidth]
-		test_loop2:
-			add eax, ebx
-    		mov byte[buffer + eax], 13
-			inc eax
-			mov byte[buffer + eax], 10
-			inc eax
+		mov eax, 1400
+		mov dx, word 0CEh
+		clean_buffer_loop2:
+			mov word[buffer + ecx * 4], '.'; char
+			mov word[buffer + ecx * 4 + 2], dx ; color
 			inc ecx
-			cmp ecx, edi
-			jnz test_loop2
+			cmp ecx, eax
+			jnz clean_buffer_loop2
+
+		call print_dot
 	popad
 	ret
-	    xor ecx, ecx
-		mov ebx, [_cwidth]
-		mov edi, [cwidth]
-		mov ebp, [cheight]
-		clean_loop_lines:
-			xor esi, esi
-			clean_loop_col:
-				mov eax, ecx
-				mul ebx
-				add eax, esi
-				mov byte[buffer + eax], '.'
-				inc esi
-				cmp esi, edi
-				jnz clean_loop_col
-			; adding \r
-			;sub eax, 2
-			mov byte[buffer + eax], 13
-			inc eax
-			mov byte[buffer + eax], 10
-			; /
-			inc ecx
-			cmp ecx, ebp
-			jnz clean_loop_lines
+
+init_vars:
+	pushad
+		mov ax, word[cheight];
+		shl eax, 10h
+		mov ax, word[cwidth]
+		mov [COORD_buffer_size], eax
+		;   bottom right top left
+		; 00 18 00 49 00 04 00 04h		
+		mov ax, word[ctop]
+		mov word[write_region + 2], ax	
+		mov bx, word[cheight]
+		dec bx
+		add	ax, bx
+		mov word[write_region + 6], ax
+		mov ax, word[cleft]
+		mov word[write_region + 0], ax
+		mov bx, word[cwidth]
+		dec bx
+		add	ax, bx
+		mov word[write_region + 4], ax
+		mov eax, dword[write_region]
+		call print_eax
+		mov eax, dword[write_region + 4]
+		call print_eax
+		;padcoord
+		mov eax, dword[cwidth]
+		shr ax, 1
+		mov dword[padcoord], eax
 	popad
 	ret
+
 section .bss
 	eaxint: resb 4
 
@@ -269,6 +264,8 @@ init_stdin_stdout:
 section .rdata
 	strdot db ".", 0
 	strendl db 0Dh, 0Ah, 0
+	pausestr db "pause",0
+	intformat db " %X ",0
 
 section .text
 
