@@ -17,10 +17,16 @@ extern  __imp__system
 global _main
 ;;;
 section .data
+score dd 0
+intbuf dd 0
+
 len dd 42
 Esc_code dd 27
 left dd 37
 right dd 39
+leftup dd 65
+rightup dd 68
+
 ;;;
 
 section .rdata
@@ -36,8 +42,15 @@ pad_attr dw   0000000011100001b
 
 
 float_zero dd 0.0
-cwidth dd 70 ; 70
-cheight dd 30 ; 0014h ; 20
+float_one dd 0.2
+float_neg_one dd -0.2
+
+coef dd 0.1
+
+cwidth dd 70
+cheight dd 30
+by dd 29
+
 char_info_size dd 04h
 
 cleft   dw 0004h
@@ -49,8 +62,11 @@ mem: resd 1
 bufin: resb 5128
 ;;;
 
-padcoord: resd 1
-oldpadcoord: resd 1
+bottom_pad_coord: resd 1
+old_bottom_pad_coord: resd 1
+top_pad_coord: resd 1
+old_top_pad_coord: resd 1
+
 stdin: resd 1
 stdout: resd 1
 written: resd 1
@@ -61,64 +77,70 @@ section .data
 
 padwidth dd 5
 padspeed dd 1
+bottomd dd 0
+topd dd 0
 
-
-ballx dd 40.0
+ballx dd 30.0
 bally dd 10.0
 ; speed
-vx dd +0.5
-vy dd -0.7
+vx dd +0.08
+vy dd +0.05
 
 section .bss
 ballxint: resd 1
 ballyint: resd 1
 oldballxint: resd 1
 oldballyint: resd 1
-msg: resb 10000
 
 section .text
 
 _main:
+	
     call init_stdin_stdout
-
-    push dword [cwidth]
-    call print_int
-    push dword [cheight]
-    call print_int
-    call println
-
     call init_vars
-
-;       jmp exit
+	call recalc_ballint
     call clean_buffer
-;       mov ecx, 200
+    call save_old_ballint
+    push cls_command
+	call [__imp__system]
     xor ecx, ecx
     main_loop:
         call process_keyboard
-;		push eax
-;		call print_int		
-		push eax
+		push dword[topd]
+		push dword[bottomd]
         call move_pad
+
         call move_ball
-        ;call clean_buffer
+		push dword[by]
+		push dword[bottom_pad_coord]
+		push dword[old_bottom_pad_coord]
 	    call draw_pad
-        call draw_ball
+
+		push dword 0
+		push dword[top_pad_coord]
+		push dword[old_top_pad_coord]
+	    call draw_pad
+
+        call draw_ball	
+
         call print_buffer
         call sleep
         inc ecx
         jnz main_loop
+second_wins:
+	push dword 2
+	jmp exit
+first_wins:
+	push dword 1
+exit:                                                                      
 
-exit:
-	push cls_command
-	call [__imp__system]
+	call print_score
     push 0
     call [__imp__ExitProcess@4]
 
 process_keyboard:
-	push ebx
-	push ecx
-	push edx
-		xor ebx,ebx
+	pushad
+		xor ebx, ebx
 		push len
 		push dword [stdin]
 		call [__imp__GetNumberOfConsoleInputEvents@8]
@@ -136,200 +158,371 @@ process_keyboard:
 		mov ecx, bufin
 
 		allkeys:
+
 			push ecx
 			xor eax,eax
 			mov ax, word [ecx]
-
-	mov edx, 1
-	cmp eax, edx
+			cmp eax, 1
 			jnz endkeys
+		
    			mov eax, dword [ecx + 4]
-
 			test eax,eax
 			jz endkeys   
 			
 			xor eax,eax
 			mov al, byte [ecx + 10]	
-
 			cmp eax, [Esc_code]
 			jz exit
-			
+
 			cmp eax, [left]
-			jz check_right
+			jz doleft
 				cmp eax, [right]
-				jnz endkeys
-				add bl, byte [ecx + 8]
-				jmp endkeys
-			check_right:	
+				jz doright 
+					cmp eax, [leftup]
+				        jz doleftup
+						cmp eax, [rightup]
+						jnz endkeys	
+						add bh, byte [ecx + 8]
+						jmp endkeys
+					doleftup:
+						sub bh, byte [ecx + 8]
+						jmp endkeys
+				doright:
+					add bl, byte [ecx + 8]
+					jmp endkeys
+			doleft:	
 			  	sub bl, byte [ecx + 8]
          		endkeys:
          		pop ecx
-			add ecx, 14h	
+			add ecx, 14h	 
 		
 			mov eax, dword [len]
 			dec eax
 			mov [len], eax				
-			test eax, eax
+			test eax, eax                                               
 			jnz allkeys
 	exit_proc_key:
 	movsx eax, bl
-	pop edx
-	pop ecx
-	pop ebx	
+	movsx edx, bh
+	mov dword[bottomd], eax
+	mov dword[topd], edx
+	popad
 	ret
+
 
 move_pad:
 	pushad
-		mov eax, dword[padcoord]
-		mov dword[oldpadcoord], eax
+		mov eax, dword[bottom_pad_coord]
+		mov dword[old_bottom_pad_coord], eax
 		mov ebx, [esp + 20h + 4]
-		add eax, ebx
+		call move_pad_small
+		mov dword[bottom_pad_coord], eax
 
+		mov eax, dword[top_pad_coord]
+		mov dword[old_top_pad_coord], eax
+		mov ebx, [esp + 20h + 8]
+		call move_pad_small
+		mov dword[top_pad_coord], eax
+	popad
+	ret 8
+
+move_pad_small:
+		add eax, ebx
 		xor edx, edx; x for left
         cmp eax, edx
-        jl too_left
-		jmp save_pad_coord
-		too_left:
-			xor eax, eax
+        jge skip_too_left
+			xor eax, eax ; too left
 			jmp save_pad_coord
-
+		skip_too_left:
 		mov ecx, [cwidth] ; x for right column
         dec ecx
         cmp eax, ecx
-        jg too_right
-		jmp save_pad_coord
-		too_right:
-			mov eax, ecx
-			jmp save_pad_coord
+        jle skip_too_right
+			mov eax, ecx; too right
+		skip_too_right:
 		save_pad_coord:
-		mov dword[padcoord], eax
-
-	popad
-    ret 4
+	ret
 
 move_ball:
     pushad
-        call recalc_ballint
-        mov eax, dword[ballxint]
-        mov ebx, dword[ballyint]
-		mov dword[oldballxint], eax
-		mov dword[oldballyint], ebx
-        xor edx, edx ; y for top
-        cmp edx, ebx    	
-        jz change_y_direction
+		fld dword[float_zero] ; ST1
+		fld dword[vx]         ; ST0
+			fcomi ST0, ST1
+		fstp dword[doublebuf]
+		fstp dword[doublebuf]
+		jb check_left_wall
+		check_right_wall:
+			call check_right_wall_proc	
+			jmp vx_if_after
+		check_left_wall:
 
-        mov ecx, [cheight] ; y for bottom row
-        dec ecx
-		dec ecx
+			call check_left_wall_proc
+			jmp vx_if_after
+		vx_if_after:
 
-        cmp ecx, ebx
-        jz change_y_direction
-        jmp skip_change_y_direction
-        change_y_direction: 
-            fld dword[vy] ; ST1
-            fld dword[float_zero]; ST0
-                fsub ST0, ST1 ; now ST0 stores negative of vy
-            fstp dword[vy]
-            fstp dword[doublebuf]
-        skip_change_y_direction:
-        fld dword[vy]
-        fld dword[bally]
-            fadd ST0, ST1
-        fstp dword[bally]
-        fstp dword[vy]
+		fld dword[float_zero] ; ST1
+		fld dword[vy]         ; ST0
+			fcomi ST0, ST1
+		fstp dword[doublebuf]
+		fstp dword[doublebuf]
 
-        xor edx, edx ; x for left
-        cmp edx, eax
-        jz change_x_direction
+		jb check_top_pad
+		check_bottom_pad:
+			call check_bottom_pad_proc
+			jmp vy_if_after
+		check_top_pad:
+			call check_top_pad_proc
+			jmp vy_if_after
+		vy_if_after:
 
-        mov ecx, [cwidth] ; x for right column
-        dec ecx
-
-        cmp ecx, eax
-        jz change_x_direction
-        jmp skip_change_x_direction
-        change_x_direction: 
-            fld dword[vx] ; ST1
-            fld dword[float_zero]; ST0
-                fsub ST0, ST1 ; now ST0 stores negative of vy
-            fstp dword[vx]
-            fstp dword[doublebuf]
-        skip_change_x_direction:
-        fld dword[vx]
-        fld dword[ballx]
-            fadd ST0, ST1
-        fstp dword[ballx]
-        fstp dword[vx]
-
-        ; TODO
     popad
     ret
 
+check_top_pad_proc:
+    pushad
+		call add_vy
+		mov dword[intbuf], 1
+		fild dword[intbuf]
+		fld dword[bally]
+			fcomi ST0, ST1
+			ja skip_cut_top_pad
+				fstp dword[bally]
+				fstp dword[bally]
+					call recalc_ballint
+					xor eax, eax
+					mov ebx, [cwidth]
+					mul ebx
+					mov ebx, dword[ballxint]
+					add eax, ebx
+					mov dx, word[buffer + eax * 4]
+					cmp dx, '~'
+					jnz second_wins
+						push dword[top_pad_coord]
+						call change_vx
+				call negate_vy
+				jmp after_skip_cut_top_pad
+		skip_cut_top_pad:
+			fstp dword[doublebuf]
+			fstp dword[doublebuf]
+		after_skip_cut_top_pad:
+	popad
+	ret
+
+check_bottom_pad_proc:
+	pushad
+		call add_vy
+		mov eax, dword[cheight]
+		dec eax
+		dec eax
+		mov dword[intbuf], eax
+		fild dword[intbuf]
+		fld dword[bally] ; ST0
+			fcomi ST1
+			jb skip_cut_bottom_pad
+				fstp dword[bally]
+				fstp dword[bally] ; bally = cheight - 2
+					call recalc_ballint
+					inc eax
+					mov ebx, [cwidth]
+					mul ebx
+					mov ebx, dword[ballxint]
+					add eax, ebx
+					mov dx, word[buffer + eax * 4]
+					cmp dx, '~'
+					jnz first_wins
+						push dword[bottom_pad_coord]
+						call change_vx
+				call negate_vy ; reverse
+				
+	
+				jmp after_skip_cut_bottom_pad
+			skip_cut_bottom_pad:
+				fstp dword[doublebuf]
+				fstp dword[doublebuf]
+			after_skip_cut_bottom_pad:
+	popad
+	ret
+
+check_left_wall_proc:
+	pushad
+		call add_vx
+		mov dword[intbuf], 0
+		fild dword[intbuf] ; ST1
+		fld dword[ballx]  ; ST0
+			fcomi ST0, ST1
+			ja skip_cut_left_wall
+			    fstp dword[ballx]
+			    fstp dword[ballx] ; ballx = 0
+				call negate_vx
+				jmp after_skip_cut_left_wall
+    	skip_cut_left_wall:
+			fstp dword[doublebuf]
+			fstp dword[doublebuf]
+		after_skip_cut_left_wall:
+
+	popad
+	ret
+
+change_vx:
+	pushad
+		mov eax, dword[esp + 20h + 4]
+		mov ebx, dword[ballxint]
+		sub ebx, eax
+		mov dword[intbuf], ebx
+			fild dword[intbuf]
+			fld dword[coef]
+				fmul ST0, ST1
+				fld dword[vx]
+					fadd ST0, ST1
+	
+					fld dword[float_one]
+						fcomi ST0, ST1
+						ja skip_cut_positive_vx
+						fstp dword[vx]
+						jmp after_cut_vx
+					skip_cut_positive_vx:
+					fstp dword[doublebuf]
+
+					fld dword[float_neg_one]
+						fcomi ST0, ST1
+						ja skip_cut_negative_vx
+						fstp dword[vx]
+						jmp after_cut_vx
+					skip_cut_negative_vx:
+					fstp dword[doublebuf]
+
+					after_cut_vx:
+				fstp dword[vx]
+			fstp dword[intbuf]
+			fstp dword[doublebuf]
+	popad
+	ret 4
+
+add_vy:
+		fld dword[vy]
+		fld dword[bally]
+			fadd ST0, ST1
+		fstp dword[bally]
+		fstp dword[doublebuf]
+	ret
+
+negate_vy:
+	fld dword[vy]
+		fchs
+	fstp dword[vy] ; vx = -vx;
+	ret
+
+check_right_wall_proc:
+	pushad
+		call add_vx
+		mov eax, dword[cwidth]
+		dec eax
+		mov dword[intbuf], eax
+		fild dword[intbuf] ; ST1
+		fld dword[ballx]  ; ST0
+			fcomi ST1
+			jb skip_cut_right_wall
+			    fstp dword[ballx]
+			    fstp dword[ballx] ; ballx = cwidth - 1
+				call negate_vx
+				jmp after_skip_cut_right_wall
+		skip_cut_right_wall:
+			fstp dword[doublebuf]
+			fstp dword[doublebuf]
+		after_skip_cut_right_wall:
+	popad
+	ret
+
+
+negate_vx:
+	fld dword[vx]
+		fchs
+	fstp dword[vx] ; vx = -vx;
+	ret
+
+add_vx:
+		fld dword[vx]
+		fld dword[ballx]
+			fadd ST0, ST1
+		fstp dword[ballx]
+		fstp dword[doublebuf]
+	ret
 
 sleep:
     pushad  
-        push dword 100 ; milliseconds
+        push dword ; milliseconds
         call [__imp__Sleep@4]
     popad
     ret
 
-draw_pad:
+draw_line: ; (int x1, x2, y, char, col)
+	pushad	
+		mov esi, [esp + 20h + 4]
+		mov edi, [esp + 20h + 8]
+		mov ebx, [esp + 20h + 12]
+		mov ax, word[esp + 20h + 16]
+		mov dx, word[esp + 20h + 18]
+		draw_line_loop:		
+			push word dx
+			push word ax
+    		push ebx
+			push esi
+			call draw_char_xy
+			inc esi
+			cmp esi, edi
+			jnz draw_line_loop
+	popad
+	ret 16
+
+draw_pad: ; (oldx, x, y)
     pushad
-        mov edi, [cheight] ; pad y
-        dec edi
+		mov edi, [esp + 20h + 12]
+		mov ecx, [esp + 20h + 4]
+;        mov edi, [cheight] ; pad y
+ ;       dec edi
         mov ebx, [cwidth]
         mov edx, [padwidth]
-;;;;;;;;;;;;;;;;;;;
-        mov ecx, [oldpadcoord]
+        mov ecx, [esp + 20h + 4]
         sub ecx, edx
         cmp ecx, 0
         jg old_skip_zeroing_left
             xor ecx, ecx
         old_skip_zeroing_left:
 
-        mov ebp, [oldpadcoord]
+        mov ebp, [esp + 20h + 4]
         add ebp, edx
         cmp ebp, ebx 
         jl old_skip_cutting_right
             mov ebp, ebx
         old_skip_cutting_right:
-        old_draw_pad_loop:
             push word [attr];
             push word ' '
             push edi
+			push ebp
             push ecx
-            call draw_char_xy
-            inc ecx
-            cmp ecx, ebp
-            jnz old_draw_pad_loop
-
-;;;;;;;;;;;;;;;;;;;
-        mov ecx, [padcoord]
+            call draw_line
+;
+        mov ecx, [esp + 20h + 8]
         sub ecx, edx
         cmp ecx, 0
         jg skip_zeroing_left
             xor ecx, ecx
         skip_zeroing_left:
 
-        mov ebp, [padcoord]
+        mov ebp, [esp + 20h + 8]
         add ebp, edx
         cmp ebp, ebx 
         jl skip_cutting_right
             mov ebp, ebx
         skip_cutting_right:
-        draw_pad_loop:
             push word [pad_attr];
             push word '~'
             push edi
+			push ebp
             push ecx
-            call draw_char_xy
-            inc ecx
-            cmp ecx, ebp
-            jnz draw_pad_loop
-
-
+            call draw_line
     popad
-    ret
+    ret 12
 
 recalc_ballint:
     pushad
@@ -360,8 +553,19 @@ draw_ball:
         push edi ; y
         push ecx ; x
         call draw_char_xy
+
+        call save_old_ballint
     popad
     ret
+
+save_old_ballint:
+	pushad
+		mov eax, dword[ballxint]
+		mov dword[oldballxint], eax
+		mov eax, dword[ballyint]
+		mov dword[oldballyint], eax
+	popad
+	ret
 
 draw_char_xy: ; (int x, int y, char c, color col)
     pushad
@@ -406,7 +610,7 @@ ret
 clean_buffer:
     pushad
         xor ecx, ecx
-        mov eax, 2800
+        mov eax, 2100
         mov dx, word [attr]
         clean_buffer_loop2:
             mov word[buffer + ecx * 4], 32; char
@@ -424,9 +628,6 @@ init_vars:
 ;		mov bx, word[cheight]
 ;		add ax, bx
 ;        mov [COORD_buffer_size], eax
-		call println
-		push dword [COORD_buffer_size]
-		call print_hex
         ;   bottom right top left
         ; 00 18 00 49 00 04 00 04h
 ;		mov ax, word[ctop]
@@ -446,19 +647,12 @@ init_vars:
 ;		shl edx, 10h
 ;		add edx, eax
 ;		mov dword[write_region + 4], edx
-		call println
-		push dword[write_region]
-		call print_hex
-		push dword[write_region + 4]
-		call print_hex
-		call println
-		
 		;jmp exit
-
         ;padcoord
         mov eax, dword[cwidth]
         shr ax, 1
-        mov dword[padcoord], eax
+        mov dword[bottom_pad_coord], eax
+		mov dword[top_pad_coord], eax
     popad
     ret
 
@@ -476,6 +670,13 @@ print_doublebuf:
     push doubleformat
     call [__imp__printf]
     add esp, 0Ch
+    ret
+
+print_float:
+    push dword[doublebuf]
+    push doubleformat
+    call [__imp__printf]
+    add esp, 08h
     ret
 
 init_stdin_stdout:
@@ -500,6 +701,7 @@ section .rdata
     intformat db " %d ",0
     hexformat db " %X ",0
     coordformat db "(%d, %d) ",0
+	score_str db 0Dh, 0Ah, 0Dh, 0Ah, 09h, 09h, 09h, "GAME OVER, Player #%d Wins!", 0Dh, 0Ah, 0Dh, 0Ah, 0
 section .text
 
 print_dot:
@@ -554,5 +756,12 @@ print_hex:
     popad
     ret 4
 
-
+print_score:
+	pushad
+		push dword [esp + 20h + 4]
+		push score_str
+		call [__imp__printf]
+		add esp, 8
+	popad
+	ret 4
 end
