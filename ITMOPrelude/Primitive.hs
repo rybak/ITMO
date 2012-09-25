@@ -86,8 +86,8 @@ natOne = Succ Zero -- 1
 
 -- Сравнивает два натуральных числа
 natCmp :: Nat -> Nat -> Tri
-natCmp = undefined
-natCmp Zero Zero		= EQ
+-- natCmp = undefined
+natCmp Zero Zero			= EQ
 natCmp Zero (Succ _)		= LT
 natCmp (Succ _) Zero		= GT
 natCmp (Succ n) (Succ m)	= natCmp n m
@@ -95,6 +95,7 @@ natCmp (Succ n) (Succ m)	= natCmp n m
 -- n совпадает с m 
 natEq :: Nat -> Nat -> Bool
 natEq Zero     Zero     = True
+--natEq (Succ n) (Succ n) = True 
 natEq Zero     (Succ _) = False
 natEq (Succ _) Zero     = False
 natEq (Succ n) (Succ m) = natEq n m
@@ -115,7 +116,10 @@ Zero     +. m = m
 infixl 6 -.
 -- Вычитание для натуральных чисел
 (-.) :: Nat -> Nat -> Nat
-n -. m = undefined
+--n -. m = undefined
+Zero -. _           = Zero
+(Succ n) -. Zero    = Succ n
+(Succ n) -. (Succ m)= n -. m
 
 infixl 7 *.
 -- Умножение для натуральных чисел
