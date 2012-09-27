@@ -79,13 +79,15 @@ gfilter p (Cons a t) = case p a of
 -- Копировать из списка в результат до первого нарушения предиката
 -- takeWhile (< 3) [1,2,3,4,1,2,3,4] == [1,2]
 takeWhile :: (a -> Bool) -> List a -> List a
-takeWhile = undefined
+takeWhile _ Nil = Nil
+takeWhile p (Cons a t) = if' (p a) (Cons a $ takeWhile p t) Nil
 
 -- Не копировать из списка в результат до первого нарушения предиката,
 -- после чего скопировать все элементы, включая первый нарушивший
 -- dropWhile (< 3) [1,2,3,4,1,2,3,4] == [3,4,1,2,3,4]
 dropWhile :: (a -> Bool) -> List a -> List a
-dropWhile = undefined
+dropWhile _ Nil = Nil
+dropWhile p a@(Cons b t) = if' (p b) (dropWhile p t) a
 
 -- Разбить список по предикату на (takeWhile p xs, dropWhile p xs),
 -- но эффективнее
