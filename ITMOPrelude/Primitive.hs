@@ -143,25 +143,33 @@ gcd n m    = gcd m $ natMod n m
 -- Целые числа
 
 -- Требуется, чтобы представление каждого числа было единственным
-data Int = UNDEFINED deriving (Show,Read)
-
-intZero   = undefined   -- 0
-intOne    = undefined     -- 1
-intNegOne = undefined -- -1
+data Int = Pos Nat | Neg Nat deriving (Show,Read)
+intZero   = Pos Zero-- 0
+intOne    = Pos $ Succ Zero -- natOne -- 1
+intNegOne = Neg Zero-- -1
 
 -- n -> - n
 intNeg :: Int -> Int
-intNeg = undefined
+intNeg intZero        = intZero
+intNeg (Pos (Succ n)) = Neg n 
+intNeg (Neg n)        = Pos $ Succ n 
 
 -- Дальше также как для натуральных
 intCmp :: Int -> Int -> Tri
-intCmp = undefined
+intCmp (Neg _) (Pos _) = LT
+intCmp (Pos _) (Neg _) = GT
+intCmp (Pos n) (Pos m) = natCmp n m
+intCmp (Neg n) (Neg m) = natCmp n m
 
 intEq :: Int -> Int -> Bool
-intEq = undefined
+intEq = case (intCmp n m) of
+    EQ -> True
+    _  -> False 
 
 intLt :: Int -> Int -> Bool
-intLt = undefined
+intLt = case (intCmp n m) of
+    LT -> True
+    _  -> False 
 
 infixl 6 .+., .-.
 -- У меня это единственный страшный терм во всём файле
