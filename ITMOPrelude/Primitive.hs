@@ -127,6 +127,10 @@ pred :: Nat -> Nat
 pred Zero = Zero
 pred (Succ n) = n
 -- Целое и остаток от деления n на m
+
+
+-- divByZero = error "Division by zero"
+
 natDivMod :: Nat -> Nat -> Pair Nat Nat
 natDivMod n m = if' (n `natLt` m) (Pair Zero n)
     (Pair (Succ $ fst predDivMod)(snd predDivMod)) where
@@ -195,15 +199,16 @@ a@(Neg _) .*. b@(Pos _) = b .*. a
 data Rat = Rat Int Nat
 
 ratNeg :: Rat -> Rat
-ratNeg (Rat x y) = Rat (intNeg x) y
+ratNeg (Rat a n) = Rat (intNeg a) n
 
 -- У рациональных ещё есть обратные элементы
 ratInv :: Rat -> Rat
-ratInv = undefined
-
+ratInv (Rat (Pos Zero) _) = undefined
+ratInv (Rat (Pos n) m) = Rat (Pos n) m
+ratInv (p@(Rat (Neg _) _)) = ratNeg $ ratInv $ ratNeg p
 -- Дальше как обычно
 ratCmp :: Rat -> Rat -> Tri
-ratCmp = undefined
+ratCmp (Rat a n) (Rat b m) = intCmp (a .*. (Pos m)) (b .*. (Pos n)) 
 
 ratEq :: Rat -> Rat -> Bool
 ratEq = undefined
