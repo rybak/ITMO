@@ -198,37 +198,49 @@ a@(Neg _) .*. b@(Pos _) = b .*. a
 
 data Rat = Rat Int Nat
 
+ratRed :: Rat -> Rat
+ratRed (Rat (Pos Zero) _) = Rat (Pos Zero) (Succ Zero)
+ratRed (Rat (Pos n) m) = Rat (Pos (n `natDiv` nm)) (m `natDiv` nm) where
+    nm = gcd n m
+ratRed p@(Rat (Neg _) _)  = ratNeg $ ratRed $ ratNeg p
+
 ratNeg :: Rat -> Rat
 ratNeg (Rat a n) = Rat (intNeg a) n
 
 -- У рациональных ещё есть обратные элементы
 ratInv :: Rat -> Rat
 ratInv (Rat (Pos Zero) _) = undefined
-ratInv (Rat (Pos n) m) = Rat (Pos n) m
-ratInv (p@(Rat (Neg _) _)) = ratNeg $ ratInv $ ratNeg p
+ratInv (Rat (Pos n) m) = Rat (Pos m) n
+ratInv p@(Rat (Neg _) _) = ratNeg $ ratInv $ ratNeg p
+
 -- Дальше как обычно
 ratCmp :: Rat -> Rat -> Tri
 ratCmp (Rat a n) (Rat b m) = intCmp (a .*. (Pos m)) (b .*. (Pos n)) 
 
 ratEq :: Rat -> Rat -> Bool
-ratEq = undefined
+ratEq p q = case (ratCmp p q) of
+    EQ -> True
+    _  -> False
 
 ratLt :: Rat -> Rat -> Bool
-ratLt = undefined
+ratLt p q = case (ratCmp p q) of
+    LT -> True
+    _  -> False
 
 infixl 7 %+, %-
 (%+) :: Rat -> Rat -> Rat
-n %+ m = undefined
+(Rat a n) %+ (Rat b m) = ratRed $
+    Rat (a .*. (Pos m) .+. b .*. (Pos n)) (n *. m)
 
 (%-) :: Rat -> Rat -> Rat
-n %- m = n %+ (ratNeg m)
+p %- q = p %+ (ratNeg q)
 
 infixl 7 %*, %/
 (%*) :: Rat -> Rat -> Rat
-n %* m = undefined
+(Rat a n) %* (Rat b m) = ratRed $ Rat (a .*. b) (n *. m) 
 
 (%/) :: Rat -> Rat -> Rat
-n %/ m = n %* (ratInv m)
+p %/ q = p %* (ratInv q)
 
 -------------------------------------------
 -- Операции над функциями.
