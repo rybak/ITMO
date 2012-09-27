@@ -31,23 +31,29 @@ Nil ++ b = b
 
 -- Список без первого элемента
 tail :: List a -> List a
-tail = undefined
+tail Nil = error "no tail in empty list"
+tail (Cons _ t) = t
 
 -- Список без последнего элемента
 init :: List a -> List a
-init = undefined
-
+init Nil = error "no init in empty list"
+init (Cons _ Nil) = Nil
+init (Cons a t)   = Cons a $ init t
 -- Первый элемент
 head :: List a -> a
-head = undefined
+head Nil = error "no head in empty list"
+head (Cons a _) = a
 
 -- Последний элемент
 last :: List a -> a
-last = undefined
+last Nil = error "no last element in empty list"
+last (Cons a Nil) = a
+last (Cons _ t) = last t
 
 -- n первых элементов списка
 take :: Nat -> List a -> List a
-take = undefined
+take Zero _ = Nil
+take (Succ n) (Cons a t) = Cons a (take n t)
 
 -- Список без n первых элементов
 drop :: Nat -> List a -> List a
