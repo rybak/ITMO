@@ -20,11 +20,14 @@ data List a = Nil |  Cons a (List a) deriving (Show,Read)
 
 -- Длина списка
 length :: List a -> Nat
-length = undefined
+length a = f a Zero where
+    f Nil l = l
+    f (Cons _ t) l = f t (Succ l)
 
 -- Склеить два списка за O(length a)
 (++) :: List a -> List a -> List a
-a ++ b = undefined
+Nil ++ b = b
+(Cons a t) ++ b = Cons a $ t ++ b
 
 -- Список без первого элемента
 tail :: List a -> List a
