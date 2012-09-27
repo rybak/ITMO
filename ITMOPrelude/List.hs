@@ -13,7 +13,7 @@ import ITMOPrelude.Primitive
 ---------------------------------------------
 -- Определение
 
-data List a = Nil |  Cons a (List a) deriving (Show,Read)
+data List a = Nil | Cons a (List a) deriving (Show,Read)
 
 ---------------------------------------------
 -- Операции
@@ -92,7 +92,11 @@ dropWhile p a@(Cons b t) = if' (p b) (dropWhile p t) a
 -- Разбить список по предикату на (takeWhile p xs, dropWhile p xs),
 -- но эффективнее
 span :: (a -> Bool) -> List a -> Pair (List a) (List a)
-span p = undefined
+span _ Nil = Pair Nil Nil
+span p l@(Cons a t) = if' (p a)
+    (Pair (Cons a $ fst t') (snd t'))
+    (Pair Nil l) where
+        t' = span p t 
 
 -- Разбить список по предикату на (takeWhile (not . p) xs, dropWhile (not . p) xs),
 -- но эффективнее
