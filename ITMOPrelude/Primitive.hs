@@ -150,7 +150,7 @@ intNegOne = Neg Zero-- -1
 
 -- n -> - n
 intNeg :: Int -> Int
-intNeg intZero        = intZero
+intNeg (Pos Zero)     = intZero
 intNeg (Pos (Succ n)) = Neg n 
 intNeg (Neg n)        = Pos $ Succ n 
 
@@ -162,19 +162,22 @@ intCmp (Pos n) (Pos m) = natCmp n m
 intCmp (Neg n) (Neg m) = natCmp n m
 
 intEq :: Int -> Int -> Bool
-intEq = case (intCmp n m) of
+intEq n m = case (intCmp n m) of
     EQ -> True
     _  -> False 
 
 intLt :: Int -> Int -> Bool
-intLt = case (intCmp n m) of
+intLt n m = case (intCmp n m) of
     LT -> True
     _  -> False 
 
 infixl 6 .+., .-.
 -- У меня это единственный страшный терм во всём файле
 (.+.) :: Int -> Int -> Int
-n .+. m = undefined
+(Pos n) .+. (Pos m) = Pos $ m +. n --  :-)
+(Neg n) .+. (Neg m) = Neg $ Succ $ m +. n
+(Pos n) .+. (Neg m) = if' (m `natLt` n) (Pos $ pred $ n -. m) (Neg $ m -. n)
+a@(Neg _) .+. b@(Pos _) = b .+. a
 
 (.-.) :: Int -> Int -> Int
 n .-. m = n .+. (intNeg m)
