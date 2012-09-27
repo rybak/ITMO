@@ -128,10 +128,9 @@ pred Zero = Zero
 pred (Succ n) = n
 -- Целое и остаток от деления n на m
 natDivMod :: Nat -> Nat -> Pair Nat Nat
-natDivMod n m = case (natCmp n m) of
-    LT -> Pair Zero n
-    _  -> Pair (Succ $ fst predDivMod)(snd predDivMod)
-    where predDivMod = natDivMod (n -. m) m
+natDivMod n m = if' (n `natLt` m) (Pair Zero n)
+    (Pair (Succ $ fst predDivMod)(snd predDivMod)) where
+    predDivMod = natDivMod (n -. m) m
 
 natDiv n = fst . natDivMod n -- Целое
 natMod n = snd . natDivMod n -- Остаток
