@@ -134,7 +134,7 @@ permutations' = undefined
 
 -- Повторяет элемент бесконечное число раз
 repeat :: a -> List a
-repeat = undefined
+repeat a = Cons a $ repeat a
 
 -- Левая свёртка
 -- порождает такое дерево вычислений:
