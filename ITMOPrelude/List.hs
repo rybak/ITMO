@@ -118,7 +118,10 @@ reverse a = f a Nil where
 -- (*) Все подсписки данного списка
 subsequences :: List a -> List (List a)
 subsequences Nil = Cons Nil Nil
-subsequences (Cons x xs) = undefined
+subsequences (Cons a t) = (f a st) ++ st where
+    st = subsequences t
+    f a (Cons b st') = Cons (Cons a b) $ f a st'
+    f a Nil = Nil
 
 -- (*) Все перестановки элементов данного списка
 permutations :: List a -> List (List a)
