@@ -184,7 +184,10 @@ n .-. m = n .+. (intNeg m)
 
 infixl 7 .*.
 (.*.) :: Int -> Int -> Int
-n .*. m = undefined
+(Pos n) .*. (Pos m) = Pos $ n *. m
+(Neg n) .*. (Neg m) = Pos $ (Succ n) *. (Succ m)
+a@(Pos _) .*. b@(Neg _) = intNeg $ a .*. (intNeg b) 
+a@(Neg _) .*. b@(Pos _) = b .*. a
 
 -------------------------------------------
 -- Рациональные числа
