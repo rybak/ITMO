@@ -52,21 +52,29 @@ last (Cons _ t) = last t
 
 -- n первых элементов списка
 take :: Nat -> List a -> List a
-take Zero _ = Nil
-take (Succ n) (Cons a t) = Cons a (take n t)
+take Zero _   = Nil
+take n    Nil = error "nothing to take in empty list"
+take (Succ n) (Cons a t) = Cons a $ take n t
 
 -- Список без n первых элементов
 drop :: Nat -> List a -> List a
-drop = undefined
+drop _ Nil  = Nil
+drop Zero a = a
+drop (Succ n) (Cons a t) = drop n t
 
 -- Оставить в списке только элементы удовлетворяющие p
 filter :: (a -> Bool) -> List a -> List a
-filter p = undefined
+filter p Nil = Nil
+filter p (Cons a t) = if' (p a)
+    (Cons a $ filter p t) (filter p t)
 
 -- Обобщённая версия. Вместо "выбросить/оставить" p
 -- говорит "выбросить/оставить b".
 gfilter :: (a -> Maybe b) -> List a -> List b
-gfilter p = undefined
+gfilter _ Nil = Nil
+gfilter p (Cons a t) = case p a of
+    Nothing -> gfilter p t
+    Just b  -> Cons b $ gfilter p t
 
 -- Копировать из списка в результат до первого нарушения предиката
 -- takeWhile (< 3) [1,2,3,4,1,2,3,4] == [1,2]
