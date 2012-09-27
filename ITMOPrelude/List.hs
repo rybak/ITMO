@@ -101,16 +101,19 @@ span p l@(Cons a t) = if' (p a)
 -- Разбить список по предикату на (takeWhile (not . p) xs, dropWhile (not . p) xs),
 -- но эффективнее
 break :: (a -> Bool) -> List a -> Pair (List a) (List a)
-break = undefined
+break p = span (not . p)
 
 -- n-ый элемент списка (считая с нуля)
 (!!) :: List a -> Nat -> a
 Nil !! n = error "!!: empty list"
-l  !! n = undefined
+(Cons a _) !! Zero = a
+(Cons _ t) !! (Succ n) = t !! n
 
 -- Список задом на перёд
 reverse :: List a -> List a
-reverse = undefined
+reverse a = f a Nil where
+    f Nil a = a
+    f (Cons a t) b = f t $ Cons a b
 
 -- (*) Все подсписки данного списка
 subsequences :: List a -> List (List a)
