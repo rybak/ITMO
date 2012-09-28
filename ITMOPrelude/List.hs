@@ -148,7 +148,8 @@ repeat a = Cons a $ repeat a
 --  / \
 -- z  l!!0
 foldl :: (a -> b -> a) -> a -> List b -> a
-foldl f z l = undefined
+foldl _ s Nil = s
+foldl f s (Cons a t) = foldl (f s a) t
 
 -- Тот же foldl, но в списке оказываются все промежуточные результаты
 -- last (scanl f z xs) == foldl f z xs
