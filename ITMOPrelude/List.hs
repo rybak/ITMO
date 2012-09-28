@@ -149,13 +149,13 @@ repeat a = Cons a $ repeat a
 -- z  l!!0
 foldl :: (a -> b -> a) -> a -> List b -> a
 foldl _ s Nil = s
-foldl f s (Cons a t) = foldl (f s a) t
+foldl f s (Cons a t) = foldl f (f s a) t
 
 -- Тот же foldl, но в списке оказываются все промежуточные результаты
 -- last (scanl f z xs) == foldl f z xs
 scanl :: (a -> b -> a) -> a -> List b -> List a
-scanl = undefined
-
+scanl _ s Nil = Cons s Nil
+scanl f s (Cons a t) = Cons s $ scanl f (f s a) t
 -- Правая свёртка
 -- порождает такое дерево вычислений:
 --    f
@@ -169,12 +169,15 @@ scanl = undefined
 --            z
 --            
 foldr :: (a -> b -> b) -> b -> List a -> b
-foldr f z l = undefined
+foldr _ s Nil = s
+foldr f s (Cons a t) = f a $ foldr f s t 
 
 -- Аналогично
 --  head (scanr f z xs) == foldr f z xs.
 scanr :: (a -> b -> b) -> b -> List a -> List b
-scanr = undefined
+scanr _ s Nil = Cons s Nil
+scanr f s (Cons a t) = Cons (f a (head t')) t' where
+    t' = scanr f s t'
 
 -- Должно завершаться за конечное время
 finiteTimeTest = take (Succ $ Succ $ Succ $ Succ Zero) $ foldr (Cons) Nil $ repeat Zero
