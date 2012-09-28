@@ -205,4 +205,6 @@ zip (Cons a t) (Cons b t') = Cons (Pair a b) $ zip t t'
 
 -- Аналогично, но плющить при помощи функции, а не конструктором Pair
 zipWith :: (a -> b -> c) -> List a -> List b -> List c
-zipWith = undefined
+zipWith _ _ Nil = Nil
+zipWith _ Nil _ = Nil
+zipWith f (Cons a t) (Cons b t') = Cons (f a b) $ zipWith f t t'
