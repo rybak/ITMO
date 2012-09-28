@@ -184,11 +184,12 @@ finiteTimeTest = take (Succ $ Succ $ Succ $ Succ Zero) $ foldr (Cons) Nil $ repe
 
 -- Применяет f к каждому элементу списка
 map :: (a -> b) -> List a -> List b
-map f l = undefined
+map _ Nil = Nil
+map f (Cons a t) = Cons (f a) $ map f t
 
 -- Склеивает список списков в список
 concat :: List (List a) -> List a
-concat = undefined
+concat a = foldr (++) a Nil
 
 -- Эквивалент (concat . map), но эффективнее
 concatMap :: (a -> List b) -> List a -> List b
