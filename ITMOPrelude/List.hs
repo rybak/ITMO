@@ -177,7 +177,7 @@ foldr f s (Cons a t) = f a $ foldr f s t
 scanr :: (a -> b -> b) -> b -> List a -> List b
 scanr _ s Nil = Cons s Nil
 scanr f s (Cons a t) = Cons (f a (head t')) t' where
-    t' = scanr f s t'
+    t' = scanr f s t
 
 -- Должно завершаться за конечное время
 finiteTimeTest = take (Succ $ Succ $ Succ $ Succ Zero) $ foldr (Cons) Nil $ repeat Zero
