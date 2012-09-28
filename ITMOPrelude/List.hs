@@ -189,15 +189,19 @@ map f (Cons a t) = Cons (f a) $ map f t
 
 -- Склеивает список списков в список
 concat :: List (List a) -> List a
-concat a = foldr (++) a Nil
+concat a = foldr (++) Nil a
 
 -- Эквивалент (concat . map), но эффективнее
 concatMap :: (a -> List b) -> List a -> List b
-concatMap = undefined
+concatMap _ Nil = Nil
+concatMap f (Cons a t) = (f a) ++ (concatMap f t)
 
 -- Сплющить два списка в список пар длинны min (length a, length b)
 zip :: List a -> List b -> List (Pair a b)
-zip a b = undefined
+zip _ Nil = Nil
+zip Nil _ = Nil
+zip (Cons a t) (Cons b t') = Cons (Pair a b) $ zip t t'
+
 
 -- Аналогично, но плющить при помощи функции, а не конструктором Pair
 zipWith :: (a -> b -> c) -> List a -> List b -> List c
