@@ -17,7 +17,7 @@ insertRoot a = Node a Leaf
 insertLeft :: a -> Tree a -> Tree a
 insertLeft a Leaf = Node a Leaf Leaf
 insertLeft a (Node p left right) = Node p (insertLeft a left) right
-
+ 
 insertRight :: a -> Tree a -> Tree a
 insertRight a Leaf = Node a Leaf Leaf
 insertRight a (Node p left right) = Node p left (insertRight a right)
@@ -31,3 +31,7 @@ turnRight Node m (Node n left c) r = (Node n l (Node m c r))
 treeMap :: (a -> b) -> Tree a -> Tree b
 treeMap _ Leaf = Leaf
 treeMap f (Node a l r) = Node (f a) (treeMap f l) (treeMap f r)
+
+treeFoldr :: (a -> b -> a -> c) -> a -> Tree b -> c
+treeFoldr _ a Leaf = a
+treeFoldr f a (Node b l r) = f (treeFoldr f a l) b (treeFoldr f a r)
