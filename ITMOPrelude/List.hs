@@ -125,8 +125,13 @@ subsequences (Cons a t) = (f a st) ++ st where
 
 -- (*) Все перестановки элементов данного списка
 permutations :: List a -> List (List a)
-permutations = undefined
-
+permutations Nil = Cons Nil Nil
+permutations (Cons a t) = i a $ permutations t where
+    i a Nil = Nil
+    i a (Cons l ls) = (i' a l) ++ (i a ls) where
+        i' a Nil = Cons (Cons a Nil) Nil
+        i' a (Cons b t) = (Cons (Cons a (Cons b t)) Nil) ++
+            map (Cons b) (i' a t) 
 -- (*) Если можете. Все перестановки элементов данного списка
 -- другим способом
 permutations' :: List a -> List (List a)
@@ -176,7 +181,7 @@ foldr f s (Cons a t) = f a $ foldr f s t
 --  head (scanr f z xs) == foldr f z xs.
 scanr :: (a -> b -> b) -> b -> List a -> List b
 scanr _ s Nil = Cons s Nil
-scanr f s (Cons a t) = Cons (f a (head t')) t' where
+scanr f s (Cons a t) = Cons (f a $ head t') t' where
     t' = scanr f s t
 
 -- Должно завершаться за конечное время
@@ -189,7 +194,7 @@ map f (Cons a t) = Cons (f a) $ map f t
 
 -- Склеивает список списков в список
 concat :: List (List a) -> List a
-concat a = foldr (++) Nil a
+concat = foldr (++) Nil
 
 -- Эквивалент (concat . map), но эффективнее
 concatMap :: (a -> List b) -> List a -> List b
