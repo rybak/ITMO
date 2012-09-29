@@ -14,10 +14,20 @@ emptyTree = Leaf
 insertRoot :: a -> Tree a -> Tree a
 insertRoot a = Node a Leaf
 
-addLeft :: a -> Tree a -> Tree a
-addLeft a Leaf = Node a Leaf Leaf
-addLeft a (Node p left right) = Node p (addLeft a left) right
+insertLeft :: a -> Tree a -> Tree a
+insertLeft a Leaf = Node a Leaf Leaf
+insertLeft a (Node p left right) = Node p (insertLeft a left) right
 
-addRight :: a -> Tree a -> Tree a
-addRight a Leaf = Node a Leaf Leaf
-addRight a (Node p left right) = Node p left (addRight a right)
+insertRight :: a -> Tree a -> Tree a
+insertRight a Leaf = Node a Leaf Leaf
+insertRight a (Node p left right) = Node p left (insertRight a right)
+
+turnLeft :: Tree a -> Tree a
+turnLeft (Node n l (Node m c r)) = Node m (Node n left c) r
+
+turnRight :: Tree a -> Tree a
+turnRight Node m (Node n left c) r = (Node n l (Node m c r))
+
+treeMap :: (a -> b) -> Tree a -> Tree b
+treeMap _ Leaf = Leaf
+treeMap f (Node a l r) = Node (f a) (treeMap f l) (treeMap f r)
