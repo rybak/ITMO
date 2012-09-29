@@ -127,8 +127,10 @@ subsequences (Cons a t) = (f a st) ++ st where
 permutations :: List a -> List (List a)
 permutations Nil = Cons Nil Nil
 permutations (Cons a t) = i a $ permutations t where
+    -- insertInLists
     i a Nil = Nil
     i a (Cons l ls) = (i' a l) ++ (i a ls) where
+        -- insertInList
         i' a Nil = Cons (Cons a Nil) Nil
         i' a (Cons b t) = (Cons (Cons a (Cons b t)) Nil) ++
             map (Cons b) (i' a t) 
