@@ -3,6 +3,7 @@ shopt -s dotglob nocaseglob
 
 d="."
 n="*"
+tset=false
 debug=false
 
 if [ $# -gt 0 ]; then
@@ -17,8 +18,6 @@ fi
 
 while [ $# -gt 0 ]
 do
-    if [ $debug = true ]; then echo -e "1 $#";
-    fi
     case "$1" in
     
     -iname) n=$2
@@ -26,7 +25,7 @@ do
             ;;
     -type)  t=$2
             shift 2
-            nc=false
+            tset=true
             ;;
     esac
 done
@@ -36,29 +35,29 @@ function searchw {
     wd=${wd/%\//}
     search $wd $2
 }
-deft="d"
+defaultt="d"
 #echo "iname=$n"
 function search {
     wd=$1
-    if [ $debug = true ]; then echo "search '$1' '$2'";fi
-    t="-${2:-$deft}"
-    if [ $debug == true ]; then echo -e "\t1 t=$t";fi
+    t="-${2:-$defaultt}"
     if [ $t $wd ]; then
         fn=${wd##*/}
-        if [ $debug == true ]; then echo -e "\t2 fn=$fn";fi
-        if [[ "${fn,,}" == ${n,,} ]]; then
+        if [[ ${fn,,} == ${n,,} ]]; then
             echo $wd
         fi
     fi
 
+    other=$defaultt
+    if [ $tset = false ]; then other="-f"; fi
+
     for d in $wd/*
     do
-        if [ $t $d ] && [ ! -d $d ]; then
+        if [ $other $d ] && [ ! -d $d ]; then
              fn=${d##*/}
-             if [[ "${fn,,}" == ${n,,} ]]; then
+             if [[ ${fn,,} == ${n,,} ]]; then
                 echo $d
              fi
-        fi        
+        fi
     done
 
     for nd in $wd/*
