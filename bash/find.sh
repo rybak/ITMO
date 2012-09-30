@@ -3,14 +3,22 @@ shopt -s dotglob nocaseglob
 
 d="."
 n="*"
+debug=false
 
 if [ $# -gt 0 ]; then
     d=$1
     shift
 fi
 
+if [ ! -d $d ] && [ ! -f $d ]; then
+    echo "$d is not a directory"
+    exit 1
+fi
+
 while [ $# -gt 0 ]
 do
+    if [ $debug = true ]; then echo -e "1 $#";
+    fi
     case "$1" in
     
     -iname) n=$2
@@ -30,15 +38,14 @@ function searchw {
 }
 deft="d"
 #echo "iname=$n"
-
 function search {
     wd=$1
-#    echo "search '$1' '$2'"
+    if [ $debug = true ]; then echo "search '$1' '$2'";fi
     t="-${2:-$deft}"
-#    echo -e "\tt=$t"
+    if [ $debug == true ]; then echo -e "\t1 t=$t";fi
     if [ $t $wd ]; then
         fn=${wd##*/}
-#        echo -e "\t1 fn=$fn"
+        if [ $debug == true ]; then echo -e "\t2 fn=$fn";fi
         if [[ "${fn,,}" == ${n,,} ]]; then
             echo $wd
         fi
@@ -46,7 +53,7 @@ function search {
 
     for d in $wd/*
     do
-        if [ $t $d ]; then
+        if [ $t $d ] && [ ! -d $d ]; then
              fn=${d##*/}
              if [[ "${fn,,}" == ${n,,} ]]; then
                 echo $d
@@ -54,10 +61,10 @@ function search {
         fi        
     done
 
-    for d in $wd/*
+    for nd in $wd/*
     do
-        if [ -d d ]; then
-            search $d $2
+        if [ -d $nd ]; then
+            search $nd $2
         fi
     done
 }
