@@ -2,7 +2,6 @@
 
 d="."
 n="*"
-debug=false
 
 if [ $# -gt 0 ]; then
     d=$1
@@ -32,9 +31,10 @@ function searchw {
     wd=${wd/%\//}
     search $wd $2
 }
+
 td="d"
 tf="f"
-#echo "iname=$n"
+
 function search {
     wd=$1
     t="-${2:-$td}"
