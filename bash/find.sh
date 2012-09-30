@@ -1,9 +1,7 @@
 #!/bin/bash
-shopt -s dotglob nocaseglob
 
 d="."
 n="*"
-tset=false
 debug=false
 
 if [ $# -gt 0 ]; then
@@ -25,7 +23,6 @@ do
             ;;
     -type)  t=$2
             shift 2
-            tset=true
             ;;
     esac
 done
@@ -35,11 +32,13 @@ function searchw {
     wd=${wd/%\//}
     search $wd $2
 }
-defaultt="d"
+td="d"
+tf="f"
 #echo "iname=$n"
 function search {
     wd=$1
-    t="-${2:-$defaultt}"
+    t="-${2:-$td}"
+
     if [ $t $wd ]; then
         fn=${wd##*/}
         if [[ ${fn,,} == ${n,,} ]]; then
@@ -47,7 +46,7 @@ function search {
         fi
     fi
 
-    if [ $tset = false ]; then t="-f"; fi
+    t="-${2:-$tf}"
 
     for f in $wd/*
     do
