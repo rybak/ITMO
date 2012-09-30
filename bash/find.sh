@@ -47,15 +47,14 @@ function search {
         fi
     fi
 
-    other=$defaultt
-    if [ $tset = false ]; then other="-f"; fi
+    if [ $tset = false ]; then t="-f"; fi
 
-    for d in $wd/*
+    for f in $wd/*
     do
-        if [ $other $d ] && [ ! -d $d ]; then
-             fn=${d##*/}
+        if  [ $t $f ] && [ ! -d $f ]; then
+             fn=${f##*/}
              if [[ ${fn,,} == ${n,,} ]]; then
-                echo $d
+                echo $f
              fi
         fi
     done
