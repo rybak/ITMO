@@ -48,15 +48,17 @@ function search {
 
     t="-${2:-$tf}"
 
-    for f in $wd/*
-    do
-        if  [ $t $f ] && [ ! -d $f ]; then
-             fn=${f##*/}
-             if [[ ${fn,,} == ${n,,} ]]; then
-                echo $f
-             fi
-        fi
-    done
+    if [ $t == "-f" ]; then
+        for f in $wd/*
+        do
+            if  [ $t $f ] && [ ! -d $f ]; then
+                fn=${f##*/}
+                if [[ ${fn,,} == ${n,,} ]]; then
+                    echo $f
+                fi
+            fi
+        done
+    fi
 
     for nd in $wd/*
     do
