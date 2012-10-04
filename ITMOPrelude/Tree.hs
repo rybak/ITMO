@@ -3,9 +3,9 @@ module ITMOPrelude.Tree where
 
 import Prelude (Show,Read,error)
 import ITMOPrelude.List
+import ITMOPrelude.Primitive
 
-
-data Tree a = Leaf | Node a (Tree a) (Tree a)
+data Tree a = Leaf | Node a (Tree a) (Tree a) deriving (Show, Read)
 
 
 emptyTree :: Tree a
