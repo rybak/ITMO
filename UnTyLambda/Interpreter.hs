@@ -48,6 +48,7 @@ wh, no, wa, sa :: Integer -> Term -> Term
 
 -- Редукция аппликативным порядком
 sa 0 t = error $ "Too long sequence at [" ++ show t ++ "]"
+sa n v@(Var Variable) = v
 sa n t = undefined
 
 -- Нормализация нормальным порядком
