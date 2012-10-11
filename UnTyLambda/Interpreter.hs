@@ -10,7 +10,7 @@ module UnTyLambda.Interpreter where
 -- использовать обычную Prelude
 import Prelude hiding (catch)
 import Control.Exception
-
+import Data.List
 ------------------------------------------------------------
 -- Определение дататайпа для нетипизированной лямбды
 type Variable = String
@@ -26,7 +26,7 @@ data Term = Var Variable | Lam Variable Term | App Term Term deriving (Show,Read
 
 free (Var v)    = [ v ]
 free (Lam v t)  = filter (/= v) . free $ t
-free (App t t') = (free t) ++ (free t')
+free (App t t') = (free t) `union` (free t')
 
 subst :: Term -> Variable -> Term -> Term
 subst t@(Var v)   var what = if v == var then what else t
@@ -35,6 +35,10 @@ subst (App t t')  var what = App (subst t var what) (subst t' var what)
 
 newname fv = head . filter (not . flip elem fv) . iterate ('_':)
 
+renameVars :: [Variable] -> Term -> Term
+renameVars vs (Var v) = Var $ newname vs v
+renameVars vs (Lam x t) = let x' = newname (vs `union` free t) x in Lam x' $ subst t x (Var x')
+renameVars vs (App a b) = App (renameVars vs a) (renameVars vs b)
 --- ...
 
 ------------------------------------------------------------
@@ -46,13 +50,43 @@ newname fv = head . filter (not . flip elem fv) . iterate ('_':)
 
 wh, no, wa, sa :: Integer -> Term -> Term
 
+reduceError t = error $ "Too long sequence at [" ++ show t ++ "]"
+
 -- Редукция аппликативным порядком
-sa 0 t = error $ "Too long sequence at [" ++ show t ++ "]"
-sa n v@(Var Variable) = v
-sa n t = undefined
+sa 0 t = reduceError t 
+sa n v@(Var _) = v
+sa n t = if wasReduced
+            then sa (n-1) t'
+            else t
+    where
+    (wasReduced, t') = saTryReduce t
+saTryReduce :: Term -> (Bool, Term)
+saTryReduce t@(App f x) = if xreduced
+    then (True, App f x')
+    else case f of
+        (Lam a b) ->
+            (True, subst (renameVars (free x) $ snd $ saTryReduce b) a x)
+        _         -> (freduced, App f' x)
+    where
+        (xreduced, x') = saTryReduce x
+        (freduced, f') = saTryReduce f
 
 -- Нормализация нормальным порядком
-no = undefined
+no 0 t = reduceError t
+no n v@(Var _) = v
+no n t = if wasReduced
+            then no (n-1) t'
+            else t
+    where
+    (wasReduced, t') = noTryReduce t
+noTryReduce :: Term -> (Bool, Term)
+noTryReduce (Lam a b) = (breduced, Lam a b')
+    where (breduced, b') = noTryReduce b
+noTryReduce (App (Lam a b) x) = (True, subst (renameVars (free x) b) a x)
+noTryReduce (App f x) = (freduced || xreduced, App f' x')
+    where
+        (freduced, f') = noTryReduce f
+        (xreduced, x') = noTryReduce x
 
 -- Редукция в слабую головную нормальную форму
 wh = undefined
