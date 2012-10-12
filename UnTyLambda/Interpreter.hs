@@ -49,11 +49,9 @@ renameVars vs (App a b) = App (renameVars vs a) (renameVars vs b)
 -- то следует бросать error, тестер его поймает):
 
 wh, no, wa, sa :: Integer -> Term -> Term
-
+wh', no', wa', sa' :: Term -> (Bool, Term)
 reduceError t = error $ "Too long sequence at [" ++ show t ++ "]"
-
 reduceWith :: (Term -> (Bool, Term)) -> Integer -> Term -> Term
-
 reduceWith manner 0 t = reduceError t
 reduceWith manner steps term =
     if wasReduced
@@ -64,9 +62,6 @@ reduceWith manner steps term =
 
 -- Редукция аппликативным порядком
 sa = reduceWith sa'
-
-sa' :: Term -> (Bool, Term)
--- ***
 sa' t@(App f x) = if xreduced
     then (True, App f x')
     else case f of
@@ -76,11 +71,9 @@ sa' t@(App f x) = if xreduced
     where
         (xreduced, x') = sa' x
         (freduced, f') = sa' f
--- ***
 sa' t = (False, t)
 
 -- Редукция аппликации в no и wh
-
 reduceApp (App (Lam a b) x) = (True, subst (renameVars (free x) b) a x)
 reduceApp (App f x) = (freduced || xreduced, App f' x')
     where
@@ -89,19 +82,15 @@ reduceApp (App f x) = (freduced || xreduced, App f' x')
 
 -- Нормализация нормальным порядком
 no = reduceWith no'
-
 no' :: Term -> (Bool, Term)
--- ***
 no' (Lam a b) = (breduced, Lam a b')
     where (breduced, b') = no' b
--- ***
 no' a@(App _ _) = reduceApp a
 no' t = (False, t)
 
 -- Редукция в слабую головную нормальную форму
 -- (вроде то же, что и no, только без wh (Lam a b)
 wh = reduceWith wh'
-
 wh' :: Term -> (Bool, Term)
 wh' a@(App _ _) = reduceApp a
 wh' t = (False, t)
@@ -109,12 +98,9 @@ wh' t = (False, t)
 -- (*) (не обязательно) Редукция "слабым" аппликативным порядком.
 -- Отличается от обычного аппликативного тем, что не лезет внутрь
 -- лямбд и правые части аппликаций, когда это возможно.
-
 wa = reduceWith wa'
-
 -- не уверен насчет wa'
 wa' :: Term -> (Bool, Term)
--- ***
 wa' (App f@(Lam a b) x) =
     if xreduced
         then (True, App f x')
@@ -127,7 +113,6 @@ wa' (App f x) =
     where
         (freduced, f') = wa' f
         (xreduced, x') = wa' x
--- ***
 wa' t = (False, t)
 
 -- Замечание: cкорость работы вашего интерпретатора специально не оценивается,
