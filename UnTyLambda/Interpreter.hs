@@ -33,7 +33,7 @@ subst t@(Var v)   var what = if v == var then what else t
 subst t@(Lam v b) var what = if v == var then t else Lam v (subst b var what)
 subst (App t t')  var what = App (subst t var what) (subst t' var what)
 
-newname fv = head . filter (not . flip elem fv) . iterate ('_':)
+newname fv = head . filter (not . flip elem fv) . iterate (++ "\'")
 
 renameVars :: [Variable] -> Term -> Term
 renameVars vs (Var v) = Var $ newname vs v
@@ -54,31 +54,32 @@ reduceError t = error $ "Too long sequence at [" ++ show t ++ "]"
 
 -- Редукция аппликативным порядком
 sa 0 t = reduceError t 
-sa n v@(Var _) = v
 sa n t = if wasReduced
             then sa (n-1) t'
             else t
     where
     (wasReduced, t') = saTryReduce t
+
 saTryReduce :: Term -> (Bool, Term)
 saTryReduce t@(App f x) = if xreduced
     then (True, App f x')
     else case f of
-        (Lam a b) ->
-            (True, subst (renameVars (free x) $ snd $ saTryReduce b) a x)
+        (Lam a b) -> (True, subst b' a x) where
+            b' = renameVars (free x) $ snd $ saTryReduce b
         _         -> (freduced, App f' x)
     where
         (xreduced, x') = saTryReduce x
         (freduced, f') = saTryReduce f
+saTryReduce t = (False, t)
 
 -- Нормализация нормальным порядком
 no 0 t = reduceError t
-no n v@(Var _) = v
 no n t = if wasReduced
             then no (n-1) t'
             else t
     where
     (wasReduced, t') = noTryReduce t
+
 noTryReduce :: Term -> (Bool, Term)
 noTryReduce (Lam a b) = (breduced, Lam a b')
     where (breduced, b') = noTryReduce b
@@ -87,9 +88,23 @@ noTryReduce (App f x) = (freduced || xreduced, App f' x')
     where
         (freduced, f') = noTryReduce f
         (xreduced, x') = noTryReduce x
+noTryReduce t = (False, t)
 
 -- Редукция в слабую головную нормальную форму
-wh = undefined
+wh 0 t = reduceError t
+wh n t = if wasReduced
+            then wh (n-1) t'
+            else t
+    where
+    (wasReduced, t') = whTryReduce t
+
+whTryReduce :: Term -> (Bool, Term)
+whTryReduce (App (Lam a b) x) = (True, subst (renameVars (free x) b) a x)
+whTryReduce (App f x) = (freduced || xreduced, App f' x')
+    where
+        (freduced, f') = whTryReduce f
+        (xreduced, x') = whTryReduce x
+whTryReduce t = (False, t)
 
 -- (*) (не обязательно) Редукция "слабым" аппликативным порядком.
 -- Отличается от обычного аппликативного тем, что не лезет внутрь
