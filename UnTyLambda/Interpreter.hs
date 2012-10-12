@@ -52,64 +52,85 @@ wh, no, wa, sa :: Integer -> Term -> Term
 
 reduceError t = error $ "Too long sequence at [" ++ show t ++ "]"
 
--- Редукция аппликативным порядком
-sa 0 t = reduceError t 
-sa n t = if wasReduced
-            then sa (n-1) t'
-            else t
-    where
-    (wasReduced, t') = saTryReduce t
+reduceWith :: (Term -> (Bool, Term)) -> Integer -> Term -> Term
 
-saTryReduce :: Term -> (Bool, Term)
-saTryReduce t@(App f x) = if xreduced
+reduceWith manner 0 t = reduceError t
+reduceWith manner steps term =
+    if wasReduced
+        then reduceWith manner (steps-1) term'
+        else term
+    where
+    (wasReduced, term') = manner term
+
+-- Редукция аппликативным порядком
+sa = reduceWith sa'
+
+sa' :: Term -> (Bool, Term)
+-- ***
+sa' t@(App f x) = if xreduced
     then (True, App f x')
     else case f of
         (Lam a b) -> (True, subst b' a x) where
-            b' = renameVars (free x) $ snd $ saTryReduce b
+            b' = renameVars (free x) $ snd $ sa' b
         _         -> (freduced, App f' x)
     where
-        (xreduced, x') = saTryReduce x
-        (freduced, f') = saTryReduce f
-saTryReduce t = (False, t)
+        (xreduced, x') = sa' x
+        (freduced, f') = sa' f
+-- ***
+sa' t = (False, t)
+
+-- Редукция аппликации в no и wh
+
+reduceApp (App (Lam a b) x) = (True, subst (renameVars (free x) b) a x)
+reduceApp (App f x) = (freduced || xreduced, App f' x')
+    where
+        (freduced, f') = no' f
+        (xreduced, x') = no' x
 
 -- Нормализация нормальным порядком
-no 0 t = reduceError t
-no n t = if wasReduced
-            then no (n-1) t'
-            else t
-    where
-    (wasReduced, t') = noTryReduce t
+no = reduceWith no'
 
-noTryReduce :: Term -> (Bool, Term)
-noTryReduce (Lam a b) = (breduced, Lam a b')
-    where (breduced, b') = noTryReduce b
-noTryReduce (App (Lam a b) x) = (True, subst (renameVars (free x) b) a x)
-noTryReduce (App f x) = (freduced || xreduced, App f' x')
-    where
-        (freduced, f') = noTryReduce f
-        (xreduced, x') = noTryReduce x
-noTryReduce t = (False, t)
+no' :: Term -> (Bool, Term)
+-- ***
+no' (Lam a b) = (breduced, Lam a b')
+    where (breduced, b') = no' b
+-- ***
+no' a@(App _ _) = reduceApp a
+no' t = (False, t)
 
 -- Редукция в слабую головную нормальную форму
-wh 0 t = reduceError t
-wh n t = if wasReduced
-            then wh (n-1) t'
-            else t
-    where
-    (wasReduced, t') = whTryReduce t
+-- (вроде то же, что и no, только без wh (Lam a b)
+wh = reduceWith wh'
 
-whTryReduce :: Term -> (Bool, Term)
-whTryReduce (App (Lam a b) x) = (True, subst (renameVars (free x) b) a x)
-whTryReduce (App f x) = (freduced || xreduced, App f' x')
-    where
-        (freduced, f') = whTryReduce f
-        (xreduced, x') = whTryReduce x
-whTryReduce t = (False, t)
+wh' :: Term -> (Bool, Term)
+wh' a@(App _ _) = reduceApp a
+wh' t = (False, t)
 
 -- (*) (не обязательно) Редукция "слабым" аппликативным порядком.
 -- Отличается от обычного аппликативного тем, что не лезет внутрь
 -- лямбд и правые части аппликаций, когда это возможно.
-wa = undefined
+
+wa = reduceWith wa'
+
+-- не уверен насчет wa'
+wa' :: Term -> (Bool, Term)
+wa' (Lam a b) = (breduced, Lam a b')
+    where (breduced, b') = wa' b
+-- ***
+wa' (App f@(Lam a b) x) =
+    if xreduced
+        then (True, App f x')
+        else (True, subst (renameVars (free x) b) a x)
+    where (xreduced, x') = wa' x
+wa' (App f x) =
+    if freduced
+        then (True, App f' x)
+        else (xreduced, App f x')
+    where
+        (freduced, f') = wa' f
+        (xreduced, x') = wa' x
+-- ***
+wa' t = (False, t)
 
 -- Замечание: cкорость работы вашего интерпретатора специально не оценивается,
 -- потому можно использовать свой изоморфный (с точностью до альфа-конверсии)
