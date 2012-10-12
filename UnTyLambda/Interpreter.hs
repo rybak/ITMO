@@ -114,8 +114,6 @@ wa = reduceWith wa'
 
 -- не уверен насчет wa'
 wa' :: Term -> (Bool, Term)
-wa' (Lam a b) = (breduced, Lam a b')
-    where (breduced, b') = wa' b
 -- ***
 wa' (App f@(Lam a b) x) =
     if xreduced
