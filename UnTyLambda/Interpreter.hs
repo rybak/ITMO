@@ -82,7 +82,6 @@ reduceApp (App f x) = (freduced || xreduced, App f' x')
 
 -- Нормализация нормальным порядком
 no = reduceWith no'
-no' :: Term -> (Bool, Term)
 no' (Lam a b) = (breduced, Lam a b')
     where (breduced, b') = no' b
 no' a@(App _ _) = reduceApp a
@@ -91,7 +90,6 @@ no' t = (False, t)
 -- Редукция в слабую головную нормальную форму
 -- (вроде то же, что и no, только без wh (Lam a b)
 wh = reduceWith wh'
-wh' :: Term -> (Bool, Term)
 wh' a@(App _ _) = reduceApp a
 wh' t = (False, t)
 
@@ -100,7 +98,6 @@ wh' t = (False, t)
 -- лямбд и правые части аппликаций, когда это возможно.
 wa = reduceWith wa'
 -- не уверен насчет wa'
-wa' :: Term -> (Bool, Term)
 wa' (App f@(Lam a b) x) =
     if xreduced
         then (True, App f x')
