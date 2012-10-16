@@ -2,43 +2,52 @@ module ITMOPrelude.Algebra where
 
 import Prelude (Show,Read,show)
 import ITMOPrelude.Primitive
+import ITMOPrelude.List
 
 class Monoid a where
-    mneutral :: a
-    moperation :: a -> a -> a
+    mempty :: a
+    mappend :: a -> a -> a
 
 instance Monoid Unit where
-    mneutral = Unit
-    moperation _ _ = Unit
+    mempty = Unit
+    mappend _ _ = Unit
+
+instance Monoid Tri where
+    mempty = EQ
+    EQ `mappend` a = a
+    LT `mappend` _ = LT
+    GT `mappend` _ = GT
 
 instance Monoid Nat where
-    mneutral = Zero
-    moperation = (+.)
+    mempty = Zero
+    mappend = (+.)
 
 instance Monoid Int where
-    mneutral = Pos $ Succ Zero
-    moperation = (.*.)
+    mempty = Pos $ Zero
+    mappend = (.+.)
 
 instance Monoid Rat where
-    mneutral = Rat (Pos $ Zero) (Succ Zero)
-    moperation = (%+)
+    mempty = Rat (Pos $ Succ Zero) (Succ Zero)
+    mappend = (%*)
 
-class Group a where
-    gneutral :: a
+instance Monoid (List a) where
+    mempty = Nil
+    mappend = (++)
+
+instance Monoid a => Monoid (Maybe a) where
+    mempty = Nothing
+    Nothing `mappend` a = a
+    a `mappend` Nothing = a
+    (Just a) `mappend` (Just b) = Just $ a `mappend` b
+
+class Monoid a => Group a where
     gneg :: a -> a
-    goperation :: a -> a -> a
 
 instance Group Unit where
-    gneutral = Unit
     gneg _ = Unit
-    goperation _ _ = Unit
 
 instance Group Int where
-    gneutral = intZero
     gneg = intNeg
-    goperation = (.+.)
 
 instance Group Rat where
-    gneutral = Rat (Pos $ Succ Zero) (Succ Zero)
     gneg = ratInv
-    goperation = (%*)
