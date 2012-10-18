@@ -9,6 +9,10 @@ class Category g where
     id :: g a a
     composition :: g b c -> g a b -> g a c
 
+instance Category (->) where
+    id a = a
+    composition = (.)
+
 class Functor f where
     fmap :: (a -> b) -> f a -> f b
 
