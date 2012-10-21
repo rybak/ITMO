@@ -61,8 +61,20 @@ class (Monad m) => (MonadJoinFmap m) where
     join :: m (m a) -> m a
     join = flip (>>=) id
 
+class (MonadFish m) => (Monad2 m) where
+    bind2 :: m a -> (a -> m b) -> m b
+    bind2 m f = (>=>) id f m
+
 class (MonadFish m) => (MonadJoinFmap2 m) where
     monadfmap2 :: (a -> b) -> m a -> m b
     monadfmap2 f = id >=> (return . f)
---    join2 :: m (m a) -> m a
---    join = 
+    join2 :: m (m a) -> m a
+    join2 = id >=> id
+
+class (MonadJoinFmap m) => (MonadFish2 m) where
+    fish :: (a -> m b) -> (b -> m c) -> a -> m c
+    fish f g a = join $ monadfmap g $ f a
+
+class (MonadJoinFmap m) => (Monad3 m) where
+    bind3 :: m a -> (a -> m b) -> m b
+    bind3 m f = join $ monadfmap f m
