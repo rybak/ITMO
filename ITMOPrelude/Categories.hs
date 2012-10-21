@@ -1,6 +1,6 @@
 module ITMOPrelude.Categories where
 
-import Prelude (Show,Read,show)
+import Prelude (Show,Read,show,flip)
 import ITMOPrelude.Primitive
 import ITMOPrelude.List
 import ITMOPrelude.Tree
@@ -18,6 +18,10 @@ class Functor f where
 
 instance Functor (Pair a) where
     fmap f (Pair x y) = Pair x $ f y
+
+instance Functor (Either a) where
+    fmap f (Left a) = Left a
+    fmap f (Right a) = Right (f a)
 
 instance Functor Maybe where
     fmap f Nothing = Nothing
@@ -42,4 +46,23 @@ instance Monad List where
     return a = Cons a Nil
     xs >>= f = concat $ map f xs
 
+instance Monad (Either a) where
+    return a = Right a
+    (Left a) >>= f = Left a
+    (Right a) >>= f = f a
 
+class (Monad m) => (MonadFish m) where
+    (>=>) :: (a -> m b) -> (b -> m c) -> a -> m c
+    (>=>) f g a = (return a) >>= f >>= g
+
+class (Monad m) => (MonadJoinFmap m) where
+    monadfmap :: (a -> b) -> m a -> m b
+    monadfmap f m = m >>= (return . f)
+    join :: m (m a) -> m a
+    join = flip (>>=) id
+
+class (MonadFish m) => (MonadJoinFmap2 m) where
+    monadfmap2 :: (a -> b) -> m a -> m b
+    monadfmap2 f = id >=> (return . f)
+--    join2 :: m (m a) -> m a
+--    join = 
