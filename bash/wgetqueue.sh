@@ -14,11 +14,6 @@ function daemonerror {
 }
 
 function daemon {
-    if [[ -f "$DAEMON" ]]; then
-        daemonerror "Error: Daemon is already running"
-        exit 255
-    fi
-    echo $$ > "$DAEMON"
     trap "" SIGHUP
     while true
     do
@@ -76,7 +71,16 @@ if [[ $1 == "-k" ]]; then
 fi
 
 if [[ $1 == "-d" ]]; then
-    daemon
+    if [[ -f "$DAEMON" ]]; then
+        daemonerror "Error: Daemon is already running"
+        exit 255
+    fi
+    daemon 1> /dev/null 2>&1 & disown
+    echo "$!" > "$DAEMON"
+    pid=`dpid`
+    echo " "
+    echo "Daemon started: PID = $pid"
+    exit
 fi
 
 for a in "$@"
@@ -84,7 +88,8 @@ do
     r=`mktemp --tmpdir="$QPATH/requests"`
     echo "$a" > "$r"
 done
+
 if [[ ! -f $DAEMON ]]; then
-    bash ./wgetqueue.sh -d > /dev/null 2>&1 & disown
-    echo "Daemon started: PID = $!"
+    bash "./wgetqueue.sh" "-d" & disown
+    exit
 fi
