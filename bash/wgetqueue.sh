@@ -28,7 +28,10 @@ function daemon {
 }
 
 function usage {
-    echo "./wgetqueue.sh"
+    echo "Usage"
+    echo "./wgetqueue.sh [Flags | URL]"
+    echo "URL"
+    echo -e "\tIf URL is given, wgetqueue.sh adds URL to queue."
     echo "Flags"
     echo -e "\t-c\n\t\tCheck if daemon is running."
     echo -e "\t-k\n\t\tKill daemon."
@@ -44,9 +47,12 @@ fi
 QPATH=$HOME/.nyaqueue
 ELOG=$QPATH/error.log
 DAEMON=$QPATH/daemonrunning
+REQUESTS=$QPATH/requests
+ATOM=$QPATH/atom
 
 mkdir -p "$QPATH"
-mkdir -p "$QPATH/requests"
+mkdir -p "$REQUESTS"
+mkdir -p "$ATOM"
 
 if [[ $1 == "-c" ]]; then
     if [[ -f $DAEMON ]]; then
@@ -78,18 +84,20 @@ if [[ $1 == "-d" ]]; then
     daemon 1> /dev/null 2>&1 & disown
     echo "$!" > "$DAEMON"
     pid=`dpid`
-    echo " "
-    echo "Daemon started: PID = $pid"
+    echo -e "\nDaemon started: PID = $pid"
     exit
 fi
 
 for a in "$@"
 do
-    r=`mktemp --tmpdir="$QPATH/requests"`
+    r=`mktemp --tmpdir="$ATOM"`
     echo "$a" > "$r"
+    r=${r##*/}
+    mv "$ATOM/$r" "$REQUESTS/$r"
 done
 
 if [[ ! -f $DAEMON ]]; then
-    bash "./wgetqueue.sh" "-d" & disown
+    ./wgetqueue.sh -d 0<&- & disown
+    sleep 1
     exit
 fi
