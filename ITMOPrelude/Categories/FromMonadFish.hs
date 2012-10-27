@@ -14,3 +14,5 @@ instance MonadFish m => MonadJoin m where
     returnJoin = returnFish
     join = id >=> id
 
+instance MonadFish m => Functor m where
+    fmap f m = m >>= (return . f)

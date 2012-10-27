@@ -13,10 +13,12 @@ data RealWorld = RealWorld
 type IO a = State RealWorld a
 
 getNat :: IO Nat
-getNat = ?
+getNat = State $
+    \rw -> (RealWorld (tail $ stdIn rw) (stdOut rw) (exitCode rw),
+            head $ stdIn rw)
 
-putNat :: Nat -> IO ()
-putNat = ?
-
-setExitCode :: Nat -> IO ()
-setExitCode = ?
+-- putNat :: Nat -> IO ()
+-- putNat = ?
+-- 
+-- setExitCode :: Nat -> IO ()
+-- setExitCode = ?
