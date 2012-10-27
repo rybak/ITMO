@@ -57,5 +57,7 @@ instance Monad (Either a) where
 newtype State s a = State { runState :: s -> (s, a) }
 
 instance Monad (State s) where
-    return = ?
-    (>>=) = ?
+    -- return :: a -> (State s) a)
+    return a = State $ \s -> (s, a)
+    -- >>= :: (State s) a -> (a -> (State s) b) -> (State s) b
+    act >>= f = State $ \s -> let (s', a) = runState act s in runState (f a) s'
