@@ -42,7 +42,9 @@ eof = Monstupar $ \s -> case s of
 infixr 2 <|>
 -- Сначала первый парсер, если он фейлится, то второй
 (<|>) :: Monstupar s a -> Monstupar s a -> Monstupar s a
-a <|> b = Monstupar $ \s -> undefined
+a <|> b = Monstupar $ \s -> case runParser a s of
+    Left c -> Left c
+    Right _ -> runParser b s
 
 -- В голове ввода сейчас нечто, удовлетворяющее p
 like :: (s -> Bool) -> Monstupar s s
