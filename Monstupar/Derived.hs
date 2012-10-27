@@ -34,19 +34,23 @@ string [] = return []
 -- "Звёздочка" -- запустить парсер максимальное число раз и саккумулировать
 -- результыты
 many :: Monstupar s a -> Monstupar s [a]
-many p = do
-    a <- p
-    as <- many p <|> return []
-    return (a:as)
-
+many p = (do
+        a <- p
+        as <- many p
+        return (a:as)) <|> return []
 -- Аккуратно с реализацией! Следите за тем, чтобы у вас из-за использования <|>
 -- не рос в бесконечность стек.
 
 -- "Плюсик"
 many1 :: Monstupar s a -> Monstupar s [a]
-many1 p = p >> many p
+many1 p = do
+    e <- p
+    es <- many p
+    return (e:es)
 
 -- "Вопросик" -- ноль или один раз
 optional :: Monstupar s a -> Monstupar s (Maybe a)
-optional = undefined
+optional parser = (do
+    a <- parser
+    return $ Just a) <|> return Nothing
 
