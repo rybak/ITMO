@@ -23,7 +23,8 @@ instance Monad (Monstupar s) where
     ma >>= f = Monstupar $ \s -> case (runParser ma s) of
         Right (s', a) -> runParser (f a) s'
         Left _        -> Left ParseError
-
+--    (>>) :: Monad m => m a -> m b -> m b
+--    ma >> mb = ma >>= \_ -> mb
 --------------------------------------------------------------------------------
 -- Примитивные парсеры.
 -- Имена и сигнатуры функций менять нельзя, тела можно
@@ -54,9 +55,11 @@ a <|> b = Monstupar $ \s -> case runParser a s of
 -- В голове ввода сейчас нечто, удовлетворяющее p
 like :: (s -> Bool) -> Monstupar s s
 like p = Monstupar $ \s -> let a = head s in
-    if p $ head s
-        then Right (tail s, head s)
-        else Left ParseError
+    if null s
+        then Left ParseError
+        else if p a
+            then Right (tail s, a)
+            else Left ParseError
 
 -- Сюда можно добавлять ещё какие-то примитивные парсеры
 -- если они понадобятся
