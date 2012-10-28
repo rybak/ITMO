@@ -96,8 +96,17 @@ prettyPrint (App t1 t2) = "(" ++ (prettyPrint t1) ++ ") (" ++
 -- Собственно сам REPL. Первый аргумент — максимальное число итераций при
 -- попытке нормализации стратегией из второго аргумента.
 replLoop :: Integer -> (Integer -> Term -> Term) -> IO ()
-replLoop patience strategy = undefined
-
+replLoop patience strategy = do
+    putStr "> "
+    s <- getLine
+    let
+        p = runParser parseLambda s
+        ans = case p of
+            Left _ -> "error"
+            Right ("", t) -> prettyPrint $ strategy patience t
+            Right (_, t)  -> "ERROR : oops"
+        in putStrLn $ ans
+    replLoop patience strategy
 -- Диалог с (replLoop 100 no) должен выглядеть так:
 -- > \x . (\y . y) x x
 -- \x . x x
