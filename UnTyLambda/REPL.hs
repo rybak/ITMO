@@ -9,42 +9,20 @@ import UnTyLambda.Interpreter
 alphaPar = oneOf ['a'..'z']
 
 -- Парсим строку в терм
-parseLambda, parseVar, parseLam, parseLambda' :: Monstupar Char Term
-parseLambda =
-   (do
-        whitespacePar
-        v <- parseVar
-        t <- parseLambda'
-        whitespacePar
-        return $ App v t) <|>
---    (do
---        whitespacePar
---        l <- parseLam
---        t <- parseLambda'
---        whitespacePar
---        return $ App l t) <|>
-    (do
-        whitespacePar
-        char '('
-        t1 <- parseLambda
-        char ')'
-        t2 <- parseLambda'
-        whitespacePar
-        return $ App t1 t2) <|>
-    (do
+parseLambda, parseVar, parseLam :: Monstupar Char Term
+
+parseOneLambda = (do
         whitespacePar
         char '('
         t <- parseLambda
         char ')'
         whitespacePar
         return $ t) <|> parseVar <|> parseLam
- 
-parseLambda' = (do
-    whitespacePar
-    t1 <- parseLambda
-    t2 <- parseLambda'
-    whitespacePar
-    return $ App t1 t2) <|> parseLambda
+
+parseLambda = do
+        ts <- many1 (whitespacePar >> parseOneLambda)
+        whitespacePar
+        return $ foldl1 App ts
 
 parseVar = do
     whitespacePar
@@ -104,7 +82,8 @@ replLoop patience strategy = do
         ans = case p of
             Left _ -> "error"
             Right ("", t) -> prettyPrint $ strategy patience t
-            Right (_, t)  -> "ERROR : oops"
+            Right (s', t)  -> "ERROR : oops\n\ts  = " ++ s ++
+                "\n\ts' = " ++ s'
         in putStrLn $ ans
     replLoop patience strategy
 -- Диалог с (replLoop 100 no) должен выглядеть так:
