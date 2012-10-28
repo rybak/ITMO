@@ -5,6 +5,8 @@ import Monstupar
 import Monstupar.Core
 import Monstupar.Derived
 import UnTyLambda.Interpreter
+import Prelude hiding (catch)
+import Control.Exception
 
 alphaPar = oneOf ['a'..'z']
 
@@ -49,7 +51,7 @@ parseLam = do
     return $ Lam var term
 
 --------------------------------------------------------------------------------
--- Заметье, что грамматика лямбда-выражений леворекурсивна.
+-- Заметьте, что грамматика лямбда-выражений леворекурсивна.
 -- Перед тем как бросаться кодить, сначала уберите леворекурсивность
 -- (неопределённость тоже стоит убрать) на бумаге, а потом напишите
 -- получившуюся грамматику в EBNF вот сюда:
@@ -64,12 +66,12 @@ parseLam = do
 lam = '\0092'
 prettyPrint :: Term -> String
 prettyPrint (Var v) = v
-prettyPrint (Lam v t) = lam : v ++ "." ++ (prettyPrint t)
+prettyPrint (Lam v t) = lam : v ++ "." ++ prettyPrint t
 prettyPrint (App (Var v1) (Var v2)) = v1 ++ " " ++ v2
-prettyPrint (App (Var v) t) = v ++ " (" ++ (prettyPrint t) ++ ")"
-prettyPrint (App t (Var v)) = '(' : (prettyPrint t) ++ ") " ++ v
-prettyPrint (App t1 t2) = "(" ++ (prettyPrint t1) ++ ") (" ++
-    (prettyPrint t2) ++ ")"
+prettyPrint (App (Var v) t) = v ++ " (" ++ prettyPrint t ++ ")"
+prettyPrint (App t (Var v)) = '(' : prettyPrint t ++ ") " ++ v
+prettyPrint (App t1 t2) = "(" ++ prettyPrint t1 ++ ") (" ++
+    prettyPrint t2 ++ ")"
 
 -- Собственно сам REPL. Первый аргумент — максимальное число итераций при
 -- попытке нормализации стратегией из второго аргумента.
@@ -82,9 +84,8 @@ replLoop patience strategy = do
         ans = case p of
             Left _ -> "error"
             Right ("", t) -> prettyPrint $ strategy patience t
-            Right (s', t)  -> "ERROR : oops\n\ts  = " ++ s ++
-                "\n\ts' = " ++ s'
-        in putStrLn $ ans
+            Right (s', t)  -> "error : " ++ s'
+        in (putStrLn $ ans) `catch` (\e -> print (e :: SomeException))
     replLoop patience strategy
 -- Диалог с (replLoop 100 no) должен выглядеть так:
 -- > \x . (\y . y) x x
