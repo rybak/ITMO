@@ -54,3 +54,5 @@ optional parser = (do
     a <- parser
     return $ Just a) <|> return Nothing
 
+whitespace = [' ', '\n', '\t']
+whitespacePar = many $ oneOf whitespace

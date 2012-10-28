@@ -45,9 +45,6 @@ natPar = do
     token <- many1 $ oneOf ['0'..'9']
     return (read (token) :: Integer)
 
-whitespace = [' ', '\n', '\t']
-whitespacePar = many $ oneOf whitespace
-
 natList = do
         number <- natPar
         numbers <- (many $ (char ',') >> natPar)
