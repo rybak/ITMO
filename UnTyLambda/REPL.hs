@@ -10,7 +10,7 @@ alphaPar = oneOf ['a'..'z']
 
 -- Парсим строку в терм
 parseLambda, parseVar, parseLam, parseLambda' :: Monstupar Char Term
-parseLambda = parseVar <|> parseLam <|>
+parseLambda =
    (do
         whitespacePar
         v <- parseVar
@@ -37,7 +37,7 @@ parseLambda = parseVar <|> parseLam <|>
         t <- parseLambda
         char ')'
         whitespacePar
-        return $ t)
+        return $ t) <|> parseVar <|> parseLam
  
 parseLambda' = (do
     whitespacePar
