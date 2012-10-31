@@ -20,9 +20,8 @@ data List a = Nil | Cons a (List a) deriving (Show,Read)
 
 -- Длина списка
 length :: List a -> Nat
-length a = f a Zero where
-    f Nil l = l
-    f (Cons _ t) l = f t (Succ l)
+length Nil = Zero
+length (Cons _ t) = Succ $ length t
 
 -- Склеить два списка за O(length a)
 (++) :: List a -> List a -> List a
