@@ -41,13 +41,13 @@ instance Monoid a => Monoid (Maybe a) where
     (Just a) `mappend` (Just b) = Just $ a `mappend` b
 
 class Monoid a => Group a where
-    gneg :: a -> a
+    ginv :: a -> a
 
 instance Group Unit where
-    gneg _ = Unit
+    ginv _ = Unit
 
 instance Group Int where
-    gneg = intNeg
+    ginv = intNeg
 
 instance Group Rat where
-    gneg = ratInv
+    ginv = ratInv
