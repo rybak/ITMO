@@ -3,7 +3,7 @@ module ITMOPrelude.Categories.FromMonadFish where
 import ITMOPrelude.Categories.MonadFish
 import ITMOPrelude.Primitive
 
-import ITMOPrelude.Categories
+import ITMOPrelude.Categories hiding ((.))
 import ITMOPrelude.Categories.MonadJoin
 
 instance MonadFish m => Monad m where

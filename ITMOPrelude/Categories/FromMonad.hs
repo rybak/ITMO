@@ -1,6 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 module ITMOPrelude.Categories.FromMonad where
-import ITMOPrelude.Categories
+import ITMOPrelude.Categories hiding ((.))
 import Prelude (flip, (.) )
 
 import ITMOPrelude.Categories.MonadJoin
