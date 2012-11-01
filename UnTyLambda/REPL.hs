@@ -11,17 +11,22 @@ import Control.Exception
 alphaPar = oneOf ['a'..'z']
 
 -- Парсим строку в терм
-parseLambda, parseVar, parseLam :: Monstupar Char Term
+parseLambda, parseVar, parseLam, parseLambda' :: Monstupar Char Term
+
+parseLambda = do
+    t <- parseLambda'
+    eof
+    return t
 
 parseOneLambda = (do
         whitespacePar
         char '('
-        t <- parseLambda
+        t <- parseLambda'
         char ')'
         whitespacePar
         return $ t) <|> parseVar <|> parseLam
 
-parseLambda = do
+parseLambda' = do
         ts <- many1 (whitespacePar >> parseOneLambda)
         whitespacePar
         return $ foldl1 App ts
@@ -47,7 +52,7 @@ parseLam = do
     whitespacePar
     char '.'
     whitespacePar
-    term <- parseLambda
+    term <- parseLambda'
     return $ Lam var term
 
 --------------------------------------------------------------------------------
@@ -66,7 +71,7 @@ parseLam = do
 lam = '\0092'
 prettyPrint :: Term -> String
 prettyPrint (Var v) = v
-prettyPrint (Lam v t) = lam : v ++ "." ++ prettyPrint t
+prettyPrint (Lam v t) = 'λ' : v ++ "." ++ prettyPrint t
 prettyPrint (App (Var v1) (Var v2)) = v1 ++ " " ++ v2
 prettyPrint (App (Var v) t) = v ++ " (" ++ prettyPrint t ++ ")"
 prettyPrint (App t (Var v)) = '(' : prettyPrint t ++ ") " ++ v
@@ -84,7 +89,7 @@ replLoop patience strategy = do
         ans = case p of
             Left _ -> "error"
             Right ("", t) -> prettyPrint $ strategy patience t
-            Right (s', t)  -> "error : " ++ s'
+            Right (s', t)  -> "error in parser : " ++ s'
         in (putStrLn $ ans) `catch` (\e -> print (e :: SomeException))
     replLoop patience strategy
 -- Диалог с (replLoop 100 no) должен выглядеть так:
