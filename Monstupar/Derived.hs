@@ -16,15 +16,15 @@ notok :: Monstupar s ()
 notok = isnot ok
 
 -- В голове ввода сейчас в точности s
-char :: Eq s => s -> Monstupar s s
+char :: (Eq s, Show s) => s -> Monstupar s s
 char = like . (==)
 
 -- В голове ввода сейчас что-то из списка
-oneOf :: Eq s => [s] -> Monstupar s s
+oneOf :: (Eq s, Show s) => [s] -> Monstupar s s
 oneOf = like . flip elem
 
 -- В префиксе головы сейчас нечто вполне определённое
-string :: Eq s => [s] -> Monstupar s [s]
+string :: (Eq s, Show s) => [s] -> Monstupar s [s]
 string (c:cs) = do
     c' <- char c
     cs' <- string cs
