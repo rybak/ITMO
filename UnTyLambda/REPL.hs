@@ -87,9 +87,9 @@ replLoop patience strategy = do
     catch (putStrLn $
         case runParser parseLambda s of
             Left (ParseErrorMsg msg) -> "Error: " ++ msg
-            Left _ -> "Error"
+            Left _        -> "Error"
             Right ("", t) -> prettyPrint $ strategy patience t
-            Right (s', t)  -> "Error in parser : " ++ s'
+            Right (s', t) -> "Error in parser : " ++ s'
         ) (\e -> print (e :: SomeException))
     replLoop patience strategy
 -- Диалог с (replLoop 100 no) должен выглядеть так:

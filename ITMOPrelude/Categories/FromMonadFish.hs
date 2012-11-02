@@ -1,4 +1,4 @@
-{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE NoImplicitPrelude, FlexibleInstances, UndecidableInstances #-}
 module ITMOPrelude.Categories.FromMonadFish where
 import ITMOPrelude.Categories.MonadFish
 import ITMOPrelude.Primitive

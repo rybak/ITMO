@@ -1,4 +1,4 @@
-{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE NoImplicitPrelude, FlexibleInstances, UndecidableInstances #-}
 module ITMOPrelude.Categories.FromMonad where
 import ITMOPrelude.Categories hiding ((.))
 import Prelude (flip, (.) )

@@ -1,4 +1,4 @@
-{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE NoImplicitPrelude, FlexibleInstances, UndecidableInstances #-}
 module ITMOPrelude.Categories.FromMonadJoin where
 import ITMOPrelude.Categories.MonadJoin
 import ITMOPrelude.Primitive
