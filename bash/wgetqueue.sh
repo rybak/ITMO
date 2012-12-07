@@ -14,7 +14,7 @@ function daemonerror {
 }
 
 function daemon {
-    trap "" HUP
+    trap "" SIGHUP
     while true
     do
         for a in "$QPATH/requests"/*

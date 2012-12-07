@@ -1,0 +1,9 @@
+.*\.o$
+.*\.hi$
+.*\~$
+.*\.sh$
+^bash/kr/*$
+^midterm/*$
+^oxij/*$
+^testdir/*$
+^c/*$
