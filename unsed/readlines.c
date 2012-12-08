@@ -86,9 +86,10 @@ int rl_readline(RL *rl, char *buf, size_t buf_size) {
         res = nl_pos + 1;
     }
     size_t i = nl_pos + 1;
-    for (; i < tc; ++i) {
-        rl->buf[i - nl_pos - 1] = rl->buf[i];
-    }
+    memmove(rl->buf, rl->buf + nl_pos + 1, tc - nl_pos - 1);
+//   for (; i < tc; ++i) {
+//       rl->buf[i - nl_pos - 1] = rl->buf[i];
+//   }
     rl->length = tc - nl_pos - 1;
     return res;
 }
