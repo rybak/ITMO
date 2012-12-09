@@ -2,7 +2,6 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -11,9 +10,9 @@ int main(int argc, char *argv[]) {
     }
     int n = atoi(argv[1]);
     RL *rl = rl_open(0, n);
-    char *buf = malloc(n+1);
+    char *buf = malloc(n + 1);
     while (1) {
-        int len = rl_readline(rl, buf, n);
+        int len = rl_readline(rl, buf, n + 1);
         if (len == 0) {
             break;
         }
