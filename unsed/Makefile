@@ -10,4 +10,4 @@ readlines-main.o : readlines-main.c
 	gcc -c readlines-main.c
 
 clean:
-	rm readlines-main readlines.o readlines-main.o
+	rm readlines-main $(objects)
