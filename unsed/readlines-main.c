@@ -4,8 +4,8 @@
 #include <stdlib.h>
 
 int main(int argc, char *argv[]) {
-    printf("%s started\n", argv[0]);
-    fflush(stdout);
+    // printf("%s started\n", argv[0]);
+    // fflush(stdout);
     if (argc != 2) {
         printf("Usage: readlines-main N\n");
         return 1;
@@ -22,8 +22,6 @@ int main(int argc, char *argv[]) {
             perror("The following error occurred: ");
             break;
         }
-        printf("len=%d |", len);
-        fflush(stdout);
         if (len > 0) {
             int written = 0;
             while (written < len) {
@@ -35,6 +33,6 @@ int main(int argc, char *argv[]) {
         }
     }
     rl_close(rl);
-    printf("%s finished\n", argv[0]);
+    // printf("%s finished\n", argv[0]);
     return 0;
 }
