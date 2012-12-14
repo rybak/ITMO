@@ -14,7 +14,16 @@ using std::cerr;
 using std::endl;
 using std::cin;
 
+const int SYS_ERROR = 1,
+          USAGE_ERROR = 2,
+          LONG_ERROR = 100,
+          SLOW_ERROR = 101,
+          WAIT_ERROR = 200,
+          NOT_EXITED_ERROR = 201,
+          RL_ERROR   = 202;
+
 const size_t pause_time = 5;
+const char pause_mark = '@';
 
 const string rand_str(size_t len) {
     string res(len, ' ');
@@ -30,20 +39,24 @@ void make_pause() {
 
 void print_test(size_t n) {
     const int pause_prob = 5;
-    int pause_been = 0;
+    bool pause_been = false;
     const size_t test_size = 10;
     for (size_t t = 0; t < test_size; ++t) {
         size_t len = rand() % (2 * n);
         string s = rand_str(len);
         if (len > 1) {
+            bool with_pause = ((rand() % pause_prob == 0) && !pause_been);
             size_t pause_pos = rand() % (len - 1) + 1;
-            s[pause_pos - 1] = 'P';
-            cout << s.substr(0, pause_pos);
-            if ((rand() % pause_prob == 0) && !pause_been) {
-                pause_been = 1;
+            if (with_pause) {
+                s[pause_pos - 1] = 'P';
+                s[len - 1] = pause_mark;
+                cout << s.substr(0, pause_pos);
+                pause_been = true;
                 make_pause();
+                cout << s.substr(pause_pos, len - pause_pos);
+            } else {
+                cout << s;
             }
-            cout << s.substr(pause_pos, len - pause_pos);
         }
         cout << endl;
     }
@@ -55,26 +68,29 @@ void close_pipe(int fd[]) {
     close(fd[1]);
 }
 
+bool pause_happened = false;
+
 void alarm_handler(int signum) {
+    pause_happened = true;
 }
 
 void init_signals() {
     struct sigaction new_action;
     if (sigemptyset(&new_action.sa_mask)) {
         perror("Can't use sigemptyset.");
-        exit(-1);
+        exit(SYS_ERROR);
     }
     new_action.sa_handler = alarm_handler;
     if (sigaction(SIGALRM, &new_action, NULL)) {
         perror("Can't use sigaction");
-        exit(-1);
+        exit(SYS_ERROR);
     }
 }
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
         cout << "Usage: tester K\n";
-        return 1;
+        return USAGE_ERROR;
     }
     init_signals();
     srand(time(NULL));
@@ -101,51 +117,57 @@ int main(int argc, char *argv[]) {
         if (pid) {
             if (pid == -1) {
                 perror("execl failed");
-                return -1;
+                return SYS_ERROR;
             }
             dup2(pipe_from_rl[0], 0);
             close_pipe(pipe_to_rl);
             close_pipe(pipe_from_rl);
             cout << "Test #" << i << ' ';
             ++i;
-            cout << "Waiting for readlines... ";
-            cout.flush();
-            alarm(pause_time);
+            cout << "Waiting for readlines...\noutput:" << endl;
+            while (!cin.eof()) {
+                string s;
+                alarm(pause_time + 1);
+                cin >> s;
+                alarm(0);
+                if (!cin.eof()) {
+                    cout << "    " << s << endl;
+                    if (s.length() > n) {
+                        cerr << "To long line found: "
+                            << s << endl;
+                        return LONG_ERROR;
+                    }
+                } else {
+                    break;
+                }
+                if (pause_happened) {
+                    pause_happened = false;
+                    if (s[s.length()] != pause_mark) {
+                        cerr << "To slow" << endl;
+                        kill(pid, SIGTERM);
+                        return SLOW_ERROR;
+                    }
+                }
+            }
             int status;
             if (waitpid(pid, &status, 0) == pid) {
-                alarm(0);
                 cout << "waiting finished." << endl;
                 if (!WIFEXITED(status)) {
                     cerr << "Something went wrong around "
                         << cmd_name << endl;
-                    return 100;
+                    return NOT_EXITED_ERROR;
                 }
                 if (WEXITSTATUS(status) != 0) {
                     cerr << "Something went wrong in "
                         << cmd_name << endl;
-                    return 101;
+                    return RL_ERROR;
                 }
-                string s;
-                cout << "output : " << endl;
-                while (!cin.eof()) {
-                    cin >> s;
-                    if (!cin.eof()) {
-                        cout << "    " << s << endl;
-                        if (s.length() > n) {
-                            cerr << "To long line found: "
-                                << s << endl;
-                            return 102;
-                        }
-                    }
-                }
-                cin.clear();
-                cout << "OK" << endl;
             } else {
-                alarm(0);
-                cerr << "Not fast enough" << endl;
-                kill(pid, SIGTERM);
-                return 1;
+                cerr << "Oops" << endl;
+                return WAIT_ERROR;
             }
+            cin.clear();
+            cout << "OK" << endl;
         } else {
             dup2(pipe_to_rl[0], 0);
             dup2(pipe_from_rl[1], 1);
