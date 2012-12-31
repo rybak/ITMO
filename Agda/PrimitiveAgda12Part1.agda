@@ -239,7 +239,9 @@ f ∘ g = λ x → f (g x)
 
 ¬ : Set → Set
 ¬ P = P → ⊥
-    
+-- Hint should've been like this:
+-- Don't think, use C-c C-,
+
 contradiction : {A B : Set} → A → ¬ A → B
 contradiction a ¬a = ⊥-elim (¬a a)
     
@@ -252,4 +254,4 @@ contra f g a = (g ∘ f) a
 
 ¬³-red f a = f (λ b → b a)
 
-    
+
