@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <errno.h>
+#include <fcntl.h>
 
 #include <iostream>
 #include <vector>
@@ -12,6 +13,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <poll.h>
+#include <sys/wait.h>
 
 #include <pty.h>
 
@@ -23,31 +25,33 @@ struct buffer_t
     bool in_dead;
     bool out_dead;
     size_t pos;
-    buffer_t() : is_dead(false), out_dead(false), pos(0)
+    buffer_t() : in_dead(false), out_dead(false), pos(0)
     {}
 };
 
 void propagate_data(pollfd *src, buffer_t *buf, pollfd *dest)
 {
-    if (buf->pos < BUF_SIZE && (in->revents & POLLIN))
+    if (buf->pos < BUF_SIZE && (src->revents & POLLIN))
     {
         int cnt = read(src->fd, buf->buf + buf->pos, BUF_SIZE - buf->pos);
+        if (cnt == 0)
+        {
+            std::cerr << "cnt == 0 " << std::endl;
+        }
         if (cnt <= 0)
         {
-            buf->is_dead = true;
-            src->events ^= POLLIN;
+            buf->in_dead = true; // <<<<<
         } else
         {
             buf->pos += cnt;
         }
     }
-    if ((buf->pos > 0) && (out->revents & POLLOUT))
+    if ((buf->pos > 0) && (dest->revents & POLLOUT))
     {
         int cnt = write(dest->fd, buf->buf, buf->pos);
         if (cnt < 0)
         {
-            perror("socket write error : ");
-            exit(1);
+            buf->out_dead = true;
         }
         if (cnt > 0)
         {
@@ -55,15 +59,19 @@ void propagate_data(pollfd *src, buffer_t *buf, pollfd *dest)
             buf->pos -= cnt;
         }
     }
-    if (buf->pos < BUF_SIZE)
+    if (buf->pos < BUF_SIZE && !buf->in_dead)
     {
         src->events |= POLLIN;
     } else
     {
         src->events &= ~POLLIN;
     }
+    //if (buf->out_dead)
+    //{
+    //    dest->events = 0;
+    //}
 }
-
+const size_t MAX_PATH = 4096;
 void handle_client(int cfd)
 {
     int amaster = 0;
@@ -84,10 +92,9 @@ void handle_client(int cfd)
         fds[0].events = fds[1].events = POLLIN | POLLERR | POLLOUT;
         buffer_t from;
         buffer_t to;
-        from.is_eof = to.is_eof = false;
-        while (true)
+        while (!from.in_dead && !to.in_dead)
         {
-            int ready = poll(pollfd, 2, 0);
+            int ready = poll(fds, 2, 0);
             if (!ready)
             {
                 continue;
@@ -104,23 +111,27 @@ void handle_client(int cfd)
             }
             propagate_data(&fds[0], &from, &fds[1]);
             propagate_data(&fds[1], &to, &fds[0]);
+            std::cerr << from.in_dead << " in  " << to.in_dead << std::endl;
+            std::cerr << from.out_dead << " out " << to.out_dead << std::endl;
         }
+        exit(0);
     }
+    setsid();
     close(amaster);
     close(cfd);
-/// TRASH
-//    dup2(cfd, 0);
-//    dup2(cfd, 1);
-//    dup2(cfd, 2);
-//    close(cfd);
-//    //execvp("cat", "cat", "-", NULL);
-//    execlp("echo", "echo", "hello", NULL);
-//    exit(0);
+    dup2(aslave, 0);
+    dup2(aslave, 1);
+    dup2(aslave, 2);
+    close(aslave);
+    int fd = open(name, O_RDWR);
+    close(fd);
+    execlp("sh", "sh", NULL);
+    exit(0);
 }
 
 int main()
 {
-    dpid = fork();
+    int dpid = fork();
     if (dpid != 0)
     {
         waitpid(dpid, NULL, 0);
