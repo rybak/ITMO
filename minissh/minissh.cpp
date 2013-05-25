@@ -20,8 +20,11 @@ const size_t BUF_SIZE = 4096;
 struct buffer_t
 {
     char buf[BUF_SIZE];
-    bool is_eof;
+    bool in_dead;
+    bool out_dead;
     size_t pos;
+    buffer_t() : is_dead(false), out_dead(false), pos(0)
+    {}
 };
 
 void propagate_data(pollfd *src, buffer_t *buf, pollfd *dest)
@@ -31,7 +34,7 @@ void propagate_data(pollfd *src, buffer_t *buf, pollfd *dest)
         int cnt = read(src->fd, buf->buf + buf->pos, BUF_SIZE - buf->pos);
         if (cnt <= 0)
         {
-            buf->is_eof = true;
+            buf->is_dead = true;
             src->events ^= POLLIN;
         } else
         {
@@ -99,14 +102,8 @@ void handle_client(int cfd)
                 std::cerr << "daemon poll error : " << strerror(errno) << std::endl;
                 exit(1);
             }
-            if (!from.is_eof)
-            {
-                propagate_data(&fds[0], &from, &fds[1]);
-            }
-            if (!to.is_eof)
-            {
-                propagate_data(&fds[1], &to, &fds[0]);
-            }
+            propagate_data(&fds[0], &from, &fds[1]);
+            propagate_data(&fds[1], &to, &fds[0]);
         }
     }
     close(amaster);
