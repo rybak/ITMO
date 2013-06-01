@@ -1,14 +1,18 @@
 import java.io.PrintWriter;
+import java.text.ParseException;
 import java.util.*;
 
 public class ParserGenerator {
 
 	private PrintWriter out;
 	private String name;
+	private String LEX;
+	private static final String PAR_THROWS_CB = ") throws ParseException {";
 
 	public ParserGenerator(PrintWriter out, String name) {
 		this.out = out;
 		this.name = name;
+		LEX = name + Core.L;
 	}
 
 	public void generate(ArrayList<ParserRule> parserRules,
@@ -20,11 +24,6 @@ public class ParserGenerator {
 		out.close();
 	}
 
-	public void generate(ArrayList<LexerRule> lexerRules,
-			ArrayList<LexerRule> skipRules) {
-
-	}
-
 	private void printRules(ArrayList<ParserRule> parserRules,
 			Map<String, Integer> t) {
 		calcRules(parserRules);
@@ -34,7 +33,6 @@ public class ParserGenerator {
 			printRuleMethod(r, t);
 		}
 	}
-
 
 	private Map<String, ArrayList<Integer>> first = new HashMap<String, ArrayList<Integer>>();
 	private Map<String, ArrayList<Integer>> follow = new HashMap<String, ArrayList<Integer>>();
@@ -54,13 +52,57 @@ public class ParserGenerator {
 	}
 
 	private void printParseMethod(ParserRule S, Map<String, Integer> t) {
-		printMethodHeader(S, "parse");
+		Core.printAtLevel(out, 1, buildType(S) + " parse(String text, ");
+		printArgs(S.args);
+		out.println(PAR_THROWS_CB);
+		Core.printAtLevel(out, 2, "lex = new " + LEX + "(text);\n");
+		Core.printAtLevel(out, 2, "lex.nextToken();\n");
 		printReturn(buildInvocation(S.name, S.args));
 		Core.close(out, 1);
 	}
 
+	private void printRuleMethod(ParserRule r, Map<String, Integer> t) {
+		String returnType = r.vars == null ? "void" : r.name + '_';
+		String ctx = r.name + '0';
+		Core.printAtLevel(out, 1, returnType + ' ' + r.name + '(');
+		printArgs(r.args);
+		out.println(PAR_THROWS_CB);
+		if (r.vars != null) {
+			Core.printAtLevel(out, 2, returnType);
+			out.print(' ');
+			out.print(ctx);
+			out.print(" = new ");
+			out.print(returnType);
+			out.println("();");
+		}
+		
+		if (r.vars != null) {
+			printReturn(ctx);
+		}
+		Core.close(out, 1);
+	}
+
+	private void printArgs(ArrayList<String> args) {
+		if (args != null) {
+			for (int i = 0, n = args.size(); i < n; ++i) {
+				out.print(args.get(i));
+				if (i < n - 1) {
+					out.print(", ");
+				}
+			}
+		}
+	}
+
 	private void printReturn(String x) {
 		Core.printAtLevel(out, 2, "return " + x + ";\n");
+	}
+
+	private void printReturn(ParserRule r) {
+		if (r.vars != null) {
+			printReturn(r.name + "0");
+		} else {
+			printReturn("");
+		}
 	}
 
 	private String buildInvocation(String name, ArrayList<String> args) {
@@ -83,33 +125,6 @@ public class ParserGenerator {
 		StringTokenizer st = new StringTokenizer(arg);
 		st.nextToken();
 		return st.nextToken();
-	}
-
-	private void printRuleMethod(ParserRule r, Map<String, Integer> t) {
-		printMethodHeader(r, r.name);
-		
-		// TODO Auto-generated method stub
-
-		Core.close(out, 1);
-	}
-
-	private void printMethodHeader(ParserRule r, String name) {
-		Core.printAtLevel(out, 1, buildType(r) + ' ' + name);
-		printArgs(r.args);
-	}
-
-	private void printArgs(ArrayList<String> args) {
-		// TODO Auto-generated method stub
-		out.print('(');
-		if (args != null) {
-			for (int i = 0, n = args.size(); i < n; ++i) {
-				out.print(args.get(i));
-				if (i < n - 1) {
-					out.print(", ");
-				}
-			}
-		}
-		out.println(") {");
 	}
 
 	private String buildType(ParserRule r) {
