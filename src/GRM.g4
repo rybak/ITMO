@@ -6,6 +6,12 @@ grammar GRM;
 import java.util.*;
 import java.io.*;
 }
+@members
+{
+    String crop(String x) {
+        return x.substring(1, x.length() - 1);
+    }
+}
 
 file returns
 [
@@ -20,7 +26,7 @@ file returns
         $skipRules = new ArrayList<LexerRule>();
         $parserRules = new ArrayList<ParserRule>();
     }
-    ID { $name = $ID.text; }
+    LexerID { $name = $LexerID.text; }
     START_PARSER
     (parsing { $parserRules.add($parsing.r); })+
     START_LEXER
@@ -51,7 +57,7 @@ args returns [ ArrayList<String> r ]
 :
     LB
     { $r = new ArrayList<String>(); }
-    (JVar { $r.add(JVar.text); })+
+    (JVar { $r.add(crop($JVar.text)); })+
     RB
 ;
 
@@ -59,7 +65,7 @@ vars returns [ ArrayList<String> r ]
 :
     VARS_B
     { $r = new ArrayList<String>(); }
-    (JVar { $r.add(JVar.text); })+
+    (JVar { $r.add(crop($JVar.text)); })+
     RB
 ;
 
@@ -67,7 +73,7 @@ code returns [ String r; ]
 :
     LCB
     { ArrayList<String> a = new ArrayList<String>(); }
-    ( JCode { a.add(JCode.subString(1); })+
+    ( JCode { a.add($JCode.text.substring(1)); })+
     {
         StringBuilder sb = new StringBuilder();
         for (String s : a) {
@@ -81,7 +87,7 @@ code returns [ String r; ]
 
 parseExpr returns [ ArrayList<ArrayList<ParseItem>> r ]
 :
-    { r = new ArrayList<ArrayList<ParseItem>(); }
+    { $r = new ArrayList<ArrayList<ParseItem>>(); }
     parseOption { $r.add($parseOption.r); }
     (OR parseOption { $r.add($parseOption.r); })*
 ;
@@ -93,41 +99,47 @@ parseOption returns [ ArrayList<ParseItem> r ]
         { String c = ""; }
         itemID
         (code { c = $code.r; })?
-        { $r.add(new ParseItem($itemID.text, c); }
+        { $r.add(new ParseItem($itemID.text, c)); }
     )+
 ;
 
 itemID : ParserID | LexerID ;
 
-lexerRule returns [ lexerRule r ]
+lexerRule returns [ LexerRule r ]
 :
     LexerID COLON token SEMICOLON
-    { $r = new LexerRule($LexerID.text, $token.text); }
+    { $r = new LexerRule($LexerID.text, $token.r); }
 ;
 
-token : TOKEN ;
+token returns [ String r ]
+:
+    TOKEN { $r = crop($TOKEN.text); }
+;
 
 START_PARSER : '_PARSER' ;
 START_LEXER : '_LEXER' ;
 START_SKIP : '_SKIP' ;
 
+fragment SMark : '%' ;
+VARS_B : SMark '[' NL ;
+JVar : '%' ~[\n]* NL ;
+fragment JMark : '#' ;
+JCode : JMark ~[\n]* NL ;
+
 fragment SmallLetter : 'a'..'z' ;
 fragment BigLetter : 'A'..'Z' ;
 fragment Letter : 'A'..'Z' | 'a'..'z' | '_' ;
 fragment Digit : '0'..'9';
+fragment NL : '\n' ;
 
-fragment JMark : '#' ;
 ParserID : SmallLetter Letter* ;
 LexerID : BigLetter Letter*;
 ID : Letter+ ;
 
-JVar : JMark JID JID ;
 fragment JID : Letter (Letter | Digit | '.')* ;
-JCode : JMark ~[\n]* '\n' ;
 
 LCB : '{\n' ;
 RCB : '}\n' ;
-VARS_B : 's[\n';
 LB : '[\n' ;
 RB : ']\n' ;
 

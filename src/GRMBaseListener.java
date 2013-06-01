@@ -10,8 +10,17 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.antlr.v4.runtime.tree.ErrorNode;
 
 public class GRMBaseListener implements GRMListener {
+	@Override public void enterParseOption(GRMParser.ParseOptionContext ctx) { }
+	@Override public void exitParseOption(GRMParser.ParseOptionContext ctx) { }
+
+	@Override public void enterVars(GRMParser.VarsContext ctx) { }
+	@Override public void exitVars(GRMParser.VarsContext ctx) { }
+
 	@Override public void enterParseExpr(GRMParser.ParseExprContext ctx) { }
 	@Override public void exitParseExpr(GRMParser.ParseExprContext ctx) { }
+
+	@Override public void enterItemID(GRMParser.ItemIDContext ctx) { }
+	@Override public void exitItemID(GRMParser.ItemIDContext ctx) { }
 
 	@Override public void enterToken(GRMParser.TokenContext ctx) { }
 	@Override public void exitToken(GRMParser.TokenContext ctx) { }
@@ -27,6 +36,9 @@ public class GRMBaseListener implements GRMListener {
 
 	@Override public void enterLexerRule(GRMParser.LexerRuleContext ctx) { }
 	@Override public void exitLexerRule(GRMParser.LexerRuleContext ctx) { }
+
+	@Override public void enterCode(GRMParser.CodeContext ctx) { }
+	@Override public void exitCode(GRMParser.CodeContext ctx) { }
 
 	@Override public void enterEveryRule(ParserRuleContext ctx) { }
 	@Override public void exitEveryRule(ParserRuleContext ctx) { }
