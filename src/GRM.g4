@@ -7,8 +7,8 @@ import java.util.*;
 import java.io.*;
 }
 
-file
-returns [
+file returns
+[
     String name,
     ArrayList<LexerRule> lexerRules,
     ArrayList<LexerRule> skipRules,
@@ -30,10 +30,7 @@ returns [
     EOF
 ;
 
-parsing
-returns [
-    ParserRule r
-]
+parsing returns [ ParserRule r ]
 :
     {
         ArrayList<String> args = null;
@@ -47,24 +44,30 @@ returns [
     (code { ic = $code.r; })?
     parseExpr
     SEMICOLON
-    {
-       $r = new ParserRule($ParserID.text, args, vars, ic, $parseExpr.r);
-    }
+    { $r = new ParserRule($ParserID.text, args, vars, ic, $parseExpr.r); }
 ;
 
-code
-returns [
-    String r;
-]
+args returns [ ArrayList<String> r ]
+:
+    LB
+    { $r = new ArrayList<String>(); }
+    (JVar { $r.add(JVar.text); })+
+    RB
+;
+
+vars returns [ ArrayList<String> r ]
+:
+    VARS_B
+    { $r = new ArrayList<String>(); }
+    (JVar { $r.add(JVar.text); })+
+    RB
+;
+
+code returns [ String r; ]
 :
     LCB
-    {
-        ArrayList<String> a = new ArrayList<String>();
-    }
-    (   
-        JCode
-        { a.add(JCode.subString(1); }
-    )+
+    { ArrayList<String> a = new ArrayList<String>(); }
+    ( JCode { a.add(JCode.subString(1); })+
     {
         StringBuilder sb = new StringBuilder();
         for (String s : a) {
@@ -76,24 +79,14 @@ returns [
     RCB
 ;
 
-parseExpr
-returns [
-    ArrayList<ArrayList<ParseItem>> r
-]
+parseExpr returns [ ArrayList<ArrayList<ParseItem>> r ]
 :
-    {
-        r = new ArrayList<ArrayList<ParseItem>();
-    }
+    { r = new ArrayList<ArrayList<ParseItem>(); }
     parseOption { $r.add($parseOption.r); }
-    (OR
-        parseOption { $r.add($parseOption.r); }
-    )*
+    (OR parseOption { $r.add($parseOption.r); })*
 ;
 
-parseOption
-returns [
-    ArrayList<ParseItem> r
-]
+parseOption returns [ ArrayList<ParseItem> r ]
 :
     { $r = new ArrayList<ParseItem>(); }
     (
@@ -104,20 +97,12 @@ returns [
     )+
 ;
 
-itemID : ParserID | LexerID;
+itemID : ParserID | LexerID ;
 
-lexerRule
-returns [
-    lexerRule r
-]
+lexerRule returns [ lexerRule r ]
 :
-    ID
-    COLON
-    token
-    SEMICOLON
-    {
-        $r = new LexerRule($ID.text, $token.text);
-    }
+    LexerID COLON token SEMICOLON
+    { $r = new LexerRule($LexerID.text, $token.text); }
 ;
 
 token : TOKEN ;
@@ -140,10 +125,11 @@ JVar : JMark JID JID ;
 fragment JID : Letter (Letter | Digit | '.')* ;
 JCode : JMark ~[\n]* '\n' ;
 
-LCB : '{' ;
-RCB : '}' ;
-LB : '[' ;
-RB : ']' ;
+LCB : '{\n' ;
+RCB : '}\n' ;
+VARS_B : 's[\n';
+LB : '[\n' ;
+RB : ']\n' ;
 
 COLON : ':' ;
 SEMICOLON : ';' ;
