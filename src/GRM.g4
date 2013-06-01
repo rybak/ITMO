@@ -36,35 +36,75 @@ returns [
 ]
 :
     {
-        ArrayList<ArrayList<ParseItem>> options = new ArrayList<ArrayList<ParseItem>>();
         ArrayList<String> args = null;
         ArrayList<String> vars = null;
+        String ic = "";
     }
     ParserID
-    (args
-            {
-            args = $args.r;
-        }
-    )?
-    (vars
-        {
-            vars = $vars.r;
-        }
-    )?
+    (args { args = $args.r; })?
+    (vars { vars = $vars.r; })?
     COLON
+    (code { ic = $code.r; })?
     parseExpr
     SEMICOLON
     {
-        $r = new ParserRule($ParserID.text, args, vars, $code.text, options);
+       $r = new ParserRule($ParserID.text, args, vars, ic, $parseExpr.r);
     }
 ;
 
-
+code
+returns [
+    String r;
+]
+:
+    LCB
+    {
+        ArrayList<String> a = new ArrayList<String>();
+    }
+    (   
+        JCode
+        { a.add(JCode.subString(1); }
+    )+
+    {
+        StringBuilder sb = new StringBuilder();
+        for (String s : a) {
+            sb.append(s);
+            sb.append('\n');
+        }
+        $r = sb.toString();
+    }
+    RCB
+;
 
 parseExpr
+returns [
+    ArrayList<ArrayList<ParseItem>> r
+]
 :
-    ID+ (OR ID*)*
+    {
+        r = new ArrayList<ArrayList<ParseItem>();
+    }
+    parseOption { $r.add($parseOption.r); }
+    (OR
+        parseOption { $r.add($parseOption.r); }
+    )*
 ;
+
+parseOption
+returns [
+    ArrayList<ParseItem> r
+]
+:
+    { $r = new ArrayList<ParseItem>(); }
+    (
+        { String c = ""; }
+        itemID
+        (code { c = $code.r; })?
+        { $r.add(new ParseItem($itemID.text, c); }
+    )+
+;
+
+itemID : ParserID | LexerID;
 
 lexerRule
 returns [
@@ -92,12 +132,18 @@ fragment Letter : 'A'..'Z' | 'a'..'z' | '_' ;
 fragment Digit : '0'..'9';
 
 fragment JMark : '#' ;
-JVar : JMark JID JID ;
-fragment JID : Letter (Letter | Digit | '.')* ;
-JCode : JMark ~[\n]* '\n' ;
 ParserID : SmallLetter Letter* ;
 LexerID : BigLetter Letter*;
 ID : Letter+ ;
+
+JVar : JMark JID JID ;
+fragment JID : Letter (Letter | Digit | '.')* ;
+JCode : JMark ~[\n]* '\n' ;
+
+LCB : '{' ;
+RCB : '}' ;
+LB : '[' ;
+RB : ']' ;
 
 COLON : ':' ;
 SEMICOLON : ';' ;
