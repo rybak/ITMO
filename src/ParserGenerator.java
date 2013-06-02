@@ -1,4 +1,3 @@
-
 import java.io.PrintWriter;
 import java.util.*;
 
@@ -288,8 +287,8 @@ public class ParserGenerator {
 	}
 
 	private void printImports(String imports) {
-		out.println("import java.text.ParseException;");
 		out.println(imports);
+		out.println("import java.text.ParseException;");
 		out.println();
 	}
 

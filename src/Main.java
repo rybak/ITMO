@@ -1,4 +1,3 @@
-
 import java.io.*;
 import java.util.*;
 import org.antlr.v4.runtime.*;
@@ -35,7 +34,8 @@ public class Main {
 
 	public static void main(String[] args) {
 		try {
-			new Main("./test/", "./test/CVars.grm").run();
+			System.out.println(System.getProperty("user.dir"));
+			new Main("src/test/", "src/test/CVars.grm").run();
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.err.println("ERROR " + e.getMessage());
