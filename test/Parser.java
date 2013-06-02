@@ -15,6 +15,9 @@ public abstract class Parser {
 	protected void check(int... expected) throws ExpectedException {
 		int foundType = lex.currTokenType();
 		for (int t : expected) {
+			if (t == Lexer.EPS) {
+				return;
+			}
 			if (foundType == t) {
 				return;
 			}
@@ -22,10 +25,10 @@ public abstract class Parser {
 		throw new ExpectedException(lex, expected, foundType, lex.currToken(),
 				lex.position());
 	}
-	
+
 	protected String consume() throws ParseException {
 		String t = lex.currToken();
-        lex.nextToken();
-        return t;
+		lex.nextToken();
+		return t;
 	}
 }

@@ -1,3 +1,4 @@
+
 import java.io.*;
 import java.util.*;
 import org.antlr.v4.runtime.*;
@@ -34,8 +35,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		try {
-			System.err.println(args[0]);
-			new Main(args[0], args[1]).run();
+			new Main("./test/", "./test/CVars.grm").run();
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.err.println("ERROR " + e.getMessage());
