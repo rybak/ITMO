@@ -62,8 +62,6 @@ public class GRMParser extends Parser {
 		public ArrayList<LexerRule> lexerRules;
 		public ArrayList<LexerRule> skipRules;
 		public ArrayList<ParserRule> parserRules;
-		public Map<String, ParserRule> rules;
-		public String start;
 		public Token LexerID;
 		public CodeContext code;
 		public ParsingContext parsing;
@@ -114,7 +112,6 @@ public class GRMParser extends Parser {
 			        ((FileContext)_localctx).lexerRules =  new ArrayList<LexerRule>();
 			        ((FileContext)_localctx).skipRules =  new ArrayList<LexerRule>();
 			        ((FileContext)_localctx).parserRules =  new ArrayList<ParserRule>();
-			        ((FileContext)_localctx).rules =  new HashMap<String, ParserRule>();
 			        ((FileContext)_localctx).start =  null;
 			    
 			setState(23); ((FileContext)_localctx).LexerID = match(LexerID);
@@ -131,11 +128,7 @@ public class GRMParser extends Parser {
 				{
 				setState(29); ((FileContext)_localctx).parsing = parsing();
 
-				        if (_localctx.start == null) {
-				            ((FileContext)_localctx).start =  ((FileContext)_localctx).parsing.r.name;
-				        }
 				        _localctx.parserRules.add(((FileContext)_localctx).parsing.r);
-				        _localctx.rules.put(((FileContext)_localctx).parsing.r.name, ((FileContext)_localctx).parsing.r);
 				    
 				}
 				}

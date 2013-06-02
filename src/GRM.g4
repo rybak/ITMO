@@ -19,16 +19,13 @@ file returns
     String imports,
     ArrayList<LexerRule> lexerRules,
     ArrayList<LexerRule> skipRules,
-    ArrayList<ParserRule> parserRules,
-    Map<String, ParserRule> rules,
-    String start
+    ArrayList<ParserRule> parserRules
 ]
 :
     {
         $lexerRules = new ArrayList<LexerRule>();
         $skipRules = new ArrayList<LexerRule>();
         $parserRules = new ArrayList<ParserRule>();
-        $rules = new HashMap<String, ParserRule>();
         $start = null;
     }
     LexerID { $name = $LexerID.text; }
@@ -36,11 +33,7 @@ file returns
     code { $imports = $code.r; } 
     START_PARSER
     (parsing {
-        if ($start == null) {
-            $start = $parsing.r.name;
-        }
         $parserRules.add($parsing.r);
-        $rules.put($parsing.r.name, $parsing.r);
     })+
     START_LEXER
     (lexerRule { $lexerRules.add($lexerRule.r); })+

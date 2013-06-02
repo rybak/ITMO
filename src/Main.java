@@ -24,12 +24,12 @@ public class Main {
 	private void generate(GRMParser.FileContext fc) throws IOException {
 		String filename = fc.name;
 		PrintWriter out = new PrintWriter(outputPath + filename + "Lexer.java");
-		Map<String, Integer> t = new LexerGenerator(out, filename).generate(
+		Set<String> tokens = new LexerGenerator(out, filename).generate(
 				fc.imports, fc.lexerRules, fc.skipRules);
 		PrintWriter outParser = new PrintWriter(outputPath + filename
 				+ "Parser.java");
-		new ParserGenerator(outParser, filename).generate(fc.imports, fc.rules,
-				fc.start, fc.parserRules, t);
+		new ParserGenerator(outParser, filename).generate(fc.imports,
+				fc.parserRules, tokens);
 	}
 
 	public static void main(String[] args) {

@@ -11,20 +11,18 @@ public class LexerGenerator {
 		this.name = name;
 	}
 
-	public Map<String, Integer> generate(String imports, ArrayList<LexerRule> lexerRules,
-			ArrayList<LexerRule> skipRules) {
+	public Set<String> generate(String imports,
+			ArrayList<LexerRule> lexerRules, ArrayList<LexerRule> skipRules) {
 		String className = name + Core.L;
 		out.println(imports);
 		out.println(Core.buildClassHeader(className, Core.L));
 		printConsts(lexerRules);
-		printConsts(skipRules);
 		printConstructor(className, lexerRules, skipRules);
 		Core.close(out, 0);
 		out.close();
-		Map<String, Integer> t = new HashMap<String, Integer>();
-		for (int i = 0; i < lexerRules.size(); ++i) {
-			LexerRule r = lexerRules.get(i);
-			t.put(r.name, i);
+		Set<String> t = new HashSet<String>();
+		for (LexerRule rule : lexerRules) {
+			t.add(rule.name);
 		}
 		return t;
 	}
