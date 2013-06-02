@@ -1,10 +1,15 @@
 public class ParseItem {
-	public String item;
+	public String name;
 	public String code;
+	public String args;
 
-	public ParseItem(String item, String code) {
-		this.item = item;
+	public ParseItem(String name, String code, String args) {
+		this.name = name;
 		this.code = code;
+		this.args = args;
 	}
 
+	public String toString() {
+		return name;
+	}
 }

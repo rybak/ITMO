@@ -11,9 +11,10 @@ public class LexerGenerator {
 		this.name = name;
 	}
 
-	public Map<String, Integer> generate(ArrayList<LexerRule> lexerRules,
+	public Map<String, Integer> generate(String imports, ArrayList<LexerRule> lexerRules,
 			ArrayList<LexerRule> skipRules) {
 		String className = name + Core.L;
+		out.println(imports);
 		out.println(Core.buildClassHeader(className, Core.L));
 		printConsts(lexerRules);
 		printConsts(skipRules);

@@ -5,6 +5,7 @@ import java.util.regex.*;
 public abstract class Lexer {
 
 	private static final String LEX_ERR = "Lexer error : ";
+	public static final int EPS = -3;
 	public static final int EOF = -2;
 	public static final int INVALID = -1;
 
@@ -43,15 +44,13 @@ public abstract class Lexer {
 		}
 		if (pos == len) {
 			currTokenType = EOF;
-			System.out.println("matched EOF");
-			System.out.flush();
 			return;
 		}
 		skip();
 		if (!match()) {
+			currTokenType = INVALID;
 			throw new ParseException(LEX_ERR + "illegal token found", pos);
 		} else {
-			System.out.println("matched " + currToken);
 			skip();
 		}
 	}
@@ -72,8 +71,8 @@ public abstract class Lexer {
 			Pattern p = patterns.get(i);
 			Matcher m = p.matcher(text.substring(pos));
 			if (m.find()) {
-				currToken = m.group();
 				if (keep) {
+					currToken = m.group();
 					currTokenType = i;
 				}
 				pos += m.end();

@@ -1,5 +1,5 @@
 import java.text.ParseException;
-
+import java.util.*;
 
 public class Main {
 
@@ -7,13 +7,12 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String text = "    111 hello 1 bla";
-		TestLexer lex = new TestLexer(text);
+		String text = "int a, *p; matrix **b,\n \t ******s  ;";
+		CVarsParser p = new CVarsParser();
 		try {
-			lex.nextToken();
-			lex.nextToken();
-			lex.nextToken();
-			lex.nextToken();
+			HashMap<String, ArrayList<String>> vars = new HashMap<String, ArrayList<String>>();
+			CVarsParser.s_ c = p.parse(text, vars);
+			System.err.println(vars);
 		} catch (ParseException e) {
 			int n = e.getErrorOffset();
 			System.err.println(text);
@@ -22,7 +21,6 @@ public class Main {
 			}
 			System.err.println('^');
 			System.err.println(e.getMessage());
-			
 			//e.printStackTrace();
 		}
 	}

@@ -13,6 +13,9 @@ public class GRMBaseListener implements GRMListener {
 	@Override public void enterParseOption(GRMParser.ParseOptionContext ctx) { }
 	@Override public void exitParseOption(GRMParser.ParseOptionContext ctx) { }
 
+	@Override public void enterCallArgs(GRMParser.CallArgsContext ctx) { }
+	@Override public void exitCallArgs(GRMParser.CallArgsContext ctx) { }
+
 	@Override public void enterVars(GRMParser.VarsContext ctx) { }
 	@Override public void exitVars(GRMParser.VarsContext ctx) { }
 

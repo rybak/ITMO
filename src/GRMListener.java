@@ -10,6 +10,9 @@ public interface GRMListener extends ParseTreeListener {
 	void enterParseOption(GRMParser.ParseOptionContext ctx);
 	void exitParseOption(GRMParser.ParseOptionContext ctx);
 
+	void enterCallArgs(GRMParser.CallArgsContext ctx);
+	void exitCallArgs(GRMParser.CallArgsContext ctx);
+
 	void enterVars(GRMParser.VarsContext ctx);
 	void exitVars(GRMParser.VarsContext ctx);
 

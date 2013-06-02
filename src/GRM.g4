@@ -8,27 +8,40 @@ import java.io.*;
 }
 @members
 {
-    String crop(String x) {
-        return x.substring(1, x.length() - 1);
+    String crop(String x, int n) {
+        return x.substring(n, x.length() - n);
     }
 }
 
 file returns
 [
     String name,
+    String imports,
     ArrayList<LexerRule> lexerRules,
     ArrayList<LexerRule> skipRules,
-    ArrayList<ParserRule> parserRules
+    ArrayList<ParserRule> parserRules,
+    Map<String, ParserRule> rules,
+    String start
 ]
 :
     {
         $lexerRules = new ArrayList<LexerRule>();
         $skipRules = new ArrayList<LexerRule>();
         $parserRules = new ArrayList<ParserRule>();
+        $rules = new HashMap<String, ParserRule>();
+        $start = null;
     }
     LexerID { $name = $LexerID.text; }
+    START_IMPORT
+    code { $imports = $code.r; } 
     START_PARSER
-    (parsing { $parserRules.add($parsing.r); })+
+    (parsing {
+        if ($start == null) {
+            $start = $parsing.r.name;
+        }
+        $parserRules.add($parsing.r);
+        $rules.put($parsing.r.name, $parsing.r);
+    })+
     START_LEXER
     (lexerRule { $lexerRules.add($lexerRule.r); })+
     START_SKIP
@@ -55,34 +68,22 @@ parsing returns [ ParserRule r ]
 
 args returns [ ArrayList<String> r ]
 :
-    LB
     { $r = new ArrayList<String>(); }
-    (JVar { $r.add(crop($JVar.text)); })+
-    RB
+    (ArgVar { $r.add(crop($ArgVar.text, 1)); })*
 ;
 
 vars returns [ ArrayList<String> r ]
 :
-    VARS_B
     { $r = new ArrayList<String>(); }
-    (JVar { $r.add(crop($JVar.text)); })+
-    RB
+    (RetVar { $r.add(crop($RetVar.text, 1)); })*
 ;
 
 code returns [ String r; ]
 :
-    LCB
-    { ArrayList<String> a = new ArrayList<String>(); }
-    ( JCode { a.add($JCode.text.substring(1)); })+
+    JCode
     {
-        StringBuilder sb = new StringBuilder();
-        for (String s : a) {
-            sb.append(s);
-            sb.append('\n');
-        }
-        $r = sb.toString();
+        $r = crop($JCode.text, 2);
     }
-    RCB
 ;
 
 parseExpr returns [ ArrayList<ArrayList<ParseItem>> r ]
@@ -99,11 +100,34 @@ parseOption returns [ ArrayList<ParseItem> r ]
         { String c = ""; }
         itemID
         (code { c = $code.r; })?
-        { $r.add(new ParseItem($itemID.text, c)); }
+        {
+            $r.add(new ParseItem($itemID.id, c, $itemID.call));
+        }
     )+
 ;
 
-itemID : ParserID | LexerID ;
+itemID returns [
+    String id,
+    String call
+]
+:
+    (
+        ParserID {
+            $call = "()";
+            $id = $ParserID.text;
+        }
+        (callArgs { $call = crop($callArgs.text, 1); } )?
+    )
+    |
+    (
+        LexerID {
+            $id = $LexerID.text;
+            $call = null;
+        }
+    )
+;
+
+callArgs : CallArgs ;
 
 lexerRule returns [ LexerRule r ]
 :
@@ -113,18 +137,18 @@ lexerRule returns [ LexerRule r ]
 
 token returns [ String r ]
 :
-    TOKEN { $r = crop($TOKEN.text); }
+    TOKEN { $r = crop($TOKEN.text, 1); }
 ;
 
+START_IMPORT : '_IMPORT' ;
 START_PARSER : '_PARSER' ;
 START_LEXER : '_LEXER' ;
 START_SKIP : '_SKIP' ;
 
-fragment SMark : '%' ;
-VARS_B : SMark '[' NL ;
-JVar : '%' ~[\n]* NL ;
-fragment JMark : '#' ;
-JCode : JMark ~[\n]* NL ;
+ArgVar : '%' ~[\n]+ NL;
+RetVar : '^' ~[\n]+ NL;
+JCode : '{$' (TOKEN|.)*? '$}' ;
+CallArgs : '$(' .*? ')$' ;
 
 fragment SmallLetter : 'a'..'z' ;
 fragment BigLetter : 'A'..'Z' ;
@@ -137,11 +161,6 @@ LexerID : BigLetter Letter*;
 ID : Letter+ ;
 
 fragment JID : Letter (Letter | Digit | '.')* ;
-
-LCB : '{\n' ;
-RCB : '}\n' ;
-LB : '[\n' ;
-RB : ']\n' ;
 
 COLON : ':' ;
 SEMICOLON : ';' ;

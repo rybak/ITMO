@@ -22,4 +22,10 @@ public abstract class Parser {
 		throw new ExpectedException(lex, expected, foundType, lex.currToken(),
 				lex.position());
 	}
+	
+	protected String consume() throws ParseException {
+		String t = lex.currToken();
+        lex.nextToken();
+        return t;
+	}
 }

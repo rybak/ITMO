@@ -6,8 +6,7 @@ public class ExpectedException extends ParseException {
 	public ExpectedException(Lexer lex, int[] expected, int foundType,
 			String found, int position) {
 		super(tokensToString(lex, expected) + " expected.\nFound "
-				+ foundToString(foundType, found) + ".", position
-				- found.length() + 1);
+				+ foundToString(foundType, found) + ".", position);
 	}
 
 	private static String tokensToString(Lexer lex, int[] tokens) {
