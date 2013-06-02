@@ -23,5 +23,6 @@ public class Core {
 
 	static void close(PrintWriter out, int level) {
 		Core.printAtLevel(out, level, "}\n");
+		out.println();
 	}
 }

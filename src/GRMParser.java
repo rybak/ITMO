@@ -212,8 +212,8 @@ public class GRMParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 
-			        ArrayList<String> args = null;
-			        ArrayList<String> vars = null;
+			        ArrayList<String> args = new ArrayList<String>();
+			        ArrayList<String> vars = new ArrayList<String>();
 			        String ic = "";
 			    
 			setState(50); ((ParsingContext)_localctx).ParserID = match(ParserID);

@@ -1,5 +1,4 @@
 import java.io.PrintWriter;
-import java.text.ParseException;
 import java.util.*;
 
 public class ParserGenerator {
@@ -38,17 +37,21 @@ public class ParserGenerator {
 	private Map<String, ArrayList<Integer>> follow = new HashMap<String, ArrayList<Integer>>();
 
 	private void calcRules(ArrayList<ParserRule> parserRules) {
-
+		// TODO delete test code VVV
+		ArrayList<Integer> test = new ArrayList<Integer>();
+		test.add(0);
+		for (ParserRule r : parserRules) {
+			first.put(r.name, test);
+		}
+		// TODO delete test code ^^^
 	}
 
 	private void printRuleClass(ParserRule r) {
-		if (r.vars != null) {
-			Core.printAtLevel(out, 1, "public class " + buildType(r) + " {\n");
-			for (String var : r.vars) {
-				Core.printAtLevel(out, 2, var + ";\n");
-			}
-			Core.close(out, 1);
+		Core.printAtLevel(out, 1, "public class " + buildType(r) + " {\n");
+		for (String var : r.vars) {
+			Core.printAtLevel(out, 2, var + ";\n");
 		}
+		Core.close(out, 1);
 	}
 
 	private void printParseMethod(ParserRule S, Map<String, Integer> t) {
@@ -57,52 +60,62 @@ public class ParserGenerator {
 		out.println(PAR_THROWS_CB);
 		Core.printAtLevel(out, 2, "lex = new " + LEX + "(text);\n");
 		Core.printAtLevel(out, 2, "lex.nextToken();\n");
+		printCheck(first.get(S.name), 2);
 		printReturn(buildInvocation(S.name, S.args));
 		Core.close(out, 1);
 	}
 
-	private void printRuleMethod(ParserRule r, Map<String, Integer> t) {
-		String returnType = r.vars == null ? "void" : r.name + '_';
+	private void printCheck(ArrayList<Integer> tokens, int level) {
+		Core.printAtLevel(out, level, "check(");
+		for (int i = 0, n = tokens.size(); i < n; ++i) {
+			out.print(tokens.get(i));
+			if (i < n - 1) {
+				out.print(", ");
+			}
+		}
+		out.println(");");
+	}
+
+	private void printRuleMethod(ParserRule r, Map<String, Integer> tokens) {
+		String returnType = r.name + '_';
 		String ctx = r.name + '0';
-		Core.printAtLevel(out, 1, returnType + ' ' + r.name + '(');
-		printArgs(r.args);
-		out.println(PAR_THROWS_CB);
-		if (r.vars != null) {
-			Core.printAtLevel(out, 2, returnType);
-			out.print(' ');
-			out.print(ctx);
-			out.print(" = new ");
-			out.print(returnType);
-			out.println("();");
+		printRuleMethodHeader(r, returnType, ctx);
+		out.println(r.initCode);
+		Core.printAtLevel(out, 2, "switch(lex.currTokenType()) {\n");
+		for (int t : first.get(r.name)) {
+			Core.printAtLevel(out, 2, "case " + t + ":\n");
+			Core.printAtLevel(out, 3, "\n");
+			Core.printAtLevel(out, 3, "break;\n");
 		}
-		
-		if (r.vars != null) {
-			printReturn(ctx);
-		}
+		Core.close(out, 2);
+		printReturn(ctx);
 		Core.close(out, 1);
 	}
 
+	private void printRuleMethodHeader(ParserRule r, String returnType,
+			String ctx) {
+		Core.printAtLevel(out, 1, returnType + ' ' + r.name + '(');
+		printArgs(r.args);
+		out.println(PAR_THROWS_CB);
+		Core.printAtLevel(out, 2, returnType);
+		out.print(' ');
+		out.print(ctx);
+		out.print(" = new ");
+		out.print(returnType);
+		out.println("();");
+	}
+
 	private void printArgs(ArrayList<String> args) {
-		if (args != null) {
-			for (int i = 0, n = args.size(); i < n; ++i) {
-				out.print(args.get(i));
-				if (i < n - 1) {
-					out.print(", ");
-				}
+		for (int i = 0, n = args.size(); i < n; ++i) {
+			out.print(args.get(i));
+			if (i < n - 1) {
+				out.print(", ");
 			}
 		}
 	}
 
 	private void printReturn(String x) {
 		Core.printAtLevel(out, 2, "return " + x + ";\n");
-	}
-
-	private void printReturn(ParserRule r) {
-		if (r.vars != null) {
-			printReturn(r.name + "0");
-		} else {
-			printReturn("");
-		}
 	}
 
 	private String buildInvocation(String name, ArrayList<String> args) {

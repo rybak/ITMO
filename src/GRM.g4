@@ -39,8 +39,8 @@ file returns
 parsing returns [ ParserRule r ]
 :
     {
-        ArrayList<String> args = null;
-        ArrayList<String> vars = null;
+        ArrayList<String> args = new ArrayList<String>();
+        ArrayList<String> vars = new ArrayList<String>();
         String ic = "";
     }
     ParserID
