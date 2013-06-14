@@ -61,6 +61,34 @@ void client::process_client()
             state = RECEIVING_FILE;
         }
         break;
+    case RECEIVING_FILE:
+        int cnt = buffers()[token].receive();
+        if (buffers()[token].need_pause_sender())
+        {
+            // TODO receiver not catching up
+            // buffer stuffed up
+        }
+        if (!buffers()[token].need_pause_receiver())
+        {
+            // TODO wake up receiver
+        }
+        if (cnt == 0)
+        {
+            // TODO end of received file
+        }
+        break;
+    case SENDING_FILE:
+        int cnt = buffers()[token].send();
+        if (buffers()[token].need_pause_receiver())
+        {
+            // TODO receiver not catching up
+            // buffer stuffed up
+        }
+        if (cnt == 0)
+        {
+            // TODO end of received file
+        }
+        break;
     }
 }
 
