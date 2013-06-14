@@ -26,7 +26,6 @@ int main(int argc, char *argv[])
     send_all(sockfd, SEND_MSG, MSG_SIZE);
     int token;
     recv_all(sockfd, (char *) &token, TOKEN_SIZE);
-    token[TOKEN_SIZE] = 0;
     std::cout << "token : " << token << std::endl;
     char buf[BUF_SIZE];
     while (true)

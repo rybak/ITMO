@@ -1,7 +1,9 @@
 #include <cstring>
+#include <unordered_map>
+#include <iostream>
 #include "client.h"
 #include "big_buffer.h"
-
+#include "http.h"
 namespace
 {
     std::unordered_map<token_t, big_buffer_t>& buffers()
@@ -10,7 +12,6 @@ namespace
         return res;
     }
 }
-
 
 client::client(int events, int fd)
     : state(RECEIVING_MSG), fd(fd), buf(fd, msg, MSG_SIZE)
@@ -42,10 +43,10 @@ void client::process_client()
                 state = SENDING_TOKEN;
                 break;
             case RECEIVER:
-                state = GETTING_TOKEN;
+                state = RECEIVING_TOKEN;
                 break;
             }
-            buf = async_buf(fd, &token, TOKEN_SIZE);
+            buf = async_buf(fd, (char *)&token, TOKEN_SIZE);
         }
         break;
     case RECEIVING_TOKEN:
@@ -58,10 +59,12 @@ void client::process_client()
     case SENDING_TOKEN:
         if (!buf.write())
         {
+            buffers()[token] = big_buffer_t(fd);
             state = RECEIVING_FILE;
         }
         break;
     case RECEIVING_FILE:
+    {
         int cnt = buffers()[token].receive();
         if (buffers()[token].need_pause_sender())
         {
@@ -72,22 +75,32 @@ void client::process_client()
         {
             // TODO wake up receiver
         }
-        if (cnt == 0)
+        if (cnt <= 0)
         {
             // TODO end of received file
         }
+    }
         break;
     case SENDING_FILE:
+    {
         int cnt = buffers()[token].send();
+        if (!buffers()[token].need_pause_sender())
+        {
+            // TODO wake up sender
+        }
         if (buffers()[token].need_pause_receiver())
         {
             // TODO receiver not catching up
-            // buffer stuffed up
         }
-        if (cnt == 0)
+        if (cnt <= 0)
         {
-            // TODO end of received file
+            // TODO end of sended file
         }
+    }
+        break;
+    case UNDEFINED:
+        std::cerr << "UNDEFINED state" << std::endl;
+        exit(2);
         break;
     }
 }
@@ -111,3 +124,15 @@ void client::check_msg()
     }
 }
 
+int client::create_token()
+{
+    return fd;
+}
+
+void client::process_token()
+{
+    if (buffers().count(token) > 0)
+    {
+        buffers()[token].set_receiver(fd);
+    }
+}

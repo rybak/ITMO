@@ -1,62 +1,100 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
+#include <stddef.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <errno.h>
+#include <fcntl.h>
+
+#include <iostream>
+
+#include <sys/socket.h>
+#include <netdb.h>
+#include <sys/epoll.h>
+#include <sys/wait.h>
+
+
+#include "http.h"
+
+typedef int token_t;
+const int WRONG_FD = -1;
 struct async_buf
 {
+    async_buf() : fd(WRONG_FD), buf(NULL), n(0)
+    {}
+
     async_buf(int fd, char *buf, int cnt)
         : fd(fd), buf(buf), n(cnt)
     {}
 
     int read()
     {
-        return rw(read);
+        if (n == 0)
+        {
+            return 0;
+        }
+        int cnt = ::read(fd, (buf + pos), n);
+        shift(cnt, "async_buf::read");
+        return cnt;
     }
 
     int write()
-    {
-        return rw(write);
-    }
-private:
-    int fd;
-    int pos, n;
-    char *buf;
-    int rw(int (*f)(int,char*,int))
     {
         if (n == 0)
         {
             return 0;
         }
-        int cnt = f(fd, buf + pos, n);
-        n -= cnt;
-        pos += cnt;
+        int cnt = ::write(fd, buf + pos, n);
+        shift(cnt, "async_buf::write");
+        return cnt;
+    }
+
+private:
+    int fd;
+    size_t pos, n;
+    char *buf;
+
+    void shift(int cnt, const char *msg)
+    {
+        if (cnt > 0)
+        {
+            n -= cnt;
+            pos += cnt;
+        }
         if (cnt < 0)
         {
-            perror("async_buf");
+            perror(msg);
             exit(1);
         }
-        return cnt;
     }
 };
 
-typedef token_t int;
-
 struct client
 {
-    explicit client(int, int);
+    client(int, int);
+    client() : state(UNDEFINED), fd(WRONG_FD)
+    {}
     void process_client();
 
 private:
     enum state_t
     {
         RECEIVING_MSG, RECEIVING_TOKEN, SENDING_TOKEN,
-        RECEIVING_FILE, SENDING_FILE
+        RECEIVING_FILE, SENDING_FILE, UNDEFINED
     } state;
-    enum client_type_t { SENDER, RECEIVER };
+    enum client_type_t { SENDER, RECEIVER } type;
     token_t token;
-    int input, output;
     int fd;
     async_buf buf;
     char msg[MSG_SIZE];
+
+    void check_msg();
+    int create_token();
+    void process_token();
 };
 
 

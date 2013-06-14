@@ -8,7 +8,6 @@
 #include <fcntl.h>
 
 #include <iostream>
-#include <vector>
 
 #include <sys/socket.h>
 #include <netdb.h>
@@ -18,14 +17,14 @@
 
 #include <pty.h>
 
-#include "http.h"
 #include "client.h"
+
 std::map<int, client> clients;
 
 int process_event(int epollfd, int conn_sock, int events)
 {
     struct epoll_event ev;
-    setnonblocking(conn_sock);
+    // setNonblocking(conn_sock);
     ev.events = (EPOLLIN | EPOLLOUT) & events;
     ev.data.fd = conn_sock;
     if (epoll_ctl(epollfd, EPOLL_CTL_ADD, conn_sock, &ev) == -1)
@@ -33,8 +32,10 @@ int process_event(int epollfd, int conn_sock, int events)
         perror("epoll_ctl: conn_sock");
         exit(EXIT_FAILURE);
     }
-    clients[conn_sock] = client(events);
+    clients[conn_sock] = client(events, conn_sock);
 }
+
+const size_t MAX_EVENTS = 10;
 
 int main(int argc, char *argv[])
 {
@@ -63,7 +64,7 @@ int main(int argc, char *argv[])
             perror("epoll_pwait");
             exit(EXIT_FAILURE);
         }
-        for (i = 0; i < nfds; ++i)
+        for (int i = 0; i < nfds; ++i)
         {
             if (events[i].data.fd == listen_sock)
             {
@@ -73,7 +74,7 @@ int main(int argc, char *argv[])
                     perror("accept");
                     exit(EXIT_FAILURE);
                 }
-                process_event(epolldf, conn_sock, events[i].events);
+                process_event(epollfd, conn_sock, events[i].events);
             } else
             {
                 clients[events[i].data.fd].process_client();
