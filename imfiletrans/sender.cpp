@@ -23,7 +23,11 @@
 int main(int argc, char *argv[])
 {
     int sockfd = init_connect_socket(argv[1], argv[2]);
-    send_all(sockfd, SND_MSG, MSG_SIZE);
+    send_all(sockfd, SEND_MSG, MSG_SIZE);
+    int token;
+    recv_all(sockfd, (char *) &token, TOKEN_SIZE);
+    token[TOKEN_SIZE] = 0;
+    std::cout << "token : " << token << std::endl;
     char buf[BUF_SIZE];
     while (true)
     {

@@ -38,7 +38,7 @@ int process_event(int epollfd, int conn_sock, int events)
 
 int main(int argc, char *argv[])
 {
-    std::cout << "Server " << std::endl;
+    std::cout << "Server" << std::endl;
     int sockfd = init_listen_socket(argv[1], argv[2]);
     struct epoll_event ev, events[MAX_EVENTS];
     int listen_sock = sockfd, conn_sock, nfds, epollfd;

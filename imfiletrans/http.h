@@ -19,27 +19,38 @@
 #include <sys/wait.h>
 
 const size_t BUF_SIZE = 4096;
-#define MSG_SIZE 5
-const char *SND_MSG = "send";
-const char *RCV_MSG = "recv";
+const size_t MSG_SIZE = 5;
+const size_t TOKEN_SIZE = sizeof(int);
+const char *SEND_MSG = "send";
+const char *RECV_MSG = "recv";
 
-int send_all(int fd, const char *buf, int n)
+int do_all(int fd, const char *buf, int n, int (*f)(int, char*, int))
 {
     while (n > 0)
     {
-        int sent = write(fd, buf, n);
-        if (sent < 0)
+        int cnt = f(fd, buf, n);
+        if (cnt < 0)
         {
-            perror("write error");
+            perror("do_all");
             exit(1);
         }
-        if (sent > 0)
+        if (cnt > 0)
         {
-            buf += sent;
-            n -= sent;
+            buf += cnt;
+            n -= cnt;
         }
     }
     return 0;
+}
+
+int send_all(int fd, const char *buf, int n)
+{
+    do_all(fd, buf, n, write);
+}
+
+int recv_all(int fd, const char *buf, int n)
+{
+    do_all(fd, buf, n, read);
 }
 
 int init_socket(char *node, char *service, struct addrinfo **servinfo)
@@ -73,7 +84,7 @@ int init_connect_socket(char *node, char *service)
     int sockfd = init_socket(node, service, &servinfo);
     if (connect(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1)
     {
-        perror("connect :\n");
+        perror("connect");
         exit(1);
     }
     freeaddrinfo(servinfo);
@@ -88,17 +99,18 @@ int init_listen_socket(char *node, char *service)
     if (setsockopt(sockfd, SOL_SOCKET,
         SO_REUSEADDR, &yes, sizeof(int)) < 0)
     {
-        std::cerr << "setsockopt -1" << std::endl;
+        
+        std::cerr << "setsockopt" << std::endl;
         exit(1);
     }
     if (bind(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) < 0)
     {
-        perror("bind error : ");
+        perror("bind");
         exit(1);
     }
     if (listen(sockfd, 5) < 0)
     {
-        perror("listem error : ");
+        perror("listen");
         exit(1);
     }
     freeaddrinfo(servinfo);

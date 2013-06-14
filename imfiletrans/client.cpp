@@ -1,16 +1,28 @@
+#include <cstring>
 #include "client.h"
+#include "big_buffer.h"
+
+namespace
+{
+    std::unordered_map<token_t, big_buffer_t>& buffers()
+    {
+        static std::unordered_map<token_t, big_buffer_t> res;
+        return res;
+    }
+}
+
 
 client::client(int events, int fd)
-    : state(GET_MSG), fd(fd)
+    : state(RECEIVING_MSG), fd(fd), buf(fd, msg, MSG_SIZE)
 {
     if (events & EPOLLIN)
     {
-        type = IN;
+        type = SENDER;
         return;
     }
     if (events & EPOLLOUT)
     {
-        type = OUT;
+        type = RECEIVER;
         return;
     }
 }
@@ -19,49 +31,55 @@ void client::process_client()
 {
     switch(state)
     {
-    case GET_MSG:
-        buf = async_buf(fd, msg, MSG_SIZE);
-        state = GETTING_MSG;
-        break;
-    case GETTING_MSG:
-        if (!buf.read())
+    case RECEIVING_MSG:
+        if (buf.read() == 0)
         {
             check_msg();
             switch (type)
             {
-            case IN:
-                state = SEND_TOKEN;
+            case SENDER:
+                token = create_token();
+                state = SENDING_TOKEN;
                 break;
-            case OUT:
-                state = GET_TOKEN;
+            case RECEIVER:
+                state = GETTING_TOKEN;
                 break;
             }
+            buf = async_buf(fd, &token, TOKEN_SIZE);
         }
         break;
-    case GET_TOKEN:
-        buf = async_buf(fd, &token, TOKEN_SIZE);
-        state = GETTING_TOKEN;
-        break;
-    case GETTING_TOKEN:
+    case RECEIVING_TOKEN:
         if (!buf.read())
         {
             process_token();
-            state = WRITING;
+            state = SENDING_FILE;
         }
         break;
-    case READING:
-        if (!buf.read())
+    case SENDING_TOKEN:
+        if (!buf.write())
         {
-
+            state = RECEIVING_FILE;
         }
         break;
-    case OUT:
-        process_out();
+    }
+}
+
+void client::check_msg()
+{
+    bool ok = true;
+    switch(type)
+    {
+    case SENDER:
+        ok = strncmp(msg, SEND_MSG, MSG_SIZE) == 0;
         break;
-    default:
-        std::cerr << "THIS SHOULD NOT HAVE HAPPENED" << std::endl;
+    case RECEIVER:
+        ok = strncmp(msg, RECV_MSG, MSG_SIZE) == 0;
+        break;
+    }
+    if (!ok)
+    {
+        std::cerr << "Wrong message : " << msg << std::endl;
         exit(1);
     }
 }
 
-void client::process_in()
