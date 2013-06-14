@@ -33,12 +33,7 @@ int process_event(int epollfd, int conn_sock, int events)
         perror("epoll_ctl: conn_sock");
         exit(EXIT_FAILURE);
     }
-    clients[conn_sock] = client();
-}
-
-int init_read_file(int fd)
-{
-    
+    clients[conn_sock] = client(events);
 }
 
 int main(int argc, char *argv[])
@@ -81,16 +76,7 @@ int main(int argc, char *argv[])
                 process_event(epolldf, conn_sock, events[i].events);
             } else
             {
-                if (events[i].events & EPOLLIN)
-                {
-                    init_read_file(events[i].data.fd);
-                    continue;
-                }
-                if (events[i].events & EPOLLOUT)
-                {
-                    init_write_file(events[i].data.fd);
-                    continue;
-                }
+                clients[events[i].data.fd].process_client();
             }
         }
     }

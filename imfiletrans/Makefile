@@ -1,3 +1,5 @@
+all : sender server receiver
+
 sender : sender.cpp http.h
 	g++ sender.cpp http.h -o sender
 server : server.cpp http.h

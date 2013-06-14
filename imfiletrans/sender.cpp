@@ -23,7 +23,7 @@
 int main(int argc, char *argv[])
 {
     int sockfd = init_connect_socket(argv[1], argv[2]);
-    send_all(sockfd, SND_MSG, TYPE_SIZE);
+    send_all(sockfd, SND_MSG, MSG_SIZE);
     char buf[BUF_SIZE];
     while (true)
     {

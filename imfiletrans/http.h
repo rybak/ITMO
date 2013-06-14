@@ -19,7 +19,7 @@
 #include <sys/wait.h>
 
 const size_t BUF_SIZE = 4096;
-#define TYPE_SIZE 5
+#define MSG_SIZE 5
 const char *SND_MSG = "send";
 const char *RCV_MSG = "recv";
 
