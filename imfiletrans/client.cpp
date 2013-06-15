@@ -13,88 +13,161 @@ namespace
     }
 }
 
-client::client(int events, int fd)
-    : state(RECEIVING_MSG), fd(fd), buf(fd, msg, MSG_SIZE)
+void client::default_values()
 {
-    if (events & EPOLLIN)
+    msg = new char[MSG_SIZE];
+    msg_pos = token_pos = 0;
+    pause = false;
+    wake_up = WRONG_FD;
+}
+
+client::client(int events, int fd)
+    : state(RECEIVING_MSG), fd(fd)
+{
+    if (!((events & EPOLLIN) || (events & EPOLLOUT)))
     {
-        type = SENDER;
-        return;
+        std::cerr << "Client constructor" << std::endl;
+        exit(2);
     }
-    if (events & EPOLLOUT)
+    default_values();
+    strncpy(msg, "DEAD", MSG_SIZE);
+}
+
+client::client() : state(UNDEFINED), fd(WRONG_FD), msg(NULL)
+{ }
+
+client::client(const client& b)
+    : state(b.state), fd(b.fd), token(b.token)
+{
+    default_values();
+    strncpy(msg, "DEAD", MSG_SIZE);
+}
+
+client::~client()
+{
+    delete[] msg;
+}
+
+void client::read_msg()
+{
+    int cnt = ::read(fd, msg + msg_pos, MSG_SIZE - msg_pos);
+    if (cnt < 0)
     {
-        type = RECEIVER;
-        return;
+        perror("read_msg");
+        exit(1);
     }
+    msg_pos += cnt;
+}
+
+void client::read_token()
+{
+    int cnt =
+        ::read(fd, (&token) + token_pos, TOKEN_SIZE - token_pos);
+    if (cnt < 0)
+    {
+        perror("read_token");
+        exit(1);
+    }
+    token_pos += cnt;
+}
+
+void client::write_token()
+{
+    int cnt =
+        ::write(fd, (&token) + token_pos, TOKEN_SIZE - token_pos);
+    if (cnt < 0)
+    {
+        perror("write_token");
+        exit(1);
+    }
+    token_pos += cnt;
 }
 
 void client::process_client()
 {
+    std::cout << "process_client " << fd << std::endl;
+    std::cout.flush();
     switch(state)
     {
     case RECEIVING_MSG:
-        if (buf.read() == 0)
+        std::cout << "RECEIVING_MSG" << std::endl;
+        read_msg();
+        if (msg_pos == MSG_SIZE)
         {
             check_msg();
+            std::cout << "good message \"" << msg << '"' << std::endl;
             switch (type)
             {
             case SENDER:
+                std::cout << "creating token... ";
+                std::cout.flush();
                 token = create_token();
+                std::cout << token << std::endl;
                 state = SENDING_TOKEN;
                 break;
             case RECEIVER:
                 state = RECEIVING_TOKEN;
                 break;
             }
-            buf = async_buf(fd, (char *)&token, TOKEN_SIZE);
         }
         break;
     case RECEIVING_TOKEN:
-        if (!buf.read())
+        std::cout << "RECEIVING_TOKEN" << std::endl;
+        read_token();
+        if (token_pos == TOKEN_SIZE)
         {
             process_token();
             state = SENDING_FILE;
         }
         break;
     case SENDING_TOKEN:
-        if (!buf.write())
+        std::cout << "SENDING_TOKEN" << std::endl;
+        write_token();
+        if (token_pos == TOKEN_SIZE)
         {
-            buffers()[token] = big_buffer_t(fd);
+            std::cout << "token sent " << token << std::endl;
+            buffers().emplace(token, big_buffer_t(fd));
             state = RECEIVING_FILE;
         }
         break;
     case RECEIVING_FILE:
     {
+        std::cout << "RECEIVING_FILE" << std::endl;
         int cnt = buffers()[token].receive();
-        if (buffers()[token].need_pause_sender())
+        if (buffers().at(token).pause_sender)
         {
-            // TODO receiver not catching up
-            // buffer stuffed up
+            pause = true;
         }
-        if (!buffers()[token].need_pause_receiver())
+        if (!buffers().at(token).pause_receiver)
         {
-            // TODO wake up receiver
+            wake_up = buffers().at(token).receiver_sock;
+        } else
+        {
+            wake_up = WRONG_FD;
         }
         if (cnt <= 0)
         {
-            // TODO end of received file
+            state = DEAD;
         }
     }
         break;
     case SENDING_FILE:
     {
-        int cnt = buffers()[token].send();
-        if (!buffers()[token].need_pause_sender())
+        int cnt = buffers().at(token).send();
+        if (!buffers().at(token).pause_sender)
         {
-            // TODO wake up sender
+            wake_up = buffers().at(token).sender_sock;
+        } else
+        {
+            wake_up = WRONG_FD;
         }
-        if (buffers()[token].need_pause_receiver())
+        if (buffers().at(token).pause_receiver)
         {
-            // TODO receiver not catching up
+            pause = true;
         }
         if (cnt <= 0)
         {
-            // TODO end of sended file
+            state = DEAD;
         }
     }
         break;
@@ -103,19 +176,21 @@ void client::process_client()
         exit(2);
         break;
     }
+    out_ok();
 }
 
 void client::check_msg()
 {
     bool ok = true;
-    switch(type)
+    if (ok = strncmp(msg, SEND_MSG, MSG_SIZE) == 0)
     {
-    case SENDER:
-        ok = strncmp(msg, SEND_MSG, MSG_SIZE) == 0;
-        break;
-    case RECEIVER:
-        ok = strncmp(msg, RECV_MSG, MSG_SIZE) == 0;
-        break;
+        type = SENDER;
+    } else
+    {
+        if (ok = strncmp(msg, RECV_MSG, MSG_SIZE) == 0)
+        {
+            type = RECEIVER;
+        }
     }
     if (!ok)
     {
@@ -134,5 +209,8 @@ void client::process_token()
     if (buffers().count(token) > 0)
     {
         buffers()[token].set_receiver(fd);
+    } else
+    {
+        state = DEAD;
     }
 }

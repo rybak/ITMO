@@ -1,7 +1,3 @@
-// sender server.com 1234 < file
-// token <- server
-// std::cout << token 
-
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -22,15 +18,21 @@
 
 int main(int argc, char *argv[])
 {
+    std::cout << "sender" << std::endl;
     int sockfd = init_connect_socket(argv[1], argv[2]);
+    std::cout << "sending message" << std::endl;
     send_all(sockfd, SEND_MSG, MSG_SIZE);
+    out_ok();
     int token;
+    std::cout << "waiting token" << std::endl;
     recv_all(sockfd, (char *) &token, TOKEN_SIZE);
+    out_ok();
     std::cout << "token : " << token << std::endl;
     char buf[BUF_SIZE];
     while (true)
     {
         int cnt = read(0, buf, BUF_SIZE);
+        sleep(1);
         if (cnt == 0)
         {
             break;

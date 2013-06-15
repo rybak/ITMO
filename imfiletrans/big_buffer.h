@@ -12,12 +12,24 @@ const size_t BIG_BUFFER_SIZE = 32 * 1024 * 1024;
 struct big_buffer_t
 {
     big_buffer_t()
-        : sender_sock(WRONG_FD), receiver_sock(WRONG_FD)
-    {}
+        : sender_sock(WRONG_FD), receiver_sock(WRONG_FD),
+        pause_receiver(false), pause_sender(false)
+    {
+        buf = new char[BIG_BUFFER_SIZE];
+    }
+
     big_buffer_t(int sender_sock)
-        : sender_pos(0), receiver_pos(0), sender_sock(sender_sock),
-          receiver_sock(WRONG_FD)
-    { }
+        : sender_pos(0), receiver_pos(0),
+        sender_sock(sender_sock), receiver_sock(WRONG_FD),
+        pause_receiver(false), pause_sender(false)
+    {
+        buf = new char[BIG_BUFFER_SIZE];
+    }
+
+    ~big_buffer_t()
+    {
+        delete[] buf;
+    }
 
     void set_receiver(int sock)
     {
@@ -50,6 +62,7 @@ struct big_buffer_t
                 "no receiver" << std::endl;
             exit(1);
         }
+        std::cout << "big_buf_t::send" << std::endl;
         int cnt = write(receiver_sock, buf + receiver_pos,
                 sender_pos - receiver_pos);
         if (cnt > 0)
@@ -65,26 +78,22 @@ struct big_buffer_t
         memmove(buf, buf + receiver_pos, n);
         receiver_pos = 0;
         sender_pos = n;
+        if (sender_pos == 0)
+        {
+            pause_receiver = true;
+            pause_sender = false;
+        }
         return cnt;
     }
 
-    const bool need_pause_sender() const
-    {
-        return pause_sender;
-    }
-    const bool need_pause_receiver() const
-    {
-        return pause_receiver;
-    }
-
+    int sender_sock;
+    int receiver_sock;
+    bool pause_sender, pause_receiver;
 private:
     static const int WRONG_FD = -1;
     int sender_pos;
-    int sender_sock;
     int receiver_pos;
-    int receiver_sock;
-    bool pause_sender, pause_receiver;
-    char *buf[BIG_BUFFER_SIZE];
+    char *buf;
 };
 
 #endif

@@ -1,3 +1,5 @@
+
+
 all : sender server receiver
 
 sender : sender.cpp http.o
@@ -7,10 +9,10 @@ receiver : receiver.cpp http.o
 	g++ receiver.cpp http.o -o receiver
 
 http.o : http.cpp http.h
-	g++ -c http.cpp
+	g++ -g -c http.cpp
 
 client.o : client.h client.cpp http.o
-	g++ -std=c++11 -c client.cpp
+	g++ -g -std=c++11 -c client.cpp
 
 server : server.cpp big_buffer.h client.o http.o
-	g++ -std=c++11 server.cpp client.o http.o -o server
+	g++ -g -std=c++11 server.cpp client.o http.o -o server

@@ -13,16 +13,19 @@
 #include <netdb.h>
 #include <sys/epoll.h>
 #include <sys/wait.h>
-#include <map>
-
-#include <pty.h>
+#include <unordered_map>
 
 #include "client.h"
 
-std::map<int, client> clients;
+std::unordered_map<int, client>& clients()
+{
+    static auto res = std::unordered_map<int, client>();
+    return res;
+}
 
 int process_event(int epollfd, int conn_sock, int events)
 {
+    std::cout << "process_event fd == " << conn_sock << std::endl;
     struct epoll_event ev;
     // setNonblocking(conn_sock);
     ev.events = (EPOLLIN | EPOLLOUT) & events;
@@ -32,33 +35,48 @@ int process_event(int epollfd, int conn_sock, int events)
         perror("epoll_ctl: conn_sock");
         exit(EXIT_FAILURE);
     }
-    clients[conn_sock] = client(events, conn_sock);
+    clients().emplace(conn_sock, client(events, conn_sock));
+    out_ok();
+}
+
+void mod(int epollfd, int fd, int mode)
+{
+    epoll_event ev;
+    ev.data.fd = fd;
+    ev.events = mode;
+    if (epoll_ctl(epollfd, EPOLL_CTL_MOD, fd, &ev) < 0)
+    {
+        perror("epoll_ctl");
+        exit(EXIT_FAILURE);
+    }
 }
 
 const size_t MAX_EVENTS = 10;
 
 int main(int argc, char *argv[])
 {
-    std::cout << "Server" << std::endl;
+    std::cout << "server" << std::endl;
     int sockfd = init_listen_socket(argv[1], argv[2]);
     struct epoll_event ev, events[MAX_EVENTS];
     int listen_sock = sockfd, conn_sock, nfds, epollfd;
-    epollfd = epoll_create(42); // ... and such things
+    epollfd = epoll_create1(0); // ... and such things
     if (epollfd == -1)
     {
         perror("epoll_create");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     ev.events = EPOLLIN | EPOLLOUT | EPOLLERR;
     ev.data.fd = listen_sock;
     if (epoll_ctl(epollfd, EPOLL_CTL_ADD, listen_sock, &ev) == -1)
     {
-        perror("epoll_ctl: listen_sock");
-        exit(1);
+        perror("epoll_ctl: add listen_sock");
+        exit(EXIT_FAILURE);
     }
     while (true)
     {
+        std::cout << "epoll_wait" << std::endl;
         nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
+        out_ok();
         if (nfds == -1)
         {
             perror("epoll_pwait");
@@ -69,7 +87,7 @@ int main(int argc, char *argv[])
             if (events[i].data.fd == listen_sock)
             {
                 conn_sock = accept(listen_sock, NULL, NULL);
-                if (conn_sock == -1)
+                if (conn_sock < 0)
                 {
                     perror("accept");
                     exit(EXIT_FAILURE);
@@ -77,7 +95,36 @@ int main(int argc, char *argv[])
                 process_event(epollfd, conn_sock, events[i].events);
             } else
             {
-                clients[events[i].data.fd].process_client();
+                int id = events[i].data.fd;
+                clients().at(id).process_client();
+                if (clients().at(id).pause)
+                {
+                    std::cout << "pause " << id << std::endl;
+                    mod(epollfd, id, EPOLLERR);
+                }
+                if (clients().at(id).wake_up != WRONG_FD)
+                {
+                    int fd = clients().at(id).wake_up;
+                    std::cout << "wake up " << fd << std::endl;
+                    mod(epollfd, fd, EPOLLIN | EPOLLOUT | EPOLLERR);
+                }
+                switch(clients().at(id).state)
+                {
+                case client::DEAD:
+                    std::cout << "dead " << id << std::endl;
+                    epoll_ctl(epollfd, EPOLL_CTL_DEL, id, NULL);
+                    close(id);
+                    break;
+                case client::SENDING_TOKEN:
+                case client::SENDING_FILE:
+                    mod(epollfd, id, EPOLLOUT | EPOLLERR);
+                    break;
+                case client::RECEIVING_MSG:
+                case client::RECEIVING_TOKEN:
+                case client::RECEIVING_FILE:
+                    mod(epollfd, id, EPOLLIN | EPOLLERR);
+                    break;
+                }
             }
         }
     }

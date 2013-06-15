@@ -22,76 +22,34 @@
 
 typedef int token_t;
 const int WRONG_FD = -1;
-struct async_buf
-{
-    async_buf() : fd(WRONG_FD), buf(NULL), n(0)
-    {}
-
-    async_buf(int fd, char *buf, int cnt)
-        : fd(fd), buf(buf), n(cnt)
-    {}
-
-    int read()
-    {
-        if (n == 0)
-        {
-            return 0;
-        }
-        int cnt = ::read(fd, (buf + pos), n);
-        shift(cnt, "async_buf::read");
-        return cnt;
-    }
-
-    int write()
-    {
-        if (n == 0)
-        {
-            return 0;
-        }
-        int cnt = ::write(fd, buf + pos, n);
-        shift(cnt, "async_buf::write");
-        return cnt;
-    }
-
-private:
-    int fd;
-    size_t pos, n;
-    char *buf;
-
-    void shift(int cnt, const char *msg)
-    {
-        if (cnt > 0)
-        {
-            n -= cnt;
-            pos += cnt;
-        }
-        if (cnt < 0)
-        {
-            perror(msg);
-            exit(1);
-        }
-    }
-};
-
 struct client
 {
-    client(int, int);
-    client() : state(UNDEFINED), fd(WRONG_FD)
-    {}
     void process_client();
-
-private:
+    client(int, int);
+    client();
+    ~client();
+    client(const client&);
+    bool pause;
+    int wake_up;
     enum state_t
     {
         RECEIVING_MSG, RECEIVING_TOKEN, SENDING_TOKEN,
-        RECEIVING_FILE, SENDING_FILE, UNDEFINED
+        RECEIVING_FILE, SENDING_FILE, UNDEFINED, DEAD
     } state;
+    void test();
+
+private:
     enum client_type_t { SENDER, RECEIVER } type;
     token_t token;
     int fd;
-    async_buf buf;
-    char msg[MSG_SIZE];
 
+    char *msg;
+    size_t msg_pos, token_pos;
+    void default_values();
+    void read_msg();
+    void read_token();
+    void write_token();
+    
     void check_msg();
     int create_token();
     void process_token();
