@@ -21,11 +21,11 @@ int main(int argc, char *argv[])
     std::cerr << "sender" << std::endl;
     int sockfd = init_connect_socket(argv[1], argv[2]);
     std::cerr << "sending message" << std::endl;
-    send_all(sockfd, SEND_MSG, MSG_SIZE);
+    write_all(sockfd, SEND_MSG, MSG_SIZE);
     out_ok();
     int token;
     std::cerr << "waiting token" << std::endl;
-    recv_all(sockfd, (char *) &token, TOKEN_SIZE);
+    read_all(sockfd, (char *) &token, TOKEN_SIZE);
     out_ok();
     std::cerr << "token : " << token << std::endl;
     char buf[BUF_SIZE];
@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
             perror("read error");
             exit(1);
         }
-        send_all(sockfd, buf, cnt);
+        write_all(sockfd, buf, cnt);
         sleep(1);
     }
     std::cerr << "token : " << token << std::endl;

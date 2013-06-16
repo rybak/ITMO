@@ -21,14 +21,13 @@ void out_ok(int level)
     }
     std::cerr << "...ok" << std::endl;
 }
-int send_all(int fd, const char *buf, int n)
+
+int write_all(int fd, const char *buf, int n)
 {
     int pos = 0;
     while (pos < n)
     {
-        std::cerr << "send_all n = " << n << std::endl;
         int cnt = write(fd, buf + pos, n - pos);
-        std::cerr << "send_all cnt = " << cnt << std::endl;
         if (cnt < 0)
         {
             perror("send_all");
@@ -42,7 +41,7 @@ int send_all(int fd, const char *buf, int n)
     return 0;
 }
 
-int recv_all(int fd, char *buf, int n)
+int read_all(int fd, char *buf, int n)
 {
     int pos = 0;
     while (pos < n)

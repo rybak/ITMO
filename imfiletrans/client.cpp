@@ -67,11 +67,12 @@ void client::process_client()
         send_file();
         break;
     case UNDEFINED:
-        std::cerr << "\tUNDEFINED state" << std::endl;
+        std::cerr << ERROR"UNDEFINED state" << std::endl;
         exit(2);
         break;
     case DEAD:
         std::cerr << "\tWAT?! 0_0" << std::endl;
+        exit(2);
         break;
     }
 }
@@ -87,7 +88,7 @@ void client::receive_msg()
             process_msg();
         } else
         {
-            std::cerr << "Wrong message : " << msg << std::endl;
+            std::cerr << "\t\t\tWrong message : " << msg << std::endl;
             state = DEAD;
         }
     }
@@ -99,7 +100,7 @@ void client::read_msg()
     int cnt = ::read(fd, msg + msg_pos, MSG_SIZE - msg_pos);
     if (cnt < 0)
     {
-        perror("read_msg");
+        perror(ERROR"read_msg");
         exit(1);
     }
     msg_pos += cnt;
@@ -122,11 +123,10 @@ bool client::check_msg()
 
 void client::process_msg()
 {
-    std::cerr << "\t\tgood message \"" << msg << '"' << std::endl;
+    std::cerr << "\t\t\tgood message \"" << msg << '"' << std::endl;
     switch (type)
     {
     case SENDER:
-        std::cerr << "\t\tcreating token... ";
         token = create_token();
         std::cerr << token << std::endl;
         state = SENDING_TOKEN;
@@ -139,6 +139,7 @@ void client::process_msg()
 
 int client::create_token()
 {
+    std::cerr << "\t\t\tcreating token... ";
     return fd;
 }
 
@@ -150,7 +151,7 @@ void client::receive_token()
     {
         if (check_token())
         {
-            std::cerr << "Good token " << token << std::endl;
+            std::cerr << "\t\tGood token : " << token << std::endl;
             state = SENDING_FILE;
         } else
         {
@@ -166,7 +167,7 @@ void client::read_token()
         ::read(fd, (&token) + token_pos, TOKEN_SIZE - token_pos);
     if (cnt < 0)
     {
-        perror("read_token");
+        perror(ERROR"read_token");
         exit(1);
     }
     token_pos += cnt;
@@ -182,7 +183,7 @@ bool client::check_token()
             return true;
         } else
         {
-            std::cerr << "Token " << token
+            std::cerr << "\t\tToken " << token
                 << " is taken." << std::endl;
             return false;
         }
@@ -211,7 +212,7 @@ void client::write_token()
         ::write(fd, (&token) + token_pos, TOKEN_SIZE - token_pos);
     if (cnt < 0)
     {
-        perror("write_token");
+        perror(ERROR"write_token");
         exit(1);
     }
     token_pos += cnt;
@@ -221,6 +222,7 @@ void client::receive_file()
 {
     std::cerr << "\tRECEIVING_FILE" << std::endl;
     int cnt = buffers().at(token).receive();
+    pause = false;
     if (buffers().at(token).pause_sender)
     {
         pause = true;
@@ -232,9 +234,10 @@ void client::receive_file()
     {
         wake_up = WRONG_FD;
     }
-    if (cnt <= 0)
+    if ((cnt < 0) || (cnt == 0 && !pause))
     {
         state = DEAD;
+        wake_up = buffers().at(token).receiver_sock;
     }
 }
 
@@ -242,9 +245,7 @@ void client::send_file()
 {
     std::cerr << "\tSENDING_FILE" << std::endl;
     int cnt = buffers().at(token).send();
-    if (cnt == 0)
-    {
-    }
+    pause = false;
     if (!buffers().at(token).pause_sender)
     {
         wake_up = buffers().at(token).sender_sock;
@@ -261,7 +262,7 @@ void client::send_file()
         std::cerr << "\t\tDONE" << std::endl;
         state = DEAD;
     }
-    if (cnt < 0)
+    if ((cnt < 0) || (cnt == 0 && !pause))
     {
         state = DEAD;
     }

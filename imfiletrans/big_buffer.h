@@ -7,8 +7,9 @@
 #include <fcntl.h>
 #include <iostream>
 
-const size_t BIG_BUFFER_SIZE = 32 * 1024 * 1024;
-
+// const size_t BIG_BUFFER_SIZE = 32 * 1024 * 1024;
+const size_t BIG_BUFFER_SIZE = 32;
+#define BBERROR "\t\tbig buffer error : "
 struct big_buffer_t
 {
     void default_values()
@@ -23,50 +24,39 @@ struct big_buffer_t
         : sender_sock(WRONG_FD), receiver_sock(WRONG_FD),
         buf(NULL)
     {
-        std::cerr << "\t\tbig_buffer_t()" << std::endl;
-        default_values();
+        //default_values();
     }
 
     big_buffer_t(int sender_sock)
         : sender_sock(sender_sock), receiver_sock(WRONG_FD),
         buf(NULL)
     {
-        std::cerr << "\t\tbig_buffer_t(int)" << std::endl;
-        default_values();
     }
 
     big_buffer_t(const big_buffer_t& b)
         : sender_sock(b.sender_sock),
         receiver_sock(b.receiver_sock)
     {
-        std::cerr << "\t\tbig_buffer_t(big_buffer_t)" << std::endl;
         buf = new char[BIG_BUFFER_SIZE];
         default_values();
     }
 
     ~big_buffer_t()
     {
-        std::cerr << "\t\tbig_buffer_t::~~~~" << std::endl;
         delete[] buf;
     }
 
     int receive()
     {
-        std::cerr << "\t\tbig_buffer_t::receive\n";
-        std::cerr << "\t\t\tpos = " << sender_pos << std::endl;
         int cnt = read(sender_sock, buf + sender_pos,
                 BIG_BUFFER_SIZE - sender_pos);
-        std::cerr << "\t\t\tfile : ";
-        write(2, buf, 20);
-        std::cerr << std::endl;
         if (cnt > 0)
         {
             sender_pos += cnt;
         }
         if (cnt < 0)
         {
-            perror("\t\tERROR : big_buffer_t::receive read");
-
+            perror(BBERROR"receive");
         }
         if (sender_pos == BIG_BUFFER_SIZE)
         {
@@ -87,7 +77,6 @@ struct big_buffer_t
                 "no receiver" << std::endl;
             exit(1);
         }
-        std::cout << "big_buffer_t::send" << std::endl;
         int cnt = write(receiver_sock, buf + receiver_pos,
                 sender_pos - receiver_pos);
         if (cnt > 0)
@@ -96,7 +85,7 @@ struct big_buffer_t
         }
         if (cnt < 0)
         {
-            perror("big_buffer_t::send write");
+            perror(BBERROR"send write");
         }
         int n = sender_pos - receiver_pos;
         if (n < 0)
