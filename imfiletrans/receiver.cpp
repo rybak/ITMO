@@ -18,17 +18,17 @@
 
 int main(int argc, char *argv[])
 {
-    std::cout << "receiver" << std::endl;
+    std::cerr << "receiver" << std::endl;
     int sockfd = init_connect_socket(argv[1], argv[2]);
-    std::cout << "sending message" << std::endl;
+    std::cerr << "sending message" << std::endl;
     send_all(sockfd, RECV_MSG, MSG_SIZE);
     out_ok();
     int token = atoi(argv[3]);
-    std::cout << "token : " << token << std::endl;
-    std::cout << "sending token" << std::endl;
+    std::cerr << "token : " << token << std::endl;
+    std::cerr << "sending token" << std::endl;
     send_all(sockfd, (char *) &token, TOKEN_SIZE);
     out_ok();
-    char buf[BUF_SIZE];
+    char *buf = new char[BUF_SIZE];
     while (true)
     {
         int cnt = read(sockfd, buf, BUF_SIZE);
@@ -41,12 +41,8 @@ int main(int argc, char *argv[])
             perror("read");
             exit(1);
         }
-        int pos = 0;
-        while (pos < cnt)
-        {
-            int wcnt = write(0, buf + pos, cnt - pos);
-            pos += wcnt;
-        }
+        send_all(1, buf, cnt);
     }
+    delete[] buf;
 }
 

@@ -17,6 +17,7 @@
 
 #include "client.h"
 
+
 std::unordered_map<int, client>& clients()
 {
     static auto res = std::unordered_map<int, client>();
@@ -25,7 +26,7 @@ std::unordered_map<int, client>& clients()
 
 int process_event(int epollfd, int conn_sock, int events)
 {
-    std::cout << "process_event fd == " << conn_sock << std::endl;
+    std::cerr << "\tprocess_event fd == " << conn_sock << std::endl;
     struct epoll_event ev;
     // setNonblocking(conn_sock);
     ev.events = (EPOLLIN | EPOLLOUT) & events;
@@ -36,10 +37,11 @@ int process_event(int epollfd, int conn_sock, int events)
         exit(EXIT_FAILURE);
     }
     clients().emplace(conn_sock, client(events, conn_sock));
-    out_ok();
 }
 
-void mod(int epollfd, int fd, int mode)
+int epollfd;
+
+void mod(int fd, int mode)
 {
     epoll_event ev;
     ev.data.fd = fd;
@@ -55,10 +57,10 @@ const size_t MAX_EVENTS = 10;
 
 int main(int argc, char *argv[])
 {
-    std::cout << "server" << std::endl;
+    std::cerr << "server" << std::endl;
     int sockfd = init_listen_socket(argv[1], argv[2]);
     struct epoll_event ev, events[MAX_EVENTS];
-    int listen_sock = sockfd, conn_sock, nfds, epollfd;
+    int listen_sock = sockfd, conn_sock, nfds;
     epollfd = epoll_create1(0); // ... and such things
     if (epollfd == -1)
     {
@@ -74,9 +76,8 @@ int main(int argc, char *argv[])
     }
     while (true)
     {
-        std::cout << "epoll_wait" << std::endl;
+        std::cerr << "epoll_wait" << std::endl;
         nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
-        out_ok();
         if (nfds == -1)
         {
             perror("epoll_pwait");
@@ -97,32 +98,53 @@ int main(int argc, char *argv[])
             {
                 int id = events[i].data.fd;
                 clients().at(id).process_client();
+                token_t t = clients().at(id).token;
                 if (clients().at(id).pause)
                 {
-                    std::cout << "pause " << id << std::endl;
-                    mod(epollfd, id, EPOLLERR);
+                    std::cerr << "\tpause " << id << std::endl;
+                    mod(id, EPOLLERR);
                 }
                 if (clients().at(id).wake_up != WRONG_FD)
                 {
                     int fd = clients().at(id).wake_up;
-                    std::cout << "wake up " << fd << std::endl;
-                    mod(epollfd, fd, EPOLLIN | EPOLLOUT | EPOLLERR);
+                    std::cerr << "\twake up " << fd << std::endl;
+                    mod(fd, EPOLLIN | EPOLLOUT | EPOLLERR);
                 }
                 switch(clients().at(id).state)
                 {
                 case client::DEAD:
-                    std::cout << "dead " << id << std::endl;
+                    std::cerr << "\tdead " << id << std::endl;
                     epoll_ctl(epollfd, EPOLL_CTL_DEL, id, NULL);
                     close(id);
+                    if (buffers().count(t))
+                    {
+                        switch(clients().at(id).type)
+                        {
+                        case client::SENDER:
+                            buffers().at(t).sender_dead = true;
+                            buffers().at(t).sender_sock = WRONG_FD;
+                            break;
+                        case client::RECEIVER:
+                            buffers().at(t).receiver_dead = true;
+                            buffers().at(t).receiver_sock = WRONG_FD;
+                            break;
+                        }
+                        if (buffers().at(t).sender_dead
+                            && buffers().at(t).receiver_dead)
+                        {
+                            buffers().erase(t);
+                        }
+                    }
+                    clients().erase(id);
                     break;
                 case client::SENDING_TOKEN:
                 case client::SENDING_FILE:
-                    mod(epollfd, id, EPOLLOUT | EPOLLERR);
+                    mod(id, EPOLLOUT | EPOLLERR);
                     break;
                 case client::RECEIVING_MSG:
                 case client::RECEIVING_TOKEN:
                 case client::RECEIVING_FILE:
-                    mod(epollfd, id, EPOLLIN | EPOLLERR);
+                    mod(id, EPOLLIN | EPOLLERR);
                     break;
                 }
             }

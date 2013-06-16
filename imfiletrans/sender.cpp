@@ -18,21 +18,20 @@
 
 int main(int argc, char *argv[])
 {
-    std::cout << "sender" << std::endl;
+    std::cerr << "sender" << std::endl;
     int sockfd = init_connect_socket(argv[1], argv[2]);
-    std::cout << "sending message" << std::endl;
+    std::cerr << "sending message" << std::endl;
     send_all(sockfd, SEND_MSG, MSG_SIZE);
     out_ok();
     int token;
-    std::cout << "waiting token" << std::endl;
+    std::cerr << "waiting token" << std::endl;
     recv_all(sockfd, (char *) &token, TOKEN_SIZE);
     out_ok();
-    std::cout << "token : " << token << std::endl;
+    std::cerr << "token : " << token << std::endl;
     char buf[BUF_SIZE];
     while (true)
     {
         int cnt = read(0, buf, BUF_SIZE);
-        sleep(1);
         if (cnt == 0)
         {
             break;
@@ -43,6 +42,8 @@ int main(int argc, char *argv[])
             exit(1);
         }
         send_all(sockfd, buf, cnt);
+        sleep(1);
     }
+    std::cerr << "token : " << token << std::endl;
 }
 
