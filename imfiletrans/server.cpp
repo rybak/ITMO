@@ -28,7 +28,7 @@ std::unordered_map<int, client>& clients()
 int epollfd;
 int listen_sock;
 
-int process_event(int events)
+void process_event(int events)
 {
     int conn_sock = accept(listen_sock, NULL, NULL);
     if (conn_sock < 0)
