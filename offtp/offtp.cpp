@@ -60,6 +60,7 @@ void send_error(int conn_sock)
 void send_file_size(int conn_sock, off_t file_size)
 {
     std::cerr << "\t\t\tsend filesize == " << file_size << std::endl;
+    fprintf(stderr, "0xfs = %lX\n", file_size);
     off_t mask = 0xFF;
     for (int i = 0; i < sizeof(off_t); ++i)
     {
