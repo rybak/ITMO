@@ -7,6 +7,8 @@ const size_t MSG_SIZE = 3;
 const char OK_MSG[] = "ok\0";
 const char ERR_MSG[] = "err ";
 void out_ok(int lvl = 0);
+void handle_error(char *);
+
 int write_all(int, const char *, int);
 
 int read_all(int, char *, int);

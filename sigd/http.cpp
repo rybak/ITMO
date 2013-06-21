@@ -13,6 +13,12 @@
 #include <sys/epoll.h>
 #include <sys/wait.h>
 
+void handle_error(char *msg)
+{
+    perror(msg);
+    exit(EXIT_FAILURE);
+}
+
 void out_ok(int level)
 {
     for (int i = 0; i < level; ++i)
@@ -24,6 +30,7 @@ void out_ok(int level)
 
 int write_all(int fd, const char *buf, int n)
 {
+    std::cerr << "write_all" << std::endl;
     int pos = 0;
     while (pos < n)
     {
