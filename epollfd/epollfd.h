@@ -17,7 +17,8 @@ struct sub_task
 
 struct epollfd
 {
-    epollfd();
+    static const int MAX_EVENTS = 10;
+    epollfd(int);
     epollfd(const epollfd &) = delete;
     epollfd & operator=(const epollfd *) = delete;
     epollfd(epollfd &&) = delete;
@@ -28,7 +29,7 @@ struct epollfd
     void unsubscribe(int, uint32_t);
     void cycle();
 private:
-    int fd;
+    int epfd;
     typedef std::pair<int, uint32_t> fdev;
     std::map<fdev, sub_task> sub_tasks;
     std::set<fdev> unsub_tasks;

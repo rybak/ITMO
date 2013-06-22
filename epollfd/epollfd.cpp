@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include "epollfd.h"
 
-epollfd::epollfd()
+epollfd::epollfd(int max_events = MAX_EVENTS)
     : epfd(epoll_create(42))
 {
     if (epfd < 0)
@@ -34,14 +34,25 @@ void epollfd::cycle()
         unsub(*it);
     }
     unsub_tasks.clear();
+    
+    std::vector<epoll_event> tmp(max_events);
+    int nfds = epoll_wait(epfd, tmp.data(), max_events, -1);
+    if (nfds < 0)
+    {
+        throw std::runtime_error("epoll_wait");
+    }
+    for (int i = 0; i < nfds; ++i)
+    {
+        epoll_event &event = tmp[i];
 
+    }
 }
 
 void epollfd::subscribe(int fd, uint32_t ev,
         cont_t cont, cont_t cont_err)
 {
     uint32_t &curr_ee = events[fd];
-    if (curr_ee & ev)
+    if ((curr_ee & ev) || sub_tasks.count({fd, ev}))
     {
         throw std::runtime_error("subscribe : sub already exist");
     }
@@ -56,7 +67,7 @@ void epollfd::unsubscribe(int fd, uint32_t ev)
         return;
     }
     uint32_t &curr_events = events[fd];
-    if ((curr_events & ev) != ev)
+    if (((curr_events & ev) != ev) || unsub_tasks.count({fd, ev}))
     {
         throw std::runtime_error("unsubscribe : doesn't exist");
     }
@@ -90,10 +101,11 @@ void epollfd::unsub(const fdev &task)
     struct epoll_event ee;
     ee.events = new_events;
     ee.data.fd = fd;
-    if (epoll_ctl(epfd, op, fd, &&ee))
+    if (epoll_ctl(epfd, op, fd, &ee))
     {
         throw std::runtime_error("unsub : epoll_ctl");
     }
     actions.erase({fd, ev});
     events[fd] = new_events;
 }
+
