@@ -35,7 +35,7 @@ private:
     std::map<fdev, sub_task> sub_tasks;
     std::set<fdev> unsub_tasks;
     std::map<int, uint32_t> events;
-    std::map<fdev, std::pair<cont_t, cont_t> >
+    std::map<int, std::map<uint32_t, std::pair<cont_t, cont_t> > >
         actions;
     void sub(const sub_task &);
     void unsub(const fdev &);

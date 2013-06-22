@@ -1,9 +1,11 @@
+#include <sys/epoll.h>
+#include <unistd.h>
+
 #include <stdexcept>
 #include <vector>
 #include <iostream>
+#include <assert.h>
 
-#include <sys/epoll.h>
-#include <unistd.h>
 #include "epollfd.h"
 
 epollfd::epollfd(int max_events = MAX_EVENTS)
@@ -35,7 +37,7 @@ void epollfd::cycle()
         unsub(curr);
     }
     unsub_tasks.clear();
-    
+
     std::vector<epoll_event> tmp(max_events);
     int nfds = epoll_wait(epfd, tmp.data(), max_events, -1);
     if (nfds < 0)
@@ -44,8 +46,26 @@ void epollfd::cycle()
     }
     for (int i = 0; i < nfds; ++i)
     {
-        epoll_event &event = tmp[i];
-
+        epoll_event &curr = tmp[i];
+        if (curr.events & EPOLLERR)
+        {
+            for (auto ev_action : actions.at(curr.data.fd))
+            {
+                // 1 second for map
+                // 2 second for cont_err
+                ev_action.second.second();
+            }
+            continue;
+        }
+        for (auto ev : {EPOLLIN, EPOLLOUT})
+        {
+            if (curr.events & ev)
+            {
+                assert(actions.at(static_cast<int>(curr.data.fd)).
+                        count(ev));
+                actions[static_cast<int>(curr.data.fd)][ev].first();
+            }
+        }
     }
 }
 
@@ -88,7 +108,7 @@ void epollfd::sub(const sub_task &task)
     {
         throw std::runtime_error("sub : epoll_ctl");
     }
-    actions[{task.fd, task.events}] = {task.cont, task.cont_err};
+    actions[task.fd][task.events] = {task.cont, task.cont_err};
     events[task.fd] = new_events;
 }
 
@@ -106,7 +126,11 @@ void epollfd::unsub(const fdev &task)
     {
         throw std::runtime_error("unsub : epoll_ctl");
     }
-    actions.erase({fd, ev});
+    actions.at(fd).erase(ev);
+    if (actions.at(fd).empty())
+    {
+        actions.erase(fd);
+    }
     events[fd] = new_events;
 }
 
