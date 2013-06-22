@@ -30,6 +30,7 @@ struct epollfd
     void cycle();
 private:
     int epfd;
+    int max_events;
     typedef std::pair<int, uint32_t> fdev;
     std::map<fdev, sub_task> sub_tasks;
     std::set<fdev> unsub_tasks;
