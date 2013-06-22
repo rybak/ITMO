@@ -12,8 +12,8 @@ struct autofd
     autofd(autofd &&);
     autofd& operator=(autofd &&);
 private:
-    static int wrong_fd = -1;
+    static const int wrong_fd = -1;
     int fd;
-}
+};
 
 #endif

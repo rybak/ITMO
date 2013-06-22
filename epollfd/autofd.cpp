@@ -1,9 +1,19 @@
 #include <unistd.h>
+
+#include <utility>
+
 #include "autofd.h"
 
 autofd::autofd(int fd)
-    : fd(fd)
-{ }
+{
+    if (fd >= 0)
+    {
+        this->fd = fd;
+    } else
+    {
+
+    }
+}
 
 autofd::~autofd()
 {
@@ -13,7 +23,7 @@ autofd::~autofd()
     }
 }
 
-autofd(autofd &&b)
+autofd::autofd(autofd &&b)
     : fd(b.fd)
 {
     b.fd = wrong_fd;
@@ -21,7 +31,6 @@ autofd(autofd &&b)
 
 autofd & autofd::operator=(autofd &&b)
 {
-    fd = b.fd;
-    b.fd = wrong_fd;
+    std::swap(fd, b.fd);
 }
 

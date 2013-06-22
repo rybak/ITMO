@@ -1,12 +1,19 @@
 #ifndef EPOLLFD_H
 #define EPOLLFD_H
-#include <ostream>
 
 #include <functional>
 #include <set>
 #include <map>
 
 typedef std::function<void(void)> cont_t;
+
+struct sub_task
+{
+    int fd;
+    uint32_t events;
+    cont_t cont;
+    cont_t cont_err;
+};
 
 struct epollfd
 {
@@ -19,6 +26,17 @@ struct epollfd
 
     void subscribe(int, uint32_t, cont_t, cont_t);
     void unsubscribe(int, uint32_t);
-}
+    void cycle();
+private:
+    int fd;
+    typedef std::pair<int, uint32_t> fdev;
+    std::map<fdev, sub_task> sub_tasks;
+    std::set<fdev> unsub_tasks;
+    std::map<int, uint32_t> events;
+    std::map<fdev, std::pair<cont_t, cont_t> >
+        actions;
+    void sub(const sub_task &);
+    void unsub(const fdev &);
+};
 
 #endif
