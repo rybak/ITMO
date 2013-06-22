@@ -25,14 +25,14 @@ epollfd::~epollfd()
 
 void epollfd::cycle()
 {
-    for (auto it = sub_tasks.begin(); it != sub_tasks.end(); ++it)
+    for (auto curr : sub_tasks)
     {
-        sub((*it).second);
+        sub(curr.second);
     }
     sub_tasks.clear();
-    for (auto it = unsub_tasks.begin(); it != unsub_tasks.end(); ++it)
+    for (auto curr : unsub_tasks)
     {
-        unsub(*it);
+        unsub(curr);
     }
     unsub_tasks.clear();
     
