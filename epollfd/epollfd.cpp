@@ -8,7 +8,7 @@
 
 #include "epollfd.h"
 
-epollfd::epollfd(int max_events = MAX_EVENTS)
+epollfd::epollfd(int max_events)
     : epfd(epoll_create(42))
 {
     if (epfd < 0)
@@ -97,6 +97,7 @@ void epollfd::unsubscribe(int fd, uint32_t ev)
 
 void epollfd::sub(const sub_task &task)
 {
+    std::cerr << "sub fd == " << task.fd << std::endl;
     uint32_t curr_events = events[task.fd];
     uint32_t new_events = curr_events | task.events;
     int op = task.events == new_events ?
@@ -106,6 +107,7 @@ void epollfd::sub(const sub_task &task)
     ee.data.fd = task.fd;
     if (epoll_ctl(epfd, op, task.fd, &ee))
     {
+        perror("sub");
         throw std::runtime_error("sub : epoll_ctl");
     }
     actions[task.fd][task.events] = {task.cont, task.cont_err};
@@ -114,6 +116,7 @@ void epollfd::sub(const sub_task &task)
 
 void epollfd::unsub(const fdev &task)
 {
+    std::cerr << "unsub fd == " << task.first << std::endl;
     int fd = task.first;
     uint32_t ev = task.second;
     uint32_t curr_events = events[fd];
@@ -124,6 +127,7 @@ void epollfd::unsub(const fdev &task)
     ee.data.fd = fd;
     if (epoll_ctl(epfd, op, fd, &ee))
     {
+        perror("unsub");
         throw std::runtime_error("unsub : epoll_ctl");
     }
     actions.at(fd).erase(ev);

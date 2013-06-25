@@ -18,7 +18,7 @@ struct sub_task
 struct epollfd
 {
     static const int MAX_EVENTS = 10;
-    epollfd(int);
+    epollfd(int max_events = MAX_EVENTS);
     epollfd(const epollfd &) = delete;
     epollfd & operator=(const epollfd *) = delete;
     epollfd(epollfd &&) = delete;
