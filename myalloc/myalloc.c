@@ -3,21 +3,22 @@
 #define SMALL_BLOCK 32
 #define BIG_BLOCK 65536
 
-void * small_malloc(size_t size);
-void * medium_malloc(size_t size);
+#include "small_malloc.h"
+#include "medium_malloc.h"
+
 void * big_malloc(size_t size);
 
 void * malloc(size_t size)
 {
     if (size <= SMALL_BLOCK)
     {
-        return small_malloc(size);
+        return (void *) small_malloc(size);
     }
     if (size >= BIG_BLOCK)
     {
-        return big_malloc(size);
+        return (void *) big_malloc(size);
     }
-    return medium_malloc(size);
+    return (void *) medium_malloc(size);
 }
 
 #define TYPE_SMALL  's'
@@ -26,8 +27,6 @@ void * malloc(size_t size)
 
 char * get_block_type(void *ptr);
 
-void small_free(void *ptr);
-void medium_free(void *ptr);
 void big_free(void *ptr);
 
 void free(void *ptr)
@@ -50,25 +49,14 @@ void free(void *ptr)
 #define LOG_PAGE_SIZE 12
 #define PAGE_SIZE (1 << LOG_PAGE_SIZE)
 
-char get_page_type(void *ptr)
+char * page_start(void *ptr)
 {
     char *p = (char *) ptr;
-    char *page_start = (p >> LOG_PAGE_SIZE) << LOG_PAGE_SIZE;
-    return *page_start;
+    return (p >> LOG_PAGE_SIZE) << LOG_PAGE_SIZE;
 }
 
-typedef struct small_free_page_t
+char get_page_type(void *ptr)
 {
-    struct small_free_page_t *next_page;
-    /* TODO */
-} small_free_page_t;
-
-static small_free_page_t * small_head = NULL;
-
-void * small_malloc(size_t size)
-{
-    assert(size <= SMALL_BLOCK);
-
-
-
+    return *page_start(ptr);
 }
+
