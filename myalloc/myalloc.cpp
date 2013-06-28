@@ -1,4 +1,3 @@
-#include <assert.h>
 
 #define SMALL_BLOCK 32
 #define BIG_BLOCK 65536
@@ -6,8 +5,12 @@
 #include "small_malloc.h"
 #include "medium_malloc.h"
 
-void * big_malloc(size_t size);
 
+extern "C"
+{
+void * malloc(size_t);
+void free(void *);
+}
 void * malloc(size_t size)
 {
     if (size <= SMALL_BLOCK)
@@ -27,7 +30,6 @@ void * malloc(size_t size)
 
 char * get_block_type(void *ptr);
 
-void big_free(void *ptr);
 
 void free(void *ptr)
 {
