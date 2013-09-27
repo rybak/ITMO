@@ -25,19 +25,16 @@ void print_ip()
     struct ifaddrs *ifa = NULL;
     void *tmpAddrPtr = NULL;
 
-    cout << "1" << endl;
     if (getifaddrs(&ifAddrStruct) < 0)
     {
         die("getifaddrs");
     }
-    cout << "2" << endl;
     for (ifa = ifAddrStruct; ifa != NULL; ifa = ifa->ifa_next)
     {
         if (ifa->ifa_addr != NULL)
         {
             if (ifa->ifa_addr->sa_family == AF_INET)
             {
-                cout << "3" << endl;
                 tmpAddrPtr = &((struct sockaddr_in *)ifa->ifa_addr)
                     ->sin_addr;
                 char addressBuffer[INET_ADDRSTRLEN + 1];
@@ -46,7 +43,6 @@ void print_ip()
                         addressBuffer, INET_ADDRSTRLEN);
                 printf("%s IP Address %s\n", ifa->ifa_name, addressBuffer); 
             } else if (ifa->ifa_addr->sa_family==AF_INET6) {
-                cout << "4" << endl;
                 tmpAddrPtr=&((struct sockaddr_in6 *)ifa->ifa_addr)
                     ->sin6_addr;
                 char addressBuffer[INET6_ADDRSTRLEN + 1];
@@ -85,19 +81,13 @@ int main(int argc, char*argv[])
         die("bind");
     }
     
-    printf("before\n");
     print_ip();
-    printf("\nafter\n");
+
     int yes = 1;
     status = setsockopt(sock, SOL_SOCKET, SO_BROADCAST, &yes, sizeof(int) );
 
-    /* -1 = 255.255.255.255 this is a BROADCAST address,
-       a local broadcast address could also be used.
-       you can comput the local broadcat using NIC address and its NETMASK 
-       */ 
-
-    dest_sock.sin_addr.s_addr=htonl(-1); /* send message to 255.255.255.255 */
-    dest_sock.sin_port = htons(atoi(argv[1])); /* port number */
+    dest_sock.sin_addr.s_addr=htonl(-1);
+    dest_sock.sin_port = htons(atoi(argv[1]));
 
     char buffer[MAXBUF];
     for(;;)
