@@ -30,7 +30,7 @@ void dontdie(const char *s)
     printf("continue...\n");
 }
 
-void make_socket(int &fd, struct sockaddr_in &sock)
+void make_socket(int &fd, struct sockaddr_in &sock, uint16_t port)
 {
     fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (fd < 0)
@@ -41,7 +41,7 @@ void make_socket(int &fd, struct sockaddr_in &sock)
     socklen_t si_len = sizeof(sock);
     memset(&sock, 0, si_len);
     sock.sin_family = AF_INET;
-    sock.sin_port = htons(0);
+    sock.sin_port = htons(port);
     sock.sin_addr.s_addr = htonl(INADDR_ANY);
 
     int status = bind(fd, (struct sockaddr *) &sock, si_len);

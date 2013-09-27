@@ -17,5 +17,6 @@ struct message_t
 
 void die(const char *);
 void dontdie(const char *);
-void make_socket(int &, struct sockaddr_in &);
+void make_socket(int &, struct
+        sockaddr_in &, uint16_t);
 #endif

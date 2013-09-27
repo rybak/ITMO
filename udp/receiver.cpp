@@ -41,26 +41,8 @@ void print_entry(const message_t msg)
 int main(int argc, char* argv[])
 {
     int sock;
-
-    sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    if (sock < 0)
-    {
-        die("socket");
-    }
-      
     struct sockaddr_in sock_in;
-    socklen_t si_len = sizeof(struct sockaddr_in);
-    memset(&sock_in, 0, si_len);
-    sock_in.sin_addr.s_addr = htonl(INADDR_ANY);
-    sock_in.sin_port = htons(atoi(argv[1]));
-    sock_in.sin_family = AF_INET;
-
-    int status = bind(sock, (struct sockaddr *) &sock_in,
-            si_len);
-    if (status < 0)
-    {
-        die("bind");
-    }
+    make_socket(sock, sock_in, atoi(argv[1]));
 
     struct timeval tv;
     tv.tv_sec = TIME_INTERVAL;
@@ -75,6 +57,7 @@ int main(int argc, char* argv[])
 
     std::map<int, message_t> clients;
     message_t input;
+    socklen_t si_len = sizeof(sock_in);
     while(true)
     {
         memset(&input, 0, sizeof(input));

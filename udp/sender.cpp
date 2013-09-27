@@ -71,6 +71,7 @@ void print_ip()
     }
     if (ifAddrStruct!= NULL)
     {
+    struct sockaddr_in dest;
         freeifaddrs(ifAddrStruct);
     }
 }
@@ -78,24 +79,8 @@ void print_ip()
 int main(int argc, char*argv[])
 {
     int sock;
-    sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    if (sock < 0)
-    {
-        die("socket");
-    }
-
     struct sockaddr_in dest;
-    socklen_t si_len = sizeof(dest);
-    memset(&dest, 0, si_len);
-    dest.sin_family = AF_INET;
-    dest.sin_port = htons(0);
-    dest.sin_addr.s_addr = htonl(INADDR_ANY);
-
-    int status = bind(sock, (struct sockaddr *) &dest, si_len);
-    if (status < 0)
-    {
-        die("bind");
-    }
+    make_socket(sock, dest, 0);
 
     dest.sin_addr.s_addr = htonl(-1);
     dest.sin_port = htons(atoi(argv[1]));
@@ -103,8 +88,11 @@ int main(int argc, char*argv[])
     print_ip();
 
     int yes = 1;
-    status = setsockopt(sock, SOL_SOCKET,
-            SO_BROADCAST, &yes, sizeof(int) );
+    if (setsockopt(sock, SOL_SOCKET,
+            SO_BROADCAST, &yes, sizeof(int)) < 0)
+    {
+        die("setsockopt");
+    }
 
     message_t msg;
     build_message(&msg, argv[2], argv[3], argv[4]);
@@ -115,9 +103,8 @@ int main(int argc, char*argv[])
         msg.timestamp=time(NULL);
         char buf[msg_size];
         memcpy(buf, &msg, msg_size);
-        status = sendto(sock, buf, msg_size, 0,
-                (struct sockaddr *) &dest, sizeof(dest));
-        if (status < 0)
+        if (sendto(sock, buf, msg_size, 0,
+                (struct sockaddr *) &dest, sizeof(dest)) < 0)
         {
             dontdie("sendto");
         }
