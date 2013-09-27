@@ -13,45 +13,55 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-#define MAXBUF 65536
+#include "common.h"
 
 int main(int argc, char* argv[])
 {
-  int sock, status, buflen;
-  unsigned sinlen;
-  char buffer[MAXBUF];
-  struct sockaddr_in sock_in;
-  int yes = 1;
+    int sock;
 
-  sinlen = sizeof(struct sockaddr_in);
-  memset(&sock_in, 0, sinlen);
+    sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (sock < 0)
+    {
+        die("socket");
+    }
+      
+    struct sockaddr_in sock_in;
+    socklen_t si_len = sizeof(struct sockaddr_in);
+    memset(&sock_in, 0, si_len);
+    sock_in.sin_addr.s_addr = htonl(INADDR_ANY);
+    sock_in.sin_port = htons(atoi(argv[1]));
+    sock_in.sin_family = AF_INET;
 
-  sock = socket (PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    int status = bind(sock, (struct sockaddr *) &sock_in,
+            si_len);
+    if (status < 0)
+    {
+        die("bind");
+    }
 
-  sock_in.sin_addr.s_addr = htonl(INADDR_ANY);
-  sock_in.sin_port = htons(atoi(argv[1]));
-  sock_in.sin_family = PF_INET;
+    printf("Port %d\n", htons(sock_in.sin_port));
 
-  status = bind(sock, (struct sockaddr *)&sock_in, sinlen);
-  printf("Bind Status = %d\n", status);
-
-  status = getsockname(sock, (struct sockaddr *)&sock_in, &sinlen);
-  printf("Sock port %d\n",htons(sock_in.sin_port));
-
-  for (;;)
-  {
-      buflen = MAXBUF;
-      memset(buffer, 0, buflen);
-      status = recvfrom(sock, buffer, buflen, 0, (struct sockaddr *)&sock_in, &sinlen);
-      printf("sendto Status = %d\n", status);
-
-      printf("Message: %s\n", buffer);
-      if(strncmp(buffer, "end", 3) == 0)
-      break;
-              
-  }
-  shutdown(sock, 2);
-  close(sock);
+    size_t buflen = MAXBUF;
+    char buffer[MAXBUF];
+    while(true)
+    {
+        memset(buffer, 0, buflen);
+        int msg_len = recvfrom(sock, buffer, buflen, 0,
+                (struct sockaddr *) &sock_in, &si_len);
+        printf("message length = %d\n", msg_len);
+        if (msg_len > 0)
+        {
+            printf("message: %s\n", buffer);
+            if(strncmp(buffer, "end", 3) == 0)
+            {
+                break;
+            }
+        } else
+        {
+            dontdie("recvfrom");
+        }
+    }
+    close(sock);
 }
 
 

@@ -10,54 +10,108 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include <iostream>
+#include <ifaddrs.h>
+
 #define MAXBUF 65536
+
+#include "common.h"
+
+
+using namespace std;
+void print_ip()
+{
+    struct ifaddrs *ifAddrStruct = NULL;
+    struct ifaddrs *ifa = NULL;
+    void *tmpAddrPtr = NULL;
+
+    cout << "1" << endl;
+    if (getifaddrs(&ifAddrStruct) < 0)
+    {
+        die("getifaddrs");
+    }
+    cout << "2" << endl;
+    for (ifa = ifAddrStruct; ifa != NULL; ifa = ifa->ifa_next)
+    {
+        if (ifa->ifa_addr != NULL)
+        {
+            if (ifa->ifa_addr->sa_family == AF_INET)
+            {
+                cout << "3" << endl;
+                tmpAddrPtr = &((struct sockaddr_in *)ifa->ifa_addr)
+                    ->sin_addr;
+                char addressBuffer[INET_ADDRSTRLEN + 1];
+                memset(addressBuffer, 0, INET_ADDRSTRLEN + 1);
+                inet_ntop(AF_INET, tmpAddrPtr,
+                        addressBuffer, INET_ADDRSTRLEN);
+                printf("%s IP Address %s\n", ifa->ifa_name, addressBuffer); 
+            } else if (ifa->ifa_addr->sa_family==AF_INET6) {
+                cout << "4" << endl;
+                tmpAddrPtr=&((struct sockaddr_in6 *)ifa->ifa_addr)
+                    ->sin6_addr;
+                char addressBuffer[INET6_ADDRSTRLEN + 1];
+                memset(addressBuffer, 0, INET6_ADDRSTRLEN + 1);
+                inet_ntop(AF_INET6, tmpAddrPtr,
+                        addressBuffer, INET6_ADDRSTRLEN);
+                printf("%s IP Address %s\n", ifa->ifa_name, addressBuffer); 
+            } 
+        }
+    }
+    if (ifAddrStruct!=NULL)
+    {
+        freeifaddrs(ifAddrStruct);
+    }
+}
 
 int main(int argc, char*argv[])
 {
-  int sock, status, buflen, sinlen;
-  char buffer[MAXBUF];
-  struct sockaddr_in sock_in;
-  int yes = 1;
+    int sock;
+    sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (sock < 0)
+    {
+        die("socket");
+    }
 
-  sinlen = sizeof(struct sockaddr_in);
-  memset(&sock_in, 0, sinlen);
-  buflen = MAXBUF;
+    struct sockaddr_in dest_sock;
+    socklen_t si_len = sizeof(dest_sock);
+    memset(&dest_sock, 0, si_len);
+    dest_sock.sin_addr.s_addr = htonl(INADDR_ANY);
+    dest_sock.sin_port = htons(0);
+    dest_sock.sin_family = AF_INET;
 
-  sock = socket (PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    int status = bind(sock, (struct sockaddr *) &dest_sock, si_len);
+    if (status < 0)
+    {
+        die("bind");
+    }
+    
+    printf("before\n");
+    print_ip();
+    printf("\nafter\n");
+    int yes = 1;
+    status = setsockopt(sock, SOL_SOCKET, SO_BROADCAST, &yes, sizeof(int) );
 
-  sock_in.sin_addr.s_addr = htonl(INADDR_ANY);
-  sock_in.sin_port = htons(0);
-  sock_in.sin_family = PF_INET;
+    /* -1 = 255.255.255.255 this is a BROADCAST address,
+       a local broadcast address could also be used.
+       you can comput the local broadcat using NIC address and its NETMASK 
+       */ 
 
-  status = bind(sock, (struct sockaddr *)&sock_in, sinlen);
-  printf("Bind Status = %d\n", status);
-  struct sockaddr addr;
-  char ip[INET_ADDRSTRLEN + 1];
-  memset(ip, 0, INET_ADDRSTRLEN + 1);
-  socklen_t addr_len = sizeof(sockaddr);
-  memset(&addr, 0, addr_len);
-  status = getsockname(sock, &addr, &addr_len); 
-  inet_ntop(addr.sa_family, &addr, ip, addr_len);
-  status = setsockopt(sock, SOL_SOCKET, SO_BROADCAST, &yes, sizeof(int) );
-  printf("IP := %s\n", ip);
+    dest_sock.sin_addr.s_addr=htonl(-1); /* send message to 255.255.255.255 */
+    dest_sock.sin_port = htons(atoi(argv[1])); /* port number */
 
-  /* -1 = 255.255.255.255 this is a BROADCAST address,
-     a local broadcast address could also be used.
-     you can comput the local broadcat using NIC address and its NETMASK 
-  */ 
-
-  sock_in.sin_addr.s_addr=htonl(-1); /* send message to 255.255.255.255 */
-  sock_in.sin_port = htons(atoi(argv[1])); /* port number */
-  sock_in.sin_family = PF_INET;
-
-  for(;;)
-  {
-      sprintf(buffer, "%s" , argv[2]);
-      buflen = strlen(buffer);
-      status = sendto(sock, buffer, buflen, 0, (struct sockaddr *)&sock_in, sinlen);
-      printf("sendto Status = %d\n", status);
-      sleep(5);
-  } 
-  shutdown(sock, 2);
-  close(sock);
+    char buffer[MAXBUF];
+    for(;;)
+    {
+        sprintf(buffer, "%s" , argv[2]);
+        size_t buflen = strlen(buffer);
+        status = sendto(sock, buffer, buflen, 0,
+                (struct sockaddr *) &dest_sock, si_len);
+        if (status < 0)
+        {
+            dontdie("sendto");
+        }
+        sleep(5);
+    } 
+    close(sock);
 }
+
