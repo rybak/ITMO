@@ -76,8 +76,19 @@ void print_ip()
     }
 }
 
-int main(int argc, char*argv[])
+void print_usage(char *cmd)
 {
+    printf("Usage:\n");
+    printf("\t%s PORT IP NAME STUDENT \n", cmd);
+}
+
+int main(int argc, char *argv[])
+{
+    if (argc < 4)
+    {
+        print_usage(argv[0]);
+        die("Wrong arguments");
+    }
     int sock;
     struct sockaddr_in dest;
     make_socket(sock, dest, 0);
