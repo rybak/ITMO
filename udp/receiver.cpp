@@ -38,8 +38,19 @@ void print_entry(const message_t msg)
     printf(HEADER_FORMAT"d\n", ip_str,
             msg.student, msg.name, msg.timestamp);
 }
+
+void print_usage(char *cmd)
+{
+    printf("Usage:\n");
+    printf("\t%s PORT\n", cmd);
+}
+
 int main(int argc, char* argv[])
 {
+    if (argc < 1)
+    {
+        print_usage(argv[0]);
+    }
     int sock;
     struct sockaddr_in sock_in;
     make_socket(sock, sock_in, atoi(argv[1]));
