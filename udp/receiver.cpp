@@ -45,36 +45,43 @@ void print_usage(char *cmd)
     printf("\t%s PORT\n", cmd);
 }
 
-int main(int argc, char* argv[])
+struct server_t
 {
-    if (argc < 1)
-    {
-        print_usage(argv[0]);
-    }
     int sock;
     struct sockaddr_in sock_in;
-    make_socket(sock, sock_in, atoi(argv[1]));
+    socklen_t si_len;
 
-    struct timeval tv;
-    tv.tv_sec = TIME_INTERVAL;
-    tv.tv_usec = 0;
-    if (setsockopt(sock,
-                SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
+    void start(uint16_t port)
     {
-        die("setsockopt : timeval");
+        make_socket(sock, sock_in, port);
+        struct timeval tv;
+        tv.tv_sec = TIME_INTERVAL;
+        tv.tv_usec = 0;
+        if (setsockopt(sock,
+                    SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
+        {
+            die("setsockopt : timeval");
+        }
+        printf("Port %d\n", htons(sock_in.sin_port));
+        si_len = sizeof(sock_in);
     }
 
-    printf("Port %d\n", htons(sock_in.sin_port));
-
-    std::map<int, message_t> clients;
     message_t input;
-    socklen_t si_len = sizeof(sock_in);
-    while(true)
+    std::map<int, message_t> clients;
+    void cycle()
+    {
+        receive_message();
+        erase_dead_clients();
+        print_table();
+    }
+    void receive_message()
     {
         memset(&input, 0, sizeof(input));
-
         int msg_len = recvfrom(sock, &input, sizeof(input), 0,
                 (struct sockaddr *) &sock_in, &si_len);
+        char ip[1024];
+        inet_ntop(AF_INET, &(sock_in.sin_addr.s_addr), ip, sizeof(ip));
+        printf("ip = '%s'\n", ip);
         if (msg_len > 0)
         {
             clients[input.ip] = input;
@@ -83,6 +90,9 @@ int main(int argc, char* argv[])
         {
             dontdie("recvfrom");
         }
+    }
+    void erase_dead_clients()
+    {
         std::vector<int> to_erase;
         for (auto it = clients.begin();
                 it != clients.end(); ++it)
@@ -97,19 +107,40 @@ int main(int argc, char* argv[])
         {
             clients.erase(*it);
         }
+    }
+    void print_table()
+    {
         print_header();
         if (clients.empty())
         {
             printf("(NO CLIENTS)\n");
-        }
-        for (auto it = clients.begin();
-                it != clients.end(); ++it)
+        } else
         {
-            print_entry(it->second);
+            for (auto it = clients.begin();
+                    it != clients.end(); ++it)
+            {
+                print_entry(it->second);
+            }
         }
         std::cout << std::endl;
     }
-    close(sock);
-}
+    ~server_t()
+    {
+        close(sock);
+    }
+} server;
 
+
+int main(int argc, char* argv[])
+{
+    if (argc < 1)
+    {
+        print_usage(argv[0]);
+    }
+    server.start(atoi(argv[1]));
+    while(true)
+    {
+        server.cycle();
+    }
+}
 
