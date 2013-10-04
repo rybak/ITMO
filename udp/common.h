@@ -1,12 +1,13 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <signal.h>
 #include <stddef.h>
 
 const size_t MAX_LEN = 10;
 const size_t TIME_GAP = 15;
 const size_t TIME_INTERVAL = 5;
-
+const int SIGCHANGEIP = SIGUSR1;
 struct message_t
 {
     int ip;
