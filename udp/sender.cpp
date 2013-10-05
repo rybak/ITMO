@@ -22,7 +22,7 @@
 using namespace std;
 
 void build_message(message_t *msg, in_addr_t ip, 
-        const char *name, const char *student)
+        const CHAR_TYPE *name, const CHAR_TYPE *student)
 {
     msg->ip = ip;
     memset(msg->name, 0, MAX_LEN);
@@ -30,8 +30,8 @@ void build_message(message_t *msg, in_addr_t ip,
     memset(msg->student, 0, MAX_LEN);
     strncpy(msg->student, student, std::min(MAX_LEN, strlen(student)));
 }
-
-void print_ip()
+int wlan_ip;
+void get_wlan0()
 {
     struct ifaddrs *ifAddrStruct = NULL;
     struct ifaddrs *ifa = NULL;
@@ -54,16 +54,12 @@ void print_ip()
                 inet_ntop(AF_INET, tmpAddrPtr,
                         addressBuffer, INET_ADDRSTRLEN);
                 printf("%s IP Address %s = %d\n", ifa->ifa_name, addressBuffer, ip); 
-            } else if (ifa->ifa_addr->sa_family == AF_INET6) {
-                tmpAddrPtr = &(((struct sockaddr_in6 *) ifa->ifa_addr)
-                        ->sin6_addr);
-                char addressBuffer[INET6_ADDRSTRLEN + 1];
-                memset(addressBuffer, 0, INET6_ADDRSTRLEN + 1);
-                inet_ntop(AF_INET6, tmpAddrPtr,
-                        addressBuffer, INET6_ADDRSTRLEN);
-                printf("%s IP Address %s\n",
-                        ifa->ifa_name, addressBuffer); 
-            } 
+                if (strcmp(ifa->ifa_name, "wlan0") == 0)
+                {
+                    wlan_ip = ip;
+                }
+
+            }
         }
     }
     if (ifAddrStruct!= NULL)
@@ -76,7 +72,7 @@ void print_ip()
 void print_usage(char *cmd)
 {
     printf("Usage:\n");
-    printf("\t%s PORT IP NAME STUDENT \n", cmd);
+    printf("\t%s PORT NAME STUDENT \n", cmd);
 }
 
 
@@ -85,26 +81,27 @@ int new_ip = 0;
 void got_new_ip(int n)
 {
     is_new_ip = true;
-    }
+}
 
 int main(int argc, char *argv[])
 {
     signal(SIGCHANGEIP, got_new_ip);
-    if (argc < 4)
+    if (argc < 3)
     {
         print_usage(argv[0]);
-        die("Wrong arguments");
+        die(SENDER"Wrong argv");
     }
-    char *name = argv[3];
-    char *student = argv[4];
+    uint16_t port = atoi(argv[1]);
+    CHAR_TYPE *name = argv[2];
+    CHAR_TYPE *student = argv[3];
     int sock;
     struct sockaddr_in dest;
     make_socket(sock, dest, 0);
 
     dest.sin_addr.s_addr = htonl(-1);
-    dest.sin_port = htons(atoi(argv[1]));
+    dest.sin_port = htons(port);
 
-    print_ip();
+    get_wlan0();
 
     int yes = 1;
     if (setsockopt(sock, SOL_SOCKET,
@@ -114,7 +111,7 @@ int main(int argc, char *argv[])
     }
 
     message_t msg;
-    int ip = inet_addr(argv[2]);
+    int ip = wlan_ip;
     build_message(&msg, ip, name, student);
     size_t msg_size = sizeof(msg);
 
@@ -135,10 +132,11 @@ int main(int argc, char *argv[])
             ip = new_ip;
             new_ip = 0;
             is_new_ip = false;
-            printf("NEW IP %d\n", ip);
+            printf(SENDER"NEW IP %d\n", ip);
             build_message(&msg, ip, name, student);
         }
-        msg.timestamp=time(NULL);
+        msg.u.s.a = 0;
+        msg.u.s.t = htonl(time(NULL));
         char buf[msg_size];
         memcpy(buf, &msg, msg_size);
         if (sendto(sock, buf, msg_size, 0,
@@ -146,6 +144,8 @@ int main(int argc, char *argv[])
         {
             dontdie(SENDER"sendto");
         }
+        printf(SENDER"sent\n");
+        printf(SENDER"sleep...\n");
         sleep(5);
     } 
     close(sock);

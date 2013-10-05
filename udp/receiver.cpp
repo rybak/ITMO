@@ -17,7 +17,7 @@
 
 #include "common.h"
 
-#define HEADER_FORMAT "%16s%10s%10s%12"
+#define HEADER_FORMAT "%20s\t%20s\t%20s\t%12"
 #define RECVR "receiver : "
 void print_header()
 {
@@ -35,14 +35,14 @@ void print_entry(const message_t msg)
     tmp.s_addr = msg.ip;
     const char *ip_str = inet_ntoa(tmp);
     int len = strlen(ip_str);
-    printf(HEADER_FORMAT"d\n", ip_str,
-            msg.student, msg.name, msg.timestamp);
+    printf(HEADER_FORMAT"lld\n", ip_str,
+            msg.student, msg.name, msg.u.timestamp);
 }
 
 void print_usage(char *cmd)
 {
     printf("Usage:\n");
-    printf("\t%s PORT S_PID\n", cmd);
+    printf("\t%s PORT NAME STUDENT\n", cmd);
 }
 
 struct server_t
@@ -83,6 +83,8 @@ struct server_t
         memset(&input, 0, sizeof(input));
         int msg_len = recvfrom(sock, &input, sizeof(input), 0,
                 (struct sockaddr *) &sock_in, &si_len);
+        input.name[19] = 0;
+        input.student[19] = 0;
         char ip_str[1024];
         inet_ntop(AF_INET, &(sock_in.sin_addr.s_addr), ip_str, sizeof(ip_str));
         int new_ip = sock_in.sin_addr.s_addr;
@@ -97,15 +99,16 @@ struct server_t
             fprintf(f, "%d", new_ip);
             fclose(f);
             ip = new_ip;
-            if (kill(sender_pid, SIGCHANGEIP) == -1)
-            {
-                die("new_ip kill");
-            }
+            // if (kill(sender_pid, SIGCHANGEIP) == -1)
+            // {
+            //     die("new_ip kill");
+            // }
         }
         if (msg_len > 0)
         {
+            printf(RECVR"msg_len = %d\n", msg_len);
             clients[input.ip] = input;
-            clients[input.ip].timestamp = time(NULL);
+            clients[input.ip].u.timestamp = time(NULL);
         } else
         {
             dontdie("recvfrom");
@@ -117,7 +120,7 @@ struct server_t
         for (auto it = clients.begin();
                 it != clients.end(); ++it)
         {
-            if (time(NULL) - ((it->second).timestamp) > TIME_GAP)
+            if (time(NULL) - ((it->second).u.timestamp) > TIME_GAP)
             {
                 to_erase.push_back(it->first);
             }
@@ -153,16 +156,17 @@ struct server_t
 
 int main(int argc, char* argv[])
 {
+    if (argc < 3)
+    {
+        print_usage(argv[0]);
+        die(RECVR"Wrong argv");
+    }
     int sender_pid = fork();
     if (sender_pid == 0)
     {
         const char *sender_path = "./sender";
-        execl(sender_path, sender_path, argv[1], "1.1.1.1", "name", "student", NULL);
+        execl(sender_path, sender_path, argv[1], argv[2], argv[3], NULL);
         die("execl");
-    }
-    if (argc < 2)
-    {
-        print_usage(argv[0]);
     }
     server.start(atoi(argv[1]), sender_pid);
     while(true)
