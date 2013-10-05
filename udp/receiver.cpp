@@ -18,14 +18,14 @@
 #include "common.h"
 
 #define HEADER_FORMAT "%16s%10s%10s%12"
-
+#define RECVR "receiver : "
 void print_header()
 {
     const char *i = "IP";
     const char *n = "name";
     const char *s = "Student";
     const char *t = "time";
-    printf("Current time : %ld\n", time(NULL));
+    printf(RECVR"Current time : %ld\n", time(NULL));
     printf(HEADER_FORMAT"s\n", i, s, n, t);
 
 }
@@ -42,7 +42,7 @@ void print_entry(const message_t msg)
 void print_usage(char *cmd)
 {
     printf("Usage:\n");
-    printf("\t%s PORT\n", cmd);
+    printf("\t%s PORT S_PID\n", cmd);
 }
 
 struct server_t
@@ -51,8 +51,11 @@ struct server_t
     struct sockaddr_in sock_in;
     socklen_t si_len;
 
-    void start(uint16_t port)
+    int sender_pid = 0;
+
+    void start(uint16_t port, int s_pid)
     {
+        sender_pid = s_pid;
         make_socket(sock, sock_in, port);
         struct timeval tv;
         tv.tv_sec = TIME_INTERVAL;
@@ -74,14 +77,31 @@ struct server_t
         erase_dead_clients();
         print_table();
     }
+    int ip = 0;
     void receive_message()
     {
         memset(&input, 0, sizeof(input));
         int msg_len = recvfrom(sock, &input, sizeof(input), 0,
                 (struct sockaddr *) &sock_in, &si_len);
-        char ip[1024];
-        inet_ntop(AF_INET, &(sock_in.sin_addr.s_addr), ip, sizeof(ip));
-        printf("ip = '%s'\n", ip);
+        char ip_str[1024];
+        inet_ntop(AF_INET, &(sock_in.sin_addr.s_addr), ip_str, sizeof(ip_str));
+        int new_ip = sock_in.sin_addr.s_addr;
+        printf(RECVR"ip = '%s' == %d\n", ip_str, new_ip);
+        if (new_ip != ip && sender_pid != 0)
+        {
+            FILE *f = fopen("new_ip", "w");
+            if (f == NULL)
+            {
+                die("new_ip FILE");
+            }
+            fprintf(f, "%d", new_ip);
+            fclose(f);
+            ip = new_ip;
+            if (kill(sender_pid, SIGCHANGEIP) == -1)
+            {
+                die("new_ip kill");
+            }
+        }
         if (msg_len > 0)
         {
             clients[input.ip] = input;
@@ -133,11 +153,18 @@ struct server_t
 
 int main(int argc, char* argv[])
 {
-    if (argc < 1)
+    int sender_pid = fork();
+    if (sender_pid == 0)
+    {
+        const char *sender_path = "./sender";
+        execl(sender_path, sender_path, argv[1], "1.1.1.1", "name", "student", NULL);
+        die("execl");
+    }
+    if (argc < 2)
     {
         print_usage(argv[0]);
     }
-    server.start(atoi(argv[1]));
+    server.start(atoi(argv[1]), sender_pid);
     while(true)
     {
         server.cycle();

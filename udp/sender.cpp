@@ -18,17 +18,13 @@
 
 #include "common.h"
 
+#define SENDER "sender : "
 using namespace std;
 
-void build_message(message_t *msg, const char *ip_str, 
+void build_message(message_t *msg, in_addr_t ip, 
         const char *name, const char *student)
 {
-    msg->ip = inet_addr(ip_str);
-    if (msg->ip == -1)
-    {
-        std::cerr << ip_str << std::endl;
-        die("inet_addr");
-    }
+    msg->ip = ip;
     memset(msg->name, 0, MAX_LEN);
     strncpy(msg->name, name, std::min(MAX_LEN, strlen(name)));
     memset(msg->student, 0, MAX_LEN);
@@ -52,11 +48,12 @@ void print_ip()
             {
                 tmpAddrPtr = &(((struct sockaddr_in *) ifa->ifa_addr)
                         ->sin_addr);
+                int ip = ((in_addr *) tmpAddrPtr) -> s_addr;
                 char addressBuffer[INET_ADDRSTRLEN + 1];
                 memset(addressBuffer, 0, INET_ADDRSTRLEN + 1);
                 inet_ntop(AF_INET, tmpAddrPtr,
                         addressBuffer, INET_ADDRSTRLEN);
-                printf("%s IP Address %s\n", ifa->ifa_name, addressBuffer); 
+                printf("%s IP Address %s = %d\n", ifa->ifa_name, addressBuffer, ip); 
             } else if (ifa->ifa_addr->sa_family == AF_INET6) {
                 tmpAddrPtr = &(((struct sockaddr_in6 *) ifa->ifa_addr)
                         ->sin6_addr);
@@ -82,13 +79,24 @@ void print_usage(char *cmd)
     printf("\t%s PORT IP NAME STUDENT \n", cmd);
 }
 
+
+bool is_new_ip = false;
+int new_ip = 0;
+void got_new_ip(int n)
+{
+    is_new_ip = true;
+    }
+
 int main(int argc, char *argv[])
 {
+    signal(SIGCHANGEIP, got_new_ip);
     if (argc < 4)
     {
         print_usage(argv[0]);
         die("Wrong arguments");
     }
+    char *name = argv[3];
+    char *student = argv[4];
     int sock;
     struct sockaddr_in dest;
     make_socket(sock, dest, 0);
@@ -106,18 +114,37 @@ int main(int argc, char *argv[])
     }
 
     message_t msg;
-    build_message(&msg, argv[2], argv[3], argv[4]);
+    int ip = inet_addr(argv[2]);
+    build_message(&msg, ip, name, student);
     size_t msg_size = sizeof(msg);
 
     for(;;)
     {
+        if (is_new_ip)
+        {
+            FILE *f = fopen("new_ip", "r");
+            if (f == NULL)
+            {
+                die("new_ip file");
+            }
+            new_ip = 0;
+            if (fscanf(f, "%d", &new_ip) != 1)
+            {
+                die("new_ip scanf");
+            }
+            ip = new_ip;
+            new_ip = 0;
+            is_new_ip = false;
+            printf("NEW IP %d\n", ip);
+            build_message(&msg, ip, name, student);
+        }
         msg.timestamp=time(NULL);
         char buf[msg_size];
         memcpy(buf, &msg, msg_size);
         if (sendto(sock, buf, msg_size, 0,
                 (struct sockaddr *) &dest, sizeof(dest)) < 0)
         {
-            dontdie("sendto");
+            dontdie(SENDER"sendto");
         }
         sleep(5);
     } 
