@@ -13,15 +13,7 @@ struct message_t
 {
     int ip;
     CHAR_TYPE name[MAX_LEN];
-    union
-    {
-        long long timestamp;
-        struct tt
-        {
-            int a;
-            int t;
-        } s;
-    } u;
+    long long timestamp;
     CHAR_TYPE student[MAX_LEN];
 };
 

@@ -23,7 +23,8 @@ const char *i = "IP";
 const char *n = "name";
 const char *s = "Student";
 const char *t = "time";
-#define HEADER_FORMAT "%20s\t%20s\t%20s\t%12"
+
+#define HEADER_FORMAT "%17.17s\t%20.20s\t%20.20s\t%12"
 
 void print_header()
 {
@@ -38,7 +39,7 @@ void print_entry(const message_t msg)
     const char *ip_str = inet_ntoa(tmp);
     int len = strlen(ip_str);
     printf(HEADER_FORMAT"lld\n", ip_str,
-            msg.student, msg.name, msg.u.timestamp);
+            msg.student, msg.name, msg.timestamp);
 }
 
 void print_usage(char *cmd)
@@ -73,41 +74,40 @@ struct server_t
 
     message_t input;
     std::map<int, message_t> clients;
+
     void cycle()
     {
         receive_message();
         erase_dead_clients();
         print_table();
     }
-    int ip = 0;
+
     void receive_message()
     {
         memset(&input, 0, sizeof(input));
         int msg_len = recvfrom(sock, &input, sizeof(input), 0,
                 (struct sockaddr *) &sock_in, &si_len);
-        input.name[19] = 0;
-        input.student[19] = 0;
-        char ip_str[1024];
-        inet_ntop(AF_INET, &(sock_in.sin_addr.s_addr), ip_str, sizeof(ip_str));
-        int new_ip = sock_in.sin_addr.s_addr;
-        printf(RECVR"ip = '%s' == %d\n", ip_str, new_ip);
-        if (msg_len > 0)
-        {
-            printf(RECVR"msg_len = %d (%ld)\n", msg_len, sizeof(message_t));
-            clients[new_ip] = input;
-            clients[new_ip].u.timestamp = time(NULL);
-        } else
+        if (msg_len == -1)
         {
             dontdie("recvfrom");
+            return;
         }
+        int new_ip = sock_in.sin_addr.s_addr;
+        printf(RECVR"msg_len = %d (%ld)\n", msg_len, sizeof(message_t));
+        char ip_str[1024];
+        inet_ntop(AF_INET, &(sock_in.sin_addr.s_addr), ip_str, sizeof(ip_str));
+        printf(RECVR"ip = '%s' == %d\n", ip_str, new_ip);
+        clients[new_ip] = input;
+        clients[new_ip].timestamp = time(NULL);
     }
+
     void erase_dead_clients()
     {
         std::vector<int> to_erase;
         for (auto it = clients.begin();
                 it != clients.end(); ++it)
         {
-            if (time(NULL) - ((it->second).u.timestamp) > TIME_GAP)
+            if (time(NULL) - ((it->second).timestamp) > TIME_GAP)
             {
                 to_erase.push_back(it->first);
             }

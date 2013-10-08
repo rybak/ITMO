@@ -27,7 +27,7 @@ void die(const char *s)
 void dontdie(const char *s)
 {
     perror(s);
-    printf("continue...\n");
+    printf("\n");
 }
 
 void make_socket(int &fd, struct sockaddr_in &sock, uint16_t port)

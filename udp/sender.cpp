@@ -14,6 +14,7 @@
 
 #include <ifaddrs.h>
 #include <time.h>
+#include <endian.h>
 
 
 #include "common.h"
@@ -85,6 +86,13 @@ void got_new_ip(int n)
     is_new_ip = true;
 }
 
+long long time_to_net()
+{
+    long long res = time(NULL) * 1000 + (rand() % 1000);
+    res = htobe64(res);
+    return res;
+}
+
 int main(int argc, char *argv[])
 {
     signal(SIGCHANGEIP, got_new_ip);
@@ -137,8 +145,7 @@ int main(int argc, char *argv[])
             printf(SENDER"NEW IP %d\n", ip);
             build_message(&msg, ip, name, student);
         }
-        msg.u.s.a = 0;
-        msg.u.s.t = htonl(time(NULL));
+        msg.timestamp = time_to_net();
         char buf[msg_size];
         memcpy(buf, &msg, msg_size);
         if (sendto(sock, buf, msg_size, 0,
