@@ -30,7 +30,9 @@ void build_message(message_t *msg, in_addr_t ip,
     memset(msg->student, 0, MAX_LEN);
     strncpy(msg->student, student, std::min(MAX_LEN, strlen(student)));
 }
+
 int wlan_ip;
+
 void get_wlan0()
 {
     struct ifaddrs *ifAddrStruct = NULL;

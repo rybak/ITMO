@@ -17,14 +17,16 @@
 
 #include "common.h"
 
-#define HEADER_FORMAT "%20s\t%20s\t%20s\t%12"
 #define RECVR "receiver : "
+
+const char *i = "IP";
+const char *n = "name";
+const char *s = "Student";
+const char *t = "time";
+#define HEADER_FORMAT "%20s\t%20s\t%20s\t%12"
+
 void print_header()
 {
-    const char *i = "IP";
-    const char *n = "name";
-    const char *s = "Student";
-    const char *t = "time";
     printf(RECVR"Current time : %ld\n", time(NULL));
     printf(HEADER_FORMAT"s\n", i, s, n, t);
 
@@ -89,26 +91,11 @@ struct server_t
         inet_ntop(AF_INET, &(sock_in.sin_addr.s_addr), ip_str, sizeof(ip_str));
         int new_ip = sock_in.sin_addr.s_addr;
         printf(RECVR"ip = '%s' == %d\n", ip_str, new_ip);
-        if (new_ip != ip && sender_pid != 0)
-        {
-            FILE *f = fopen("new_ip", "w");
-            if (f == NULL)
-            {
-                die("new_ip FILE");
-            }
-            fprintf(f, "%d", new_ip);
-            fclose(f);
-            ip = new_ip;
-            // if (kill(sender_pid, SIGCHANGEIP) == -1)
-            // {
-            //     die("new_ip kill");
-            // }
-        }
         if (msg_len > 0)
         {
-            printf(RECVR"msg_len = %d\n", msg_len);
-            clients[input.ip] = input;
-            clients[input.ip].u.timestamp = time(NULL);
+            printf(RECVR"msg_len = %d (%ld)\n", msg_len, sizeof(message_t));
+            clients[new_ip] = input;
+            clients[new_ip].u.timestamp = time(NULL);
         } else
         {
             dontdie("recvfrom");
