@@ -21,6 +21,14 @@ import qualified Graphics.Rendering.Cairo as C
 import qualified Graphics.Rendering.Cairo.Matrix as M
 import System.IO.Unsafe (unsafePerformIO)
  
+
+-- Rybak imports
+import Text.Printf
+import Data.List
+import Control.Monad hiding(mzero)
+import Data.Binary.IEEE754
+import Data.Binary
+
 -- Something scary
  
 data Corner = TopLeft | TopCenter | TopRight
@@ -373,11 +381,11 @@ instance Arrow (->) where
 class Functor f where
   fmap :: (a -> b) -> f a -> f b
  
-instance Functor [] where
-  fmap = P.map
- 
-instance Functor ((->) c) where
-  fmap f g c = f (g c)
+-- instance Functor [] where
+--   fmap = P.map
+--  
+-- instance Functor ((->) c) where
+--   fmap f g c = f (g c)
  
 --class Applicative f where
 --  pure :: a -> f a
@@ -472,11 +480,11 @@ renderFun window (RocketState {..}) = do
   where
   rocket = image 50 50 True MiddleCenter "rocket.png"
  
-main = render True 500 500 16 startState stateFun renderFun
+-- main = render True 500 500 16 startState stateFun renderFun
 fx, fy, fz :: (Monoid a, Group a, Ring a) => a -> a -> a-> Vector3 a -> a
-fx s r b (Vector3 x y z) = x - s * x + s * y
-fy s r b (Vector3 x y z) = y -x * z + r * x - y
-fz s r b (Vector3 x y z) = z + x * y - b * z
+fx s r b (Vector3 x y z) =  s * y + s * x
+fy s r b (Vector3 x y z) =  r * x - y - x * z
+fz s r b (Vector3 x y z) =  x * y - b * z
 
 pairwise :: [a] -> [(a,a)]
 pairwise (x1:x2:xs) = (x1,x2) : pairwise (x2:xs)
@@ -489,20 +497,55 @@ takeWhile1 p [] = []
 takeWhile1 p (x:xs) | p x = x : takeWhile1 p xs
                     | P.otherwise = [x]
 
-diff :: (P.Ord a, Group a, Monoid a) => Vector3 a -> Vector3 a -> a
-diff v1 v2 = P.maximum $ P.zipWith (-) (toList v1) (toList v2)
+diff :: (P.Ord a, Group a, Monoid a, P.Num a) => Vector3 a -> Vector3 a -> a
+diff v1 v2 = P.maximum $ P.map P.abs $ P.zipWith (-) (toList v1) (toList v2)
 
-goodDiff :: (P.Ord a, Group a, Monoid a) => a -> (Vector3 a, Vector3 a) -> Bool
+notNaN (Vector3 x y z) = P.not ((P.isNaN x) P.|| (P.isNaN y) P.|| (P.isNaN z))
+
+goodDiff :: Float -> (Vector3 Float, Vector3 Float) -> Bool
 goodDiff eps (v1, v2) = diff v1 v2 P.> eps
+                        P.&& (notNaN v1) P.&& (notNaN v2)
+                              
 
-eulerList s r b eps = takeWhile1 (goodDiff eps) $ pairwise $ P.iterate f $ Vector3 0.0 0.0 0.0
-              where f v = Vector3 (fx s r b v) (fy s r b v) (fz s r b v)
+eulerList :: Float -> Float -> Float -> Float -> Float -> Vector3 Float -> [(Vector3 Float, Vector3 Float)]
+eulerList s r b eps dt start = takeWhile1 (goodDiff eps) $ pairwise $ P.iterate f start
+              where
+                f v@(Vector3 x y z) = Vector3 (x + dt * (dx v)) (y + dt * (dy v)) (z + dt * (dz v))
+                                      
+                dx = fx s r b
+                dy = fy s r b
+                dz = fz s r b
 
+fromELtoDL :: [(Vector3 Float, Vector3 Float)] -> [(Float, Float, Float)]
 
--- main =
---   print $ euler eps s r b
---    where
---     eps = 0.0001
---     s = 10.0
---     r = 4.0
---     b = 8.0 / 3.0
+fromELtoDL = P.map toTuple
+                where
+                  toTuple (Vector3 x y z, _) = (x,y,z)
+fst3 (a, _, _) = a
+snd3 (_, b, _) = b
+trd3 (_, _, c) = c
+
+filename = "euler.dat"
+
+list = take n $ fromELtoDL $ eulerList s r b eps dt start
+   where
+     eps = 0.000001 :: Float
+     dt = 0.001
+     s = 10.0
+     r = 28.0
+     b = 8.0 / 3.0 :: Float
+     start = Vector3 10.0 10.0 10.0 
+
+n = 1000
+
+main = do
+       encodeFile filename (n, unzip3 list)
+       P.print list
+
+main2 =
+  P.print list >>= \_ ->
+  P.writeFile filename $ join [printf "%.5f %.5f %.5f\n" x y z |
+                                x <- (map fst3 list),
+                                y <- (map snd3 list),
+                                z <- (map trd3 list)]
+                               
