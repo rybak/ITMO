@@ -15,7 +15,7 @@ import Control.Monad.Trans (liftIO)
 import Data.IORef
 import qualified Data.Set as S
 import Data.Time.Clock.POSIX
-import Graphics.UI.Gtk hiding (fill,drawPolygon,lineWidth,Arrow)
+import Graphics.UI.Gtk hiding (drawPolygon,Arrow)
 import Graphics.UI.Gtk.Gdk.Events
 import qualified Graphics.Rendering.Cairo as C
 import qualified Graphics.Rendering.Cairo.Matrix as M
@@ -483,7 +483,7 @@ renderFun window (RocketState {..}) = do
  
 -- main = render True 500 500 16 startState stateFun renderFun
 fx, fy, fz :: (Monoid a, Group a, Ring a) => a -> a -> a-> Vector3 a -> a
-fx s _ _ (Vector3 x y z) =  s * (y - x)
+fx s _ _ (Vector3 x y _) =  s * (y - x)
 fy _ r _ (Vector3 x y z) =  x * (r - z) - y
 fz _ _ b (Vector3 x y z) =  x * y - b * z
 
@@ -498,68 +498,58 @@ takeWhile1 p [] = []
 takeWhile1 p (x:xs) | p x = x : takeWhile1 p xs
                     | P.otherwise = [x]
 
-diff :: (P.Ord a, Group a, Monoid a, P.Num a) => Vector3 a -> Vector3 a -> a
-diff v1 v2 = P.maximum $ P.map P.abs $ P.zipWith (-) (toList v1) (toList v2)
-
 notNaN (Vector3 x y z) = P.not ((P.isNaN x) P.|| (P.isNaN y) P.|| (P.isNaN z))
 
-goodDiff :: Float -> (Vector3 Float, Vector3 Float) -> Bool
-goodDiff eps (v1, v2) = diff v1 v2 P.> eps
-                        P.&& (notNaN v1) P.&& (notNaN v2)
-                              
-
-eulerList :: Float -> Float -> Float -> Float -> Float -> Vector3 Float -> [(Vector3 Float, Vector3 Float)]
-eulerList s r b eps dt start = takeWhile1 (goodDiff eps) $ pairwise $ P.iterate f start
-              where
-                f v@(Vector3 x y z) = Vector3 (x + dt * (dx v)) (y + dt * (dy v)) (z + dt * (dz v))
-                                      
+explicitEuler s r b dt v@(Vector3 x y z) = Vector3 (x + dt * (dx v)) (y + dt * (dy v)) (z + dt * (dz v)) where
                 dx = fx s r b
                 dy = fy s r b
                 dz = fz s r b
 
-eulerList2 :: Float -> Float -> Float -> Float -> Float -> Vector3 Float -> [Vector3 Float]
-eulerList2 s r b _ dt start = takeWhile1 notNaN $ P.iterate f start
-                        where
-                f v@(Vector3 x y z) = Vector3 (x + dt * (dx v)) (y + dt * (dy v)) (z + dt * (dz v))
-                                      
-                dx = fx s r b
-                dy = fy s r b
-                dz = fz s r b
+lorenz :: (Float -> Float -> Float -> Float -> (Vector3 Float) -> Vector3 Float) -> Float -> Float -> Float -> Float -> (Vector3 Float) -> [Vector3 Float]
+lorenz next s r b h start = takeWhile1 notNaN $ P.iterate (next s r b h) start
 
+eulerList :: Float -> Float -> Float -> Float -> Vector3 Float -> [Vector3 Float]
+eulerList = lorenz explicitEuler
 
-fromELtoDL :: [(Vector3 Float, Vector3 Float)] -> [(Float, Float, Float)]
+implicitEuler :: Float -> Float -> Float -> Float -> Vector3 Float -> [Vector3 Float]
+implicitEuler = let
+    next s r b h v = (oneIter s r b h (oneIter s r b h v))
+    oneIter s r b h (Vector3 x y z) = Vector3
+        ((x + h * s * y) / (1.0 + s * h))
+        ((y + h * x * (r - z)) / (1.0 + h))
+        ((h * x * y + z) / (1.0 + b * h))
+  in lorenz next
 
-fromELtoDL = P.map (toTuple . P.fst)
+rk4 :: Float -> Float -> Float -> Float -> Vector3 Float -> Vector3 Float
+rk4 s r b h v@(Vector3 x y z) = let
+  f v@(Vector3 x y z) = Vector3 (fx s r b v)(fy s r b v)(fz s r b v)
+  k1 = h ^* f v
+  k2 = h ^* f (v + 0.5 ^* k1)
+  k3 = h ^* f (v + 0.5 ^* k2)
+  k4 = h ^* f (v + k3)
+  d = (1.0 / 6.0) ^* (k1 + 2 ^* k2 + 2 ^* k3 + k4)
+  in v + d
+  
+rungeKutta4 = lorenz rk4
 
 toTuple (Vector3 x y z) = (x,y,z)
 
-fst3 (a, _, _) = a
-snd3 (_, b, _) = b
-trd3 (_, _, c) = c
-
-filename = "euler.bin"
-
-list r = take n $ map toTuple $ eulerList2 s r b eps dt start
+list r method = take n $ map toTuple $ method s r b dt start
    where
-     eps = 0.0001 :: Float
      dt = 0.005
      s = 10
      b = 2.6666666
 --     b = 8.0 / 3.0 :: Float
      start = Vector3 3.051522 1.582542 15.62388
 
-n = 10000
+n = 20000
 
-main2 = encodeFile filename $ list 28
+output filename method = P.mapM_ (\r -> P.writeFile (filename ++ show r) $ join [printf "%f %f %f\n" x y z | (x, y, z) <- list r method])
 
-main1 =
-    P.writeFile filename $ join [printf "%f %f %f\n" x y z | (x, y, z) <- list 28] 
-
-
+main :: P.IO ()
 main = do
     argv <- getArgs
-    let l = map P.read argv in
-        P.mapM_ (\r ->
-            P.writeFile (filename ++ show r) $ join [printf "%f %f %f\n" x y z | (x, y, z) <- list r]
-            ) l
- 
+    let l = if null argv then [1.0, 2.0 .. 30.0] else map P.read argv in
+      output "euler" eulerList l
+      >> output "implicit" implicitEuler l
+      >> output "rk" rungeKutta4 l
