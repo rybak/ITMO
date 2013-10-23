@@ -28,6 +28,7 @@ import Data.List
 import Control.Monad hiding(mzero)
 import Data.Binary.IEEE754
 import Data.Binary
+import System.Environment(getArgs)
 
 -- Something scary
  
@@ -482,9 +483,9 @@ renderFun window (RocketState {..}) = do
  
 -- main = render True 500 500 16 startState stateFun renderFun
 fx, fy, fz :: (Monoid a, Group a, Ring a) => a -> a -> a-> Vector3 a -> a
-fx s r b (Vector3 x y z) =  s * y + s * x
-fy s r b (Vector3 x y z) =  r * x - y - x * z
-fz s r b (Vector3 x y z) =  x * y - b * z
+fx s _ _ (Vector3 x y z) =  s * (y - x)
+fy _ r _ (Vector3 x y z) =  x * (r - z) - y
+fz _ _ b (Vector3 x y z) =  x * y - b * z
 
 pairwise :: [a] -> [(a,a)]
 pairwise (x1:x2:xs) = (x1,x2) : pairwise (x2:xs)
@@ -516,36 +517,49 @@ eulerList s r b eps dt start = takeWhile1 (goodDiff eps) $ pairwise $ P.iterate 
                 dy = fy s r b
                 dz = fz s r b
 
+eulerList2 :: Float -> Float -> Float -> Float -> Float -> Vector3 Float -> [Vector3 Float]
+eulerList2 s r b _ dt start = takeWhile1 notNaN $ P.iterate f start
+                        where
+                f v@(Vector3 x y z) = Vector3 (x + dt * (dx v)) (y + dt * (dy v)) (z + dt * (dz v))
+                                      
+                dx = fx s r b
+                dy = fy s r b
+                dz = fz s r b
+
+
 fromELtoDL :: [(Vector3 Float, Vector3 Float)] -> [(Float, Float, Float)]
 
-fromELtoDL = P.map toTuple
-                where
-                  toTuple (Vector3 x y z, _) = (x,y,z)
+fromELtoDL = P.map (toTuple . P.fst)
+
+toTuple (Vector3 x y z) = (x,y,z)
+
 fst3 (a, _, _) = a
 snd3 (_, b, _) = b
 trd3 (_, _, c) = c
 
-filename = "euler.dat"
+filename = "euler.bin"
 
-list = take n $ fromELtoDL $ eulerList s r b eps dt start
+list r = take n $ map toTuple $ eulerList2 s r b eps dt start
    where
-     eps = 0.000001 :: Float
-     dt = 0.001
-     s = 10.0
-     r = 28.0
-     b = 8.0 / 3.0 :: Float
-     start = Vector3 10.0 10.0 10.0 
+     eps = 0.0001 :: Float
+     dt = 0.005
+     s = 10
+     b = 2.6666666
+--     b = 8.0 / 3.0 :: Float
+     start = Vector3 3.051522 1.582542 15.62388
 
-n = 1000
+n = 10000
+
+main2 = encodeFile filename $ list 28
+
+main1 =
+    P.writeFile filename $ join [printf "%f %f %f\n" x y z | (x, y, z) <- list 28] 
+
 
 main = do
-       encodeFile filename (n, unzip3 list)
-       P.print list
-
-main2 =
-  P.print list >>= \_ ->
-  P.writeFile filename $ join [printf "%.5f %.5f %.5f\n" x y z |
-                                x <- (map fst3 list),
-                                y <- (map snd3 list),
-                                z <- (map trd3 list)]
-                               
+    argv <- getArgs
+    let l = map P.read argv in
+        P.mapM_ (\r ->
+            P.writeFile (filename ++ show r) $ join [printf "%f %f %f\n" x y z | (x, y, z) <- list r]
+            ) l
+ 
