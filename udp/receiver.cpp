@@ -16,6 +16,7 @@
 #include <map>
 
 #include "common.h"
+#include "message.h"
 
 #define RECVR "receiver : "
 

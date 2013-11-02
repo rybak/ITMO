@@ -16,8 +16,8 @@
 #include <time.h>
 #include <endian.h>
 
-
 #include "common.h"
+#include "message.h"
 
 #define SENDER "sender : "
 using namespace std;
