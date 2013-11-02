@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
     CHAR_TYPE *student = argv[3];
     int sock;
     struct sockaddr_in dest;
-    make_socket(sock, dest, 0);
+    make_udp_socket(sock, dest, 0);
 
     dest.sin_addr.s_addr = htonl(-1);
     dest.sin_port = htons(port);

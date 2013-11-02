@@ -59,7 +59,7 @@ struct server_t
     void start(uint16_t port, int s_pid)
     {
         sender_pid = s_pid;
-        make_socket(sock, sock_in, port);
+        make_udp_socket(sock, sock_in, port);
         struct timeval tv;
         tv.tv_sec = TIME_INTERVAL;
         tv.tv_usec = 0;
