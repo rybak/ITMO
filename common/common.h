@@ -2,7 +2,7 @@
 #define COMMON_H
 
 #include <signal.h>
-#include <stddef.h>
+#include <stdint.h>
 
 void die(const char *);
 void dontdie(const char *);

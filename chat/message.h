@@ -1,12 +1,17 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
-typedef unsigned char[6] mac_addr_t;
-
+#include "ma.h"
 struct announce_message
 {
+    void to_net();
+    void to_host();
+    void update();
+    announce_message();
+
+private:
     long long timestamp;
-    unsigned char mac_addr[6];
+    mac_addr_t mac_addr;
 };
 
 

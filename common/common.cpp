@@ -1,4 +1,3 @@
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <stddef.h>
@@ -14,7 +13,6 @@
 
 #include <ifaddrs.h>
 #include <time.h>
-
 
 #include "common.h"
 
