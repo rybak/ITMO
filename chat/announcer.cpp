@@ -1,4 +1,5 @@
 #include <ctime>
+#include <cstring>
 #include "chat.h"
 #include "announcer.h"
 #include "common.h"
@@ -14,7 +15,7 @@ void announcer::announce()
         char buf[msg_size];
         memcpy(buf, &net_msg, msg_size);
         if (sendto(announce_sock, buf, msg_size, 0,
-                (struct sockaddr *) &announce_addr, sizeof(announce_addr)) < 0)
+                (struct sockaddr *) &aa, sizeof(aa)) < 0)
         {
             dontdie("announce :: sendto");
         }
@@ -28,8 +29,8 @@ bool announcer::good_timing()
 
 announcer::announcer()
 {
-    announce_addr.sin_addr.s_addr = htonl(-1);
-    announce_addr.sin_port = htons(ANNOUNCE_PORT);
+    aa.sin_addr.s_addr = htonl(-1);
+    aa.sin_port = htons(ANNOUNCE_PORT);
     int yes = 1;
     if (setsockopt(announce_sock, SOL_SOCKET,
             SO_BROADCAST, &yes, sizeof(int)) < 0)

@@ -4,6 +4,8 @@
 #define CHAT_STR "chat : "
 
 #include <endian.h>
+#include <cstdlib>
+#include <ctime>
 #include "common.h"
 #include "ma.h"
 

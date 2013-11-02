@@ -1,7 +1,9 @@
 #ifndef ANNOUNCER_H
 #define ANNOUNCER_H
 
+#include <netinet/in.h>
 #include "message.h"
+#include <unistd.h>
 
 const uint16_t ANNOUNCE_PORT = 1234;
 
@@ -16,8 +18,7 @@ private:
     announce_message msg;
 
     int announce_sock;
-    struct sockaddr_in announce_addr;
-    
+    struct sockaddr_in aa;
 };
 
 #endif
