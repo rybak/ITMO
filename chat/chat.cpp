@@ -19,7 +19,15 @@ void print_usage(char *cmd)
     printf("\t%s \n", cmd);
 }
 
-const char MSG_KEY = 's';
+const int MSG_KEY = 's';
+const int QUIT_KEY = 'q';
+
+void quit()
+{
+    printf("Quiting ... \n");
+    sleep(0);
+    exit(0);
+}
 
 int main(int argc, char *argv[])
 {
@@ -28,6 +36,7 @@ int main(int argc, char *argv[])
     print_mac(ma);
     announcer a;
     chatter c;
+    printf("Send key = '%c'\n", MSG_KEY);
 
     for(;;)
     {
@@ -38,14 +47,16 @@ int main(int argc, char *argv[])
         nanosleep(&sleep_time, NULL);
         if (kbhit())
         {
-            char ch = getchar();
-            printf("Key %d = '%c' is pressed\n", (int) ch, ch);
+            int ch = getchar();
+            printf("\rKey %d = '%c' is pressed\n", (int) ch, ch);
             switch(ch)
             {
-                MSG_KEY:
+                case MSG_KEY:
                     c.read_message();
-                
-
+                    break;
+                case QUIT_KEY:
+                    quit();
+                    break;
                 default:
                     break;
             }

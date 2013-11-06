@@ -1,13 +1,12 @@
 #include <ctime>
 #include <cstring>
-
-// future includes : 
 #include <cstdio>
-// /future
 
 #include "sender.h"
+
 sender::sender()
 {
+    printf("sender contructor\n");
 }
 
 sender::~sender()
