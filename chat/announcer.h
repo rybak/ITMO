@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include "message.h"
 
-const uint16_t ANNOUNCE_PORT = 1234;
+const uint16_t ANNOUNCE_PORT = 1235;
 
 struct announcer
 {

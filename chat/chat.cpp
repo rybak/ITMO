@@ -11,8 +11,6 @@
 
 using namespace std;
 
-const uint16_t PORT = 1235;
-
 void print_usage(char *cmd)
 {
     printf("Usage:\n");
