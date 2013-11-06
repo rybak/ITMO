@@ -15,3 +15,7 @@ void chatter::cycle()
     r.cycle();
 }
 
+void chatter::read_message()
+{
+    s.read_message();
+}

@@ -7,6 +7,8 @@
 #include "ma.h"
 #include "kbhit.h"
 
+#include "chatter.h"
+
 using namespace std;
 
 const uint16_t PORT = 1235;
@@ -16,6 +18,8 @@ void print_usage(char *cmd)
     printf("Usage:\n");
     printf("\t%s \n", cmd);
 }
+
+const char MSG_KEY = 's';
 
 int main(int argc, char *argv[])
 {
@@ -34,9 +38,9 @@ int main(int argc, char *argv[])
         nanosleep(&sleep_time, NULL);
         if (kbhit())
         {
-            char c = getchar();
-            printf("Key %d = '%c' is pressed\n", (int) c, c);
-            switch(c)
+            char ch = getchar();
+            printf("Key %d = '%c' is pressed\n", (int) ch, ch);
+            switch(ch)
             {
                 MSG_KEY:
                     c.read_message();
@@ -46,7 +50,6 @@ int main(int argc, char *argv[])
                     break;
             }
         }
-        c.receive_messages();
         c.cycle();
     } 
 }

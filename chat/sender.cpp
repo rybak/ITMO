@@ -31,8 +31,13 @@ void sender::send_message()
 void sender::read_message()
 {
     msg = new char[MSG_MAX_LEN];
-    printf("Enter message (max length of a message is %d):\n", MSG_MAX_LEN);
-    scanf("%s", msg);
+    printf("Enter message (max length of a message is %ld):\n", MSG_MAX_LEN);
+    int cnt = scanf("%s", msg);
+    if (cnt < 0)
+    {
+        perror("scanf gone wrong");
+        return;
+    }
     // TODO add message to all messages
     need_send = true;
 }
