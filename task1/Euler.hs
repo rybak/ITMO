@@ -30,100 +30,6 @@ import Data.Binary.IEEE754
 import Data.Binary
 import System.Environment(getArgs)
 
--- Something scary
- 
-data Corner = TopLeft | TopCenter | TopRight
-            | MiddleLeft | MiddleCenter | MiddleRight
-            | BottomLeft | BottomCenter | BottomRight
-            deriving Show
- 
-cornerPos :: Corner -> Vector2 Double
-cornerPos TopLeft      = Vector2 0 0
-cornerPos TopCenter    = Vector2 (1/2) 0
-cornerPos TopRight     = Vector2 1 0
-cornerPos MiddleLeft   = Vector2 0 (1/2)
-cornerPos MiddleCenter = Vector2 (1/2) (1/2)
-cornerPos MiddleRight  = Vector2 1 (1/2)
-cornerPos BottomLeft   = Vector2 0 1
-cornerPos BottomCenter = Vector2 (1/2) 1
-cornerPos BottomRight  = Vector2 1 1
- 
-data Image = Image M.Matrix Pixbuf
- 
-{-# NOINLINE image #-}
-image w h flip c x = unsafePerformIO $ do
-  i <- pixbufNewFromFile x
-  r <- pixbufScaleSimple i w h InterpHyper
-  return $ Image (M.Matrix 1 0 0 (if flip then -1 else 1) (negate a) (if flip then b else negate b)) r
-  where
-  (Vector2 a b) = vzip (*) (Vector2 (fromIntegral w) (fromIntegral h)) (cornerPos c)
- 
-putImage (Image m i) = do
-  C.save
-  C.transform m
-  setSourcePixbuf i 0 0
-  C.paint
-  C.restore
- 
-render :: (Show z) => Bool
-       -> Int -> Int -> Int -> z
-       -> (Double -> Double -> (String -> Bool) -> z -> z)
-       -> (Vector2 Double -> z -> C.Render ())
-       -> P.IO ()
-render debug width height tick z stateFun renderFun = do
-  t0 <- getPOSIXTime
-  prevtime <- newIORef t0
-  state <- newIORef z
-  keys <- newIORef (S.empty :: S.Set String)
-
-  initGUI
-  window <- windowNew
-  drawingArea <- drawingAreaNew
-  set window [ containerChild := drawingArea ]
-  windowSetDefaultSize window width height
-  widgetModifyBg drawingArea StateNormal (Color 0xffffff 0xffffff 0xffffff)
-  onDestroy window mainQuit
-
-  onExpose drawingArea $ handleDraw drawingArea state
-  onKeyPress window $ handleKey t0 prevtime keys state
-  onKeyRelease window $ handleKey t0 prevtime keys state
-  timeoutAdd (updateState t0 prevtime keys state >> widgetQueueDraw drawingArea >> return True) tick
-
-  widgetShowAll window
-  mainGUI
-  where
-  updateState t0 prevtime keys state = do
-    t <- getPOSIXTime
-    tp <- readIORef prevtime
-    ks <- readIORef keys
-    cs <- readIORef state
-    if debug
-       then do
-            P.putStrLn "-- Debug"
-            P.print t
-            P.print ks
-            P.print cs
-       else return ()
-    writeIORef state $ stateFun (P.realToFrac $ t P.- t0) (P.realToFrac $ t P.- tp) (`S.member` ks) cs
-    writeIORef prevtime t
-  handleDraw drawingArea state _ = do
-    win <- widgetGetDrawWindow drawingArea
-    (w', h') <- widgetGetSize drawingArea
-    let w = realToFrac w'
-        h = realToFrac h'
-    cs <- readIORef state
-    renderWithDrawable win $ do
-      C.setMatrix $ M.Matrix 1 0 0 (-1) 0 h
-      renderFun (Vector2 w h) cs
-    return True
-  handleKey t0 prevtime keys state (Key rel _ _ mod _ _ _ val name char) = do
-    modifyIORef keys $ \ks ->
-      if rel
-         then S.delete name ks
-         else S.insert name ks
-    updateState t0 prevtime keys state
-    return True
- 
 -- Holes
  
 data Hole = Hole
@@ -403,125 +309,37 @@ infixr 5 ^/
 infixr 5 *
 infixr 5 /
  
--- drawing
+-- Rybak's code
  
-rgb (Color3 r g b) = C.setSourceRGB r g b
-rgba (Color4 r g b a) = C.setSourceRGBA r g b a
- 
-translate = uncurryVector2 C.translate
-rotate = C.rotate
-lineWidth = C.setLineWidth
-scale = uncurryVector2 C.scale
-moveTo = uncurryVector2 C.moveTo
-lineTo = uncurryVector2 C.lineTo
- 
-drawPolygon xs = drawOpenPolygon xs >> C.closePath
-drawOpenPolygon [] = return ()
-drawOpenPolygon (x:xs) = C.newPath >> moveTo x >> P.mapM_ lineTo xs
- 
-fill f = f >> C.fill
-stroke f = f >> C.stroke
- 
-fillPolygon = fill . drawPolygon
-strokePolygon = stroke . drawPolygon
-strokeLine = stroke . drawOpenPolygon
-strokeWidthLine x p = lineWidth x >> strokeLine p
- 
---
- 
-data RocketState = RocketState
-  { t  :: Double
-  , p  :: Vector2 Double
-  , v  :: Vector2 Double
-  , o  :: Vector2 Double
-  , a  :: Vector2 Double
-  } deriving Show
- 
-startState = RocketState
-  { t = 0
-  , p = Vector2 0 0
-  , v = Vector2 0 0
-  , o = Vector2 1 0
-  , a = Vector2 0 0
-  }
- 
-throttle k s = s { a = 100 ^* c ^* (o s)
-                 , o = transformVector2 (rotationMatrix $ 0.01 * alpha) (o s) } where
-  c = key "Down" (- 1) 0 + key "Up" 1 0
-  alpha = key "Left" (- 1.4) 0 + key "Right" 1.4 0
-  key s yes no = if k s then yes else no
- 
-physics dt s = s { p = p s + dt ^* v s
-                 , v = v s + dt ^* a s }
- 
-friction dt s = s { v = v s - dt ^* v s ^/ 2 }
- 
-stateFun t dt keyChecker = friction dt . physics dt . throttle keyChecker . (\x -> x { t = t })
- 
-wbushes w f 0 _ _ = []
-wbushes w f n p seg = Vector2 p nextp
-                 : wbushes (w ^/ 1.1) f (n P.- 1) nextp (nextseg f)
-              P.++ wbushes (w ^/ 1.1) f (n P.- 1) nextp (nextseg (negate . f))
-  where
-  nextp = p + seg + w
-  nextseg f = transformVector2 (rotationMatrix $ f n) seg
- 
-renderFun window (RocketState {..}) = do
-  translate $ (Vector2 (1/2) (1/2)) .* window
- 
-  rgb (Color3 0 0 0)
-  C.rectangle (-5) (-5) 10 10
-  C.fill
- 
-  P.mapM_ (\(Vector2 f t) -> strokeWidthLine 1 [f, t]) $ wbushes (Vector2 (2 * sin t) 0) ((* 0.05) . fromIntegral) 10 (Vector2 0 0) (Vector2 0 20)
- 
-  translate p
-  C.rotate $ angleBetweenVector2 o (Vector2 0 1)
-  putImage rocket
-  where
-  rocket = image 50 50 True MiddleCenter "rocket.png"
- 
--- main = render True 500 500 16 startState stateFun renderFun
 fx, fy, fz :: (Monoid a, Group a, Ring a) => a -> a -> a-> Vector3 a -> a
 fx s _ _ (Vector3 x y _) =  s * (y - x)
 fy _ r _ (Vector3 x y z) =  x * (r - z) - y
 fz _ _ b (Vector3 x y z) =  x * y - b * z
 
-pairwise :: [a] -> [(a,a)]
-pairwise (x1:x2:xs) = (x1,x2) : pairwise (x2:xs)
-pairwise _ = []
-
-toList (Vector3 a b c) = [a, b, c]
+-- toList (Vector3 a b c) = [a, b, c]
 
 takeWhile1 :: (a -> Bool) -> [a] -> [a]
-takeWhile1 p [] = []
+takeWhile1 _ [] = []
 takeWhile1 p (x:xs) | p x = x : takeWhile1 p xs
                     | P.otherwise = [x]
 
+notNaN :: Vector3 Float -> Bool
 notNaN (Vector3 x y z) = P.not ((P.isNaN x) P.|| (P.isNaN y) P.|| (P.isNaN z))
 
+explicitEuler, implicitEuler, rungeKutta4 :: Float -> Float -> Float -> Float -> Vector3 Float -> Vector3 Float
 explicitEuler s r b dt v@(Vector3 x y z) = Vector3 (x + dt * (dx v)) (y + dt * (dy v)) (z + dt * (dz v)) where
                 dx = fx s r b
                 dy = fy s r b
                 dz = fz s r b
 
-lorenz :: (Float -> Float -> Float -> Float -> (Vector3 Float) -> Vector3 Float) -> Float -> Float -> Float -> Float -> (Vector3 Float) -> [Vector3 Float]
-lorenz next s r b h start = takeWhile1 notNaN $ P.iterate (next s r b h) start
-
-eulerList :: Float -> Float -> Float -> Float -> Vector3 Float -> [Vector3 Float]
-eulerList = lorenz explicitEuler
-
-implicitEuler :: Float -> Float -> Float -> Float -> Vector3 Float -> [Vector3 Float]
-implicitEuler = let
-    next s r b h v = (oneIter s r b h (oneIter s r b h v))
+implicitEuler s r b h = (oneIter s r b h) . (oneIter s r b h) . (explicitEuler s r b h)
+                        where
     oneIter s r b h (Vector3 x y z) = Vector3
         ((x + h * s * y) / (1.0 + s * h))
         ((y + h * x * (r - z)) / (1.0 + h))
         ((h * x * y + z) / (1.0 + b * h))
-  in lorenz next
-
-rk4 :: Float -> Float -> Float -> Float -> Vector3 Float -> Vector3 Float
-rk4 s r b h v@(Vector3 x y z) = let
+ 
+rungeKutta4 s r b h v = let
   f v@(Vector3 x y z) = Vector3 (fx s r b v)(fy s r b v)(fz s r b v)
   k1 = h ^* f v
   k2 = h ^* f (v + 0.5 ^* k1)
@@ -530,17 +348,41 @@ rk4 s r b h v@(Vector3 x y z) = let
   d = (1.0 / 6.0) ^* (k1 + 2 ^* k2 + 2 ^* k3 + k4)
   in v + d
   
-rungeKutta4 = lorenz rk4
+lorenz :: (Float -> Float -> Float -> Float -> (Vector3 Float) -> Vector3 Float) -> Float -> Float -> Float -> Float -> (Vector3 Float) -> [Vector3 Float]
+lorenz next s r b h start = takeWhile1 notNaN $ P.iterate (next s r b h) start
 
-toTuple (Vector3 x y z) = (x,y,z)
+explicitEulerList, implicitEulerList, rungeKutta4List, adamsList :: Float -> Float -> Float -> Float -> Vector3 Float -> [Vector3 Float]
+explicitEulerList = lorenz explicitEuler
+implicitEulerList = lorenz implicitEuler
+rungeKutta4List = lorenz rungeKutta4
 
-list r method = take n $ map toTuple $ method s r b dt start
-   where
-     dt = 0.005
-     s = 10
-     b = 2.6666666
---     b = 8.0 / 3.0 :: Float
-     start = Vector3 3.051522 1.582542 15.62388
+adamsK = 4
+
+adamsOne :: Float -> [Float] -> Float -> Float
+adamsOne h [y3', y2', y1', y0'] yi = yi + (h / 24.0) * (55 * y0' - 59 * y1' + 37 * y2' - 9 * y3')
+adamsOne _ _ _ = error "adamsOne"
+
+adams :: Float -> Float -> Float -> Float -> [Vector3 Float] -> Vector3 Float -> [Vector3 Float]
+adams s r b h [v3, v2', v1', v0'] v = let
+    nextv = v
+    in nextv : (adams s r b h [v2', v1', v0', applyf s r b v] v)
+adams _ _ _ _ _ _ = error "adams method"
+
+applyf :: Float -> Float -> Float -> Vector3 Float -> Vector3 Float
+applyf s r b v = Vector3 (fx s r b v) (fy s r b v) (fz s r b v)
+
+adamsList s r b h start = let
+    sl = map (applyf s r b) (take adamsK (rungeKutta4List s r b h start))
+    v4 = last sl
+    in adams s r b h sl v4
+
+toTuple (Vector3 x y z) = (x, y, z)
+
+list r method = take n $ map toTuple $ method s r b dt start where
+    dt = 0.005
+    s = 10
+    b = 2.6666666
+    start = Vector3 3.051522 1.582542 15.62388
 
 n = 20000
 
@@ -550,6 +392,6 @@ main :: P.IO ()
 main = do
     argv <- getArgs
     let l = if null argv then [1.0, 2.0 .. 30.0] else map P.read argv in
-      output "euler" eulerList l
-      >> output "implicit" implicitEuler l
-      >> output "rk" rungeKutta4 l
+      output "euler" explicitEulerList l
+      >> output "implicit" implicitEulerList l
+      >> output "rk" rungeKutta4List l

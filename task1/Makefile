@@ -1,7 +1,4 @@
-all : main euler
-
-main : main.hs
-	ghc main.hs -o lorenz
+HC=ghc -O2
 
 euler : Euler.hs
-	ghc Euler.hs -o euler
+	$(HC) Euler.hs -o euler
