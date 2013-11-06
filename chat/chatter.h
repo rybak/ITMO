@@ -5,19 +5,19 @@
 #include <unistd.h>
 #include "message.h"
 
-const uint16_t ANNOUNCE_PORT = 1234;
+#include "sender.h"
+#include "receiver.h"
+
+const size_t MSG_MAX_LEN = 1024;
 
 struct chatter
 {
     chatter(const uint16_t port = TCP_LISTEN_PORT);
+    void cycle();
     ~chatter();
 private:
-    bool good_timing();
-    int last_announce_time;
-    announce_message msg;
-
-    int listen_sock;
-    struct sockaddr_in aa;
+    sender s;
+    receiver r;
 };
 
 #endif

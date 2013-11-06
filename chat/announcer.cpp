@@ -29,6 +29,7 @@ bool announcer::good_timing()
 
 announcer::announcer(const uint16_t port)
 {
+    make_udp_socket(announce_sock, aa, port);
     aa.sin_addr.s_addr = htonl(-1);
     aa.sin_port = htons(port);
     int yes = 1;
