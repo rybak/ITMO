@@ -1,6 +1,8 @@
 #ifndef RECEIVER_H
 #define RECEIVER_H
 
+const uint16_t TCP_LISTEN_PORT = 1236;
+
 struct receiver
 {
     receiver();
