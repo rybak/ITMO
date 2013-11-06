@@ -21,13 +21,18 @@ int main(int argc, char *argv[])
     mac_addr_t ma;
     get_mac(ma);
     print_mac(ma);
-    exit(0);
     announcer a;
+
 
     for(;;)
     {
         a.announce();
         sleep(1);
+        if (kbhit())
+        {
+            char c = getchar();
+            printf("Key %d = '%c' is pressed\n", (int) c, c);
+        }
     } 
 }
 

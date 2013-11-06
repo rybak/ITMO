@@ -1,10 +1,10 @@
 #include <ctime>
 #include <cstring>
 #include "chat.h"
-#include "announcer.h"
+#include "chatter.h"
 #include "common.h"
 
-void announcer::announce()
+void chatter::announce()
 {
     if (good_timing())
     {
@@ -22,12 +22,12 @@ void announcer::announce()
     }
 }
 
-bool announcer::good_timing()
+bool chatter::good_timing()
 {
     return time(NULL) - last_announce_time < TIME_INTERVAL;
 }
 
-announcer::announcer(const uint16_t port)
+chatter::chatter(const uint16_t port)
 {
     aa.sin_addr.s_addr = htonl(-1);
     aa.sin_port = htons(port);
@@ -39,7 +39,7 @@ announcer::announcer(const uint16_t port)
     }
 }
 
-announcer::~announcer()
+chatter::~chatter()
 {
     close(announce_sock);
 }
