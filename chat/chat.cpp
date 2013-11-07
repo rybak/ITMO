@@ -4,13 +4,11 @@
 #include <ctype.h>
 #include <cstdlib>
 
-
 #include "common.h"
-#include "announcer.h"
-#include "chat.h"
 #include "ma.h"
 #include "kbhit.h"
 
+#include "chat.h"
 #include "chatter.h"
 #include "ports.h"
 
@@ -69,13 +67,12 @@ int main(int argc, char *argv[])
     {
         printf ("Non-option argument %s\n", argv[index]);
     }
-    uint16_t tcp_port = tcp_port_val != NULL ? atoi(tcp_port_val)
-        : TCP_PORT;
+    uint16_t tcp_port = tcp_port_val != NULL ? atoi(tcp_port_val) : TCP_PORT;
+    uint16_t udp_port = udp_port_val != NULL ? atoi(udp_port_val) : UDP_PORT;
 
     mac_addr_t ma;
     get_mac(ma);
     print_mac(ma);
-    announcer a;
     chatter c;
     printf("Send key = '%c'\n", MSG_KEY);
     timespec sleep_time;
@@ -83,7 +80,6 @@ int main(int argc, char *argv[])
     sleep_time.tv_nsec = 100l * 1000l * 1000l;
     for(;;)
     {
-        a.announce();
         nanosleep(&sleep_time, NULL);
         if (kbhit())
         {

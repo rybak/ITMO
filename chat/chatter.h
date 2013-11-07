@@ -8,6 +8,7 @@
 #include "sender.h"
 #include "receiver.h"
 #include "ports.h"
+#include "announcer.h"
 
 struct chatter
 {
@@ -18,6 +19,7 @@ struct chatter
 private:
     sender s;
     receiver r;
+    announcer a;
 };
 
 #endif
