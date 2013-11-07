@@ -4,8 +4,6 @@
 #include <cstdint>
 #include <netinet/in.h>
 
-const uint16_t TCP_LISTEN_PORT = 1236;
-
 struct receiver
 {
     receiver();

@@ -5,12 +5,12 @@
 #include <unistd.h>
 #include "message.h"
 
-const uint16_t ANNOUNCE_PORT = 1235;
+#include "ports.h"
 
 struct announcer
 {
     void announce();
-    announcer(const uint16_t port = ANNOUNCE_PORT);
+    announcer(const uint16_t port = UDP_PORT);
     ~announcer();
 private:
     bool good_timing();

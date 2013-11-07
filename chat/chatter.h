@@ -7,11 +7,11 @@
 
 #include "sender.h"
 #include "receiver.h"
-
+#include "ports.h"
 
 struct chatter
 {
-    chatter(const uint16_t port = TCP_LISTEN_PORT);
+    chatter(const uint16_t port = TCP_PORT);
     void cycle();
     ~chatter();
     void read_message();
