@@ -29,9 +29,11 @@ struct chatter
 private:
     mac_addr_t mac_addr;
 
-    receiver R;
-    sender S;
     listener L;
+    void receive_am();
+    receiver R;
+    void receive_cm();
+    sender S;
     announcer A;
 
     fd_set fds;

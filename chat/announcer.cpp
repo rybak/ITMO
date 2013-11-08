@@ -13,7 +13,7 @@ void announcer::announce()
 {
     if (good_timing())
     {
-        printf("announcer :: announce\n");
+        printf("announcer::announce\n");
         msg.update();
         announce_message net_msg(msg);
         net_msg.to_net();
@@ -24,7 +24,7 @@ void announcer::announce()
         if (sendto(sock, &pmsg, msg_size, 0,
                 (struct sockaddr *) &aa, sizeof(aa)) < 0)
         {
-            dontdie("announce :: sendto");
+            dontdie("announce::sendto");
         }
     }
 }

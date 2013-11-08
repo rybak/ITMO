@@ -42,16 +42,18 @@ void chatter::cycle()
     //    S.cycle();
     //    R.cycle();
     //     erase_dead_users();
-    printf("chatter :: cycle\n");
     fd_set read_fds;
     FD_ZERO(&read_fds);
     memcpy(&read_fds, &fds, sizeof(fds));
     timeval tv = {0, 100000};
     int nready = select(maxfd + 1, &read_fds, NULL, NULL, &tv);
-    printf("nready = %d\n", nready);
+    if (nready > 0)
+    {
+        printf("nready = %d\n", nready);
+    }
     if (nready == -1)
     {
-        return;
+        die("chatter::cycle : select");
     }
     for(int i = 0; i <= maxfd && nready > 0; i++)
     {
@@ -60,22 +62,39 @@ void chatter::cycle()
             nready--;
             if (i == L.sock)
             {
-                announce_message msg = L.receive_message();
+                receive_am();
             }
             else
             {
-                // R.sock
+                // receive_cm();
             }
         }
-
     }
+}
 
+void chatter::receive_am()
+{
+    announce_message msg = L.receive_message();
+    long long id = msg.mac_addr.id;
+    if (users.count(id) > 0)
+    {
+        users[id].timestamp = msg.timestamp;
+    } else
+    {
+        printf("New user. MAC = ");
+        print_mac(msg.mac_addr);
+        printf("\n");
+        users[id] = msg;
+    }
+}
 
+void chatter::receive_cm()
+{
 }
 
 void chatter::read_message()
 {
-    printf("chatter :: read_message\n");
+    printf("chatter::read_message\n");
     S.read_message();
     char ch = getchar();
 }

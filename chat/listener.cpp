@@ -31,14 +31,14 @@ listener::~listener()
 
 announce_message listener::receive_message()
 {
-    printf("listener :: receive_message\n");
+    printf("listener::receive_message\n");
     packed_message msg;
     int msg_len = recvfrom(sock, &msg, sizeof(msg), 0,
             (struct sockaddr *) &sock_in, &si_len);
     if (msg_len == -1)
     {
-        // dontdie("listener :: recvfrom");
-        die("listener :: receive_message");
+        // dontdie("listener::recvfrom");
+        die("listener::receive_message");
     }
     int new_ip = sock_in.sin_addr.s_addr;
     char ip_str[1024];
