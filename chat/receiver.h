@@ -8,15 +8,11 @@ struct receiver
 {
     receiver(const uint16_t);
     ~receiver();
-    void cycle();
     int sock = -1;
+    void receive_message();
 private:
-    sockaddr_in lsa;
     uint16_t port;
 
-    void receive_messages();
-    void print_messages();
-    void add_message(char *, size_t);
 };
 
 #endif
