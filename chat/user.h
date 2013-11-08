@@ -10,6 +10,7 @@ struct user
     user(const announce_message &);
 
     void update();
+
     mac_addr_t mac_addr;
     std::string nickname;
     int ip;

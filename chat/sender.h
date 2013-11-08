@@ -6,14 +6,10 @@ struct sender
     sender(const uint16_t);
     ~sender();
 
-    void read_message();
-    void cycle();
     int sock = -1;
-private:
+    void send_message(int); // _message
 
-    bool need_send;
-    char *msg;
-    void send_message(); // _message
+private:
 
     uint16_t port;
 };

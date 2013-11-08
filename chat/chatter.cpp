@@ -97,7 +97,14 @@ void chatter::receive_cm()
 void chatter::read_message()
 {
     printf("chatter::read_message\n");
-    S.read_message();
+    char *msg = new char[MSG_MAX_LEN];
+    printf("Enter message (max length of a message is %ld):\n", MSG_MAX_LEN);
+    int cnt = scanf("%s", msg);
+    if (cnt < 0)
+    {
+        perror("scanf gone wrong");
+        return;
+    }
     char ch = getchar();
 }
 
@@ -138,7 +145,8 @@ void chatter::print_users()
 
 bool is_dead_user(const user &u)
 {
-    return false;
+    long long ht = time(NULL) * 1000l;
+    return (ht - u.timestamp) / 1000l > TIME_GAP;
 }
 
 void chatter::erase_dead_users()
@@ -147,7 +155,7 @@ void chatter::erase_dead_users()
     for (auto it = users.begin();
             it != users.end(); ++it)
     {
-        if (is_dead_user(*it))
+        if (is_dead_user(it->second))
         {
             to_erase.push_back(it->first);
         }
