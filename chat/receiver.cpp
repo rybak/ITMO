@@ -15,12 +15,12 @@ namespace {
     {
         mac_addr_t ma;
         std::string nick;
-
-
     };
 }
-receiver::receiver()
+receiver::receiver(const uint16_t port)
+    : port(port)
 {
+    printf("receiver contructor\n");
     // init tcp listen sock
 }
 

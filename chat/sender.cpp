@@ -1,10 +1,12 @@
+#include <cstdint>
 #include <ctime>
 #include <cstring>
 #include <cstdio>
 
 #include "sender.h"
 
-sender::sender()
+sender::sender(uint16_t port)
+    : port(port)
 {
     printf("sender contructor\n");
 }

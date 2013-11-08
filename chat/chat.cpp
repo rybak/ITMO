@@ -22,6 +22,7 @@ void print_usage(char *cmd)
 
 const int MSG_KEY = 's';
 const int QUIT_KEY = 'q';
+const int PRINT_KEY = 'p';
 
 void quit()
 {
@@ -32,25 +33,25 @@ void quit()
 
 int main(int argc, char *argv[])
 {
-    char *tcp_port_val = NULL;
     char *udp_port_val = NULL;
+    char *tcp_port_val = NULL;
     int index;
     int optch;
 
     opterr = 0;
 
-    while ((optch = getopt (argc, argv, "t:u:")) != -1)
+    while ((optch = getopt (argc, argv, "u:t:")) != -1)
     {
         switch (optch)
         {
-            case 't':
-                tcp_port_val = optarg;
-                break;
             case 'u':
                 udp_port_val = optarg;
                 break;
+            case 't':
+                tcp_port_val = optarg;
+                break;
             case '?':
-                if (optopt == 't' || optopt == 'u')
+                if (optopt == 'u' || optopt == 't')
                     fprintf (stderr, "Option -%c requires an argument.\n", optopt);
                 else if (isprint (optopt))
                     fprintf (stderr, "Unknown option `-%c'.\n", optopt);
@@ -67,17 +68,15 @@ int main(int argc, char *argv[])
     {
         printf ("Non-option argument %s\n", argv[index]);
     }
-    uint16_t tcp_port = tcp_port_val != NULL ? atoi(tcp_port_val) : TCP_PORT;
-    uint16_t udp_port = udp_port_val != NULL ? atoi(udp_port_val) : UDP_PORT;
+    uint16_t udp_port = udp_port_val != NULL ? atoi(udp_port_val) : udp_port;
+    uint16_t tcp_port = tcp_port_val != NULL ? atoi(tcp_port_val) : tcp_port;
 
-    mac_addr_t ma;
-    get_mac(ma);
-    print_mac(ma);
-    chatter c;
-    printf("Send key = '%c'\n", MSG_KEY);
+printf("sizeof(packed_message) = %ld\n", sizeof(packed_message));
+printf("%ld\n", sizeof(long long) + sizeof(_mac_addr_t));
     timespec sleep_time;
-    sleep_time.tv_sec = 0;
+    sleep_time.tv_sec = 0; /// 0
     sleep_time.tv_nsec = 100l * 1000l * 1000l;
+    chatter c(udp_port, tcp_port);
     for(;;)
     {
         nanosleep(&sleep_time, NULL);
@@ -92,6 +91,9 @@ int main(int argc, char *argv[])
                     break;
                 case QUIT_KEY:
                     quit();
+                    break;
+                case PRINT_KEY:
+                    c.print_users();
                     break;
                 default:
                     break;

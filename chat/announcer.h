@@ -10,14 +10,14 @@
 struct announcer
 {
     void announce();
-    announcer(const uint16_t port = UDP_PORT);
+    announcer(const uint16_t);
     ~announcer();
+    int sock;
 private:
     bool good_timing();
     int last_announce_time;
     announce_message msg;
 
-    int announce_sock;
     struct sockaddr_in aa;
 };
 

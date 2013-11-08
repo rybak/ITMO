@@ -9,9 +9,18 @@
 #include "ma.h"
 
 #include <cstdio>
+
+void mov(_mac_addr_t &to, const _mac_addr_t &from)
+{
+    for (int i = 0; i < 6; ++i)
+    {
+        to[i] = from[i];
+    }
+}
+
 void print_mac(const mac_addr_t &ma)
 {
-    printf("%02x:%02x:%02x:%02x:%02x:%02x\n", ma[0], ma[1], ma[2], ma[3], ma[4], ma[5]);
+    printf("%02x:%02x:%02x:%02x:%02x:%02x", ma.ma[0], ma.ma[1], ma.ma[2], ma.ma[3], ma.ma[4], ma.ma[5]);
 }
 
 void get_mac(mac_addr_t &dest_ma)
@@ -60,13 +69,13 @@ void get_mac(mac_addr_t &dest_ma)
         if (success)
         {
             MAC_CALC = true;
-            memcpy(ma, ifr.ifr_hwaddr.sa_data, 6);
+            memcpy(ma.ma, ifr.ifr_hwaddr.sa_data, 6);
         } else
         {
             die("get_mac");
         }
     }
-    memcpy(dest_ma, ma, sizeof(ma));
+    memcpy(&dest_ma, &ma, sizeof(ma));
 }
 
 

@@ -6,12 +6,14 @@
 
 struct receiver
 {
-    receiver();
+    receiver(const uint16_t);
     ~receiver();
     void cycle();
+    int sock = -1;
 private:
-    int listen_sock;
     sockaddr_in lsa;
+    uint16_t port;
+
     void receive_messages();
     void print_messages();
     void add_message(char *, size_t);

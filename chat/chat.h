@@ -10,6 +10,7 @@
 #include "ma.h"
 
 const size_t TIME_INTERVAL = 5;
+const size_t TIME_GAP = 15;
 
 inline long long net_time()
 {
