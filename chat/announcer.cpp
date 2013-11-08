@@ -3,22 +3,25 @@
 #include <cstring>
 #include <cstdio>
 
-#include "chat.h"
-#include "announcer.h"
 #include "common.h"
+#include "chat.h"
+#include "message.h"
+
+#include "announcer.h"
 
 void announcer::announce()
 {
     if (good_timing())
     {
+        printf("announcer :: announce\n");
         msg.update();
         announce_message net_msg(msg);
         net_msg.to_net();
-        const size_t msg_size = sizeof(long long) + sizeof(_mac_addr_t);
-        char buf[msg_size];
-        memcpy(buf, &(net_msg.mac_addr.ma), sizeof(_mac_addr_t));
-        memcpy(buf + sizeof(_mac_addr_t), &(net_msg.timestamp), sizeof(long long));
-        if (sendto(sock, buf, msg_size, 0,
+        packed_message pmsg;
+        copy_packed_message(pmsg, net_msg);
+        const size_t msg_size = sizeof(pmsg);
+        last_announce_time = time(NULL);
+        if (sendto(sock, &pmsg, msg_size, 0,
                 (struct sockaddr *) &aa, sizeof(aa)) < 0)
         {
             dontdie("announce :: sendto");
@@ -28,12 +31,13 @@ void announcer::announce()
 
 bool announcer::good_timing()
 {
-    return time(NULL) - last_announce_time < TIME_INTERVAL;
+    return time(NULL) - last_announce_time > TIME_INTERVAL;
 }
 
 announcer::announcer(const uint16_t port)
+    : last_announce_time(time(NULL) - TIME_INTERVAL)
 {
-    printf("announcer contructor\n");
+    printf("announcer contructor port = %d\n", (int) port);
     make_udp_socket(sock, aa, 0);
     aa.sin_addr.s_addr = htonl(-1);
     aa.sin_port = htons(port);

@@ -31,7 +31,7 @@ announce_message::announce_message(const packed_message &msg)
     mov(mac_addr.ma, msg.ma);
 }
 
-void copy_a_msg(packed_message &to, const announce_message &from)
+void copy_packed_message(packed_message &to, const announce_message &from)
 {
     mov(to.ma, from.mac_addr.ma);
     to.timestamp = from.timestamp;

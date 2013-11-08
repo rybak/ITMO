@@ -2,6 +2,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <cstring>
 
 #include <cstdio>
 #include <iostream>
@@ -19,24 +20,57 @@ chatter::chatter(const uint16_t udp_port, const uint16_t tcp_port)
 {
     get_mac(mac_addr);
     print_mac(mac_addr);
-    FD_ZERO(&fds);
-    FD_SET(S.sock, &fds);
-    FD_SET(R.sock, &fds);
-    FD_SET(A.sock, &fds);
-    FD_SET(L.sock, &fds);
+    printf("\n");
 }
 
 chatter::~chatter()
 {
 }
 
+
+void chatter::start()
+{
+    FD_ZERO(&fds);
+//    FD_SET(R.sock, &fds);
+    FD_SET(L.sock, &fds);
+    maxfd = L.sock;
+}
+
 void chatter::cycle()
 {
     A.announce();
-    S.cycle();
-    R.cycle();
-    erase_dead_users();
-    
+    //    S.cycle();
+    //    R.cycle();
+    //     erase_dead_users();
+    printf("chatter :: cycle\n");
+    fd_set read_fds;
+    FD_ZERO(&read_fds);
+    memcpy(&read_fds, &fds, sizeof(fds));
+    timeval tv = {0, 100000};
+    int nready = select(maxfd + 1, &read_fds, NULL, NULL, &tv);
+    printf("nready = %d\n", nready);
+    if (nready == -1)
+    {
+        return;
+    }
+    for(int i = 0; i <= maxfd && nready > 0; i++)
+    {
+        if (FD_ISSET(i, &read_fds))
+        {
+            nready--;
+            if (i == L.sock)
+            {
+                announce_message msg = L.receive_message();
+            }
+            else
+            {
+                // R.sock
+            }
+        }
+
+    }
+
+
 }
 
 void chatter::read_message()

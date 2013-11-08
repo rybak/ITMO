@@ -21,6 +21,7 @@
 struct chatter
 {
     chatter(const uint16_t, const uint16_t);
+    void start();
     void cycle();
     ~chatter();
     void read_message();
@@ -34,6 +35,7 @@ private:
     announcer A;
 
     fd_set fds;
+    int maxfd;
    // std::map<long long, std::string> users;
     
     std::map<long long, announce_message> users;

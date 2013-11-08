@@ -68,8 +68,8 @@ int main(int argc, char *argv[])
     {
         printf ("Non-option argument %s\n", argv[index]);
     }
-    uint16_t udp_port = udp_port_val != NULL ? atoi(udp_port_val) : udp_port;
-    uint16_t tcp_port = tcp_port_val != NULL ? atoi(tcp_port_val) : tcp_port;
+    uint16_t udp_port = udp_port_val != NULL ? atoi(udp_port_val) : UDP_PORT;
+    uint16_t tcp_port = tcp_port_val != NULL ? atoi(tcp_port_val) : TCP_PORT;
 
 printf("sizeof(packed_message) = %ld\n", sizeof(packed_message));
 printf("%ld\n", sizeof(long long) + sizeof(_mac_addr_t));
@@ -77,6 +77,7 @@ printf("%ld\n", sizeof(long long) + sizeof(_mac_addr_t));
     sleep_time.tv_sec = 0; /// 0
     sleep_time.tv_nsec = 100l * 1000l * 1000l;
     chatter c(udp_port, tcp_port);
+    c.start();
     for(;;)
     {
         nanosleep(&sleep_time, NULL);

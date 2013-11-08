@@ -3,7 +3,6 @@
 #include <arpa/inet.h>
 #include <ctime>
 
-#include <cstring>
 #include <cstdio>
 
 #include "ports.h"
@@ -18,8 +17,7 @@ listener::listener(const uint16_t port = UDP_PORT)
     struct timeval tv;
     tv.tv_sec = 0;
     tv.tv_usec = 10000;
-    if (setsockopt(sock,
-                SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
+    if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
     {
         die("listener : setsockopt : timeval");
     }
@@ -33,13 +31,14 @@ listener::~listener()
 
 announce_message listener::receive_message()
 {
+    printf("listener :: receive_message\n");
     packed_message msg;
     int msg_len = recvfrom(sock, &msg, sizeof(msg), 0,
             (struct sockaddr *) &sock_in, &si_len);
     if (msg_len == -1)
     {
         // dontdie("listener :: recvfrom");
-        return;
+        die("listener :: receive_message");
     }
     int new_ip = sock_in.sin_addr.s_addr;
     char ip_str[1024];

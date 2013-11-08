@@ -26,7 +26,7 @@ receiver::receiver(const uint16_t port)
 
 receiver::~receiver()
 {
-    close(listen_sock);
+    close(sock);
 }
 
 void receiver::cycle()

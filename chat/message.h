@@ -24,7 +24,7 @@ struct announce_message
     long long timestamp;
 };
 
-void copy_a_msg(packed_message &, const announce_message &);
+void copy_packed_message(packed_message &, const announce_message &);
 void copy_announce_message(announce_message &, const packed_message &);
 
 
