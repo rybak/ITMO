@@ -36,8 +36,6 @@ void sender::send_message(const user &u, const std::string &text)
     {
         die("sender::send_message : connect");
     }
-
-
 }
 
 
