@@ -1,6 +1,8 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
+#include <cstddef>
+
 #include "ma.h"
 
 const size_t MSG_MAX_LEN = 1024;

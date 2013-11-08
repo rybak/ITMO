@@ -4,6 +4,7 @@
 #include <cstdio>
 
 #include "sender.h"
+#include "message.h"
 
 sender::sender(uint16_t port)
     : port(port)

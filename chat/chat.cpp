@@ -5,7 +5,6 @@
 #include <cstdlib>
 
 #include "common.h"
-#include "ma.h"
 #include "kbhit.h"
 
 #include "chat.h"
@@ -71,8 +70,6 @@ int main(int argc, char *argv[])
     uint16_t udp_port = udp_port_val != NULL ? atoi(udp_port_val) : UDP_PORT;
     uint16_t tcp_port = tcp_port_val != NULL ? atoi(tcp_port_val) : TCP_PORT;
 
-printf("sizeof(packed_message) = %ld\n", sizeof(packed_message));
-printf("%ld\n", sizeof(long long) + sizeof(_mac_addr_t));
     timespec sleep_time;
     sleep_time.tv_sec = 0; /// 0
     sleep_time.tv_nsec = 100l * 1000l * 1000l;

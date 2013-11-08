@@ -17,17 +17,19 @@ void announce_message::to_host()
 
 void announce_message::update()
 {
-    timestamp = time(NULL);
+    timestamp = time(NULL) * 1000l;
 }
 
 announce_message::announce_message()
 {
+    mac_addr.id = 0;
     get_mac(mac_addr);
 }
 
 announce_message::announce_message(const packed_message &msg)
     : timestamp(msg.timestamp)
 {
+    mac_addr.id = 0;
     mov(mac_addr.ma, msg.ma);
 }
 

@@ -6,13 +6,14 @@
 
 #include <cstdio>
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <vector>
 
 #include "chat.h"
-#include "chatter.h"
 #include "common.h"
-#include "ma.h"
+#include "message.h"
+#include "user.h"
+#include "chatter.h"
 
 chatter::chatter(const uint16_t udp_port, const uint16_t tcp_port)
     : S(tcp_port), R(tcp_port),
@@ -78,13 +79,14 @@ void chatter::receive_am()
     long long id = msg.mac_addr.id;
     if (users.count(id) > 0)
     {
-        users[id].timestamp = msg.timestamp;
+        users.at(id).timestamp = msg.timestamp;
+        users.at(id).update();
     } else
     {
         printf("New user. MAC = ");
         print_mac(msg.mac_addr);
         printf(" ip = %d\n", msg.ip);
-        users[id] = msg;
+        users.emplace(id, user(msg));
     }
 }
 
@@ -104,13 +106,15 @@ namespace
     void print_header()
     {
         printf("Current time : %ld\n", time(NULL));
-        printf("%10s%10s\n", "time", "mac");
+        printf("%10s%18s%10s\n", "time", "mac", "nick");
     }
 
-    void print_entry(const announce_message msg)
+    void print_entry(const user &u)
     {
-        printf("%10lld %10d ", msg.timestamp, msg.ip);
-        print_mac(msg.mac_addr);
+        printf("%10lld ", u.timestamp);
+        print_mac(u.mac_addr);
+        printf("%.10s", u.nickname.c_str());
+        printf(" %d ", u.ip);
         printf("\n");
     }
 }
@@ -132,13 +136,18 @@ void chatter::print_users()
     std::cout << std::endl;
 }
 
+bool is_dead_user(const user &u)
+{
+    return false;
+}
+
 void chatter::erase_dead_users()
 {
     std::vector<long long> to_erase;
     for (auto it = users.begin();
             it != users.end(); ++it)
     {
-        if (time(NULL) - ((it->second).timestamp) > TIME_GAP)
+        if (is_dead_user(*it))
         {
             to_erase.push_back(it->first);
         }

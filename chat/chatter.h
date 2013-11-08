@@ -6,17 +6,19 @@
 
 #include <sys/types.h>
 
-#include <map>
+#include <unordered_map>
 #include <vector>
 #include <string>
 
-#include "message.h"
+#include "ports.h"
+
 #include "sender.h"
 #include "receiver.h"
-#include "ports.h"
 #include "announcer.h"
 #include "listener.h"
+
 #include "ma.h"
+#include "user.h"
 
 struct chatter
 {
@@ -40,7 +42,7 @@ private:
     int maxfd;
    // std::map<long long, std::string> users;
     
-    std::map<long long, announce_message> users;
+    std::unordered_map<long long, user> users;
     void erase_dead_users();
 };
 

@@ -1,8 +1,6 @@
 #ifndef SENDER_H
 #define SENDER_H
 
-#include "message.h"
-
 struct sender
 {
     sender(const uint16_t);
