@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
             switch(ch)
             {
                 case MSG_KEY:
-                    c.read_message();
+                    c.send_message();
                     break;
                 case QUIT_KEY:
                     quit();

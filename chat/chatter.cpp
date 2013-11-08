@@ -8,10 +8,11 @@
 #include <iostream>
 #include <unordered_map>
 #include <vector>
+#include <string>
 
 #include "chat.h"
 #include "common.h"
-#include "message.h"
+#include "announce_message.h"
 #include "user.h"
 #include "chatter.h"
 
@@ -40,9 +41,7 @@ void chatter::start()
 void chatter::cycle()
 {
     A.announce();
-    //    S.cycle();
-    //    R.cycle();
-    //     erase_dead_users();
+    // erase_dead_users();
     fd_set read_fds;
     FD_ZERO(&read_fds);
     memcpy(&read_fds, &fds, sizeof(fds));
@@ -94,22 +93,41 @@ void chatter::receive_cm()
 {
 }
 
-void chatter::read_message()
+namespace
 {
-    printf("chatter::read_message\n");
-    char *msg = new char[MSG_MAX_LEN];
-    printf("Enter message (max length of a message is %ld):\n", MSG_MAX_LEN);
-    int cnt = scanf("%s", msg);
-    if (cnt < 0)
+    std::string read_message()
     {
-        perror("scanf gone wrong");
+        printf("read_message\n");
+        char *msg = new char[MSG_MAX_LEN];
+        printf("Enter message (max length of a message is %ld):\n", MSG_MAX_LEN);
+        int cnt = scanf("%s", msg);
+        if (cnt < 0)
+        {
+            perror("scanf gone wrong");
+            return std::string("");
+        }
+        char ch = getchar();
+        return std::string(msg);
+    }
+}
+void chatter::send_message()
+{
+    long long ht = host_time();
+    std::string text = read_message();
+    if (text.length() == 0)
+    {
         return;
     }
-    char ch = getchar();
+    for (auto it = users.begin(); it != users.end(); ++it)
+    {
+        S.send_message(it->second, text);
+    }
 }
+
 
 namespace
 {
+
     void print_header()
     {
         printf("Current time : %ld\n", time(NULL));
@@ -134,8 +152,7 @@ void chatter::print_users()
         printf("(NO users)\n");
     } else
     {
-        for (auto it = users.begin();
-                it != users.end(); ++it)
+        for (auto it = users.begin(); it != users.end(); ++it)
         {
             print_entry(it->second);
         }
@@ -145,7 +162,7 @@ void chatter::print_users()
 
 bool is_dead_user(const user &u)
 {
-    long long ht = time(NULL) * 1000l;
+    long long ht = host_time();
     return (ht - u.timestamp) / 1000l > TIME_GAP;
 }
 

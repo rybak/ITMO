@@ -3,7 +3,7 @@
 #include <netinet/in.h>
 
 #include "ma.h"
-#include "message.h"
+#include "announce_message.h"
 // #include "chat.h"
 
 struct listener

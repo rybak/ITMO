@@ -1,6 +1,7 @@
 #include <ctime>
 
-#include "message.h"
+#include "announce_message.h"
+#include "common.h"
 
 #include "user.h"
 
@@ -14,7 +15,7 @@ user::user(const announce_message &amsg)
 
 void user::update()
 {
-    long long ht = time(NULL) * 1000l;
+    long long ht = host_time();
     offset = timestamp - ht;
 }
 

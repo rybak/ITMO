@@ -48,3 +48,11 @@ void make_udp_socket(int &fd, struct sockaddr_in &sock, uint16_t port)
         die("bind");
     }
 }
+
+long long host_time()
+{
+    long long res = time(NULL) * 1000ll;
+    return res;
+}
+
+

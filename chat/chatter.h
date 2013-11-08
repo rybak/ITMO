@@ -26,7 +26,7 @@ struct chatter
     void start();
     void cycle();
     ~chatter();
-    void read_message();
+    void send_message();
     void print_users();
 private:
     mac_addr_t mac_addr;

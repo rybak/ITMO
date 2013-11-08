@@ -8,4 +8,6 @@ void die(const char *);
 void dontdie(const char *);
 void make_udp_socket(int &, struct
         sockaddr_in &, uint16_t);
+long long host_time();
+
 #endif

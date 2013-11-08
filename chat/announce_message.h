@@ -1,5 +1,5 @@
-#ifndef MESSAGE_H
-#define MESSAGE_H
+#ifndef ANNOUNCE_MESSAGE_H
+#define ANNOUNCE_MESSAGE_H
 
 #include <cstddef>
 

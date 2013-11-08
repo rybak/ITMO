@@ -1,9 +1,8 @@
 #include <endian.h>
 #include <ctime>
 
-#include "message.h"
-#include "chat.h"
 #include "common.h"
+#include "announce_message.h"
 
 void announce_message::to_net()
 {
@@ -17,7 +16,7 @@ void announce_message::to_host()
 
 void announce_message::update()
 {
-    timestamp = time(NULL) * 1000l;
+    timestamp = host_time();
 }
 
 announce_message::announce_message()

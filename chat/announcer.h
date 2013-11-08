@@ -3,7 +3,7 @@
 
 #include <netinet/in.h>
 #include <unistd.h>
-#include "message.h"
+#include "announce_message.h"
 
 #include "ports.h"
 

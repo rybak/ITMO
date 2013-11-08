@@ -3,36 +3,43 @@ CC=g++ -std=c++11 -O2 -I"$(INCLUDE)"
 CCO=$(CC) -g -c
 CF=$(INCLUDE)/common
 
-chat: chat.cpp common announcer.o kbhit.o chatter.o ports.h user.o
-	$(CC) chat.cpp kbhit.o chatter.o ma.cpp announcer.o message.o sender.o listener.o receiver.o user.o $(CF).o -o chat
+chat: chat.cpp common.o kbhit.o chatter.o ports.h user.o
+	$(CC) chat.cpp kbhit.o chatter.o ma.cpp announcer.o announce_message.o sender.o listener.o receiver.o user.o common.o chat_message.o -o chat
 
-kbhit.o : kbhit.cpp kbhit.h
-	$(CCO) kbhit.cpp
-
-chatter.o : chatter.cpp chatter.h chat.h common ma.o message.o sender.o receiver.o announcer.o listener.o user.o
+chatter.o : chatter.cpp sender.o receiver.o announcer.o listener.o announce_message.o chatter.h chat.h common.o ma.o user.o
 	$(CCO) chatter.cpp
 
-message.o : message.cpp message.h
-	$(CCO) message.cpp
-
-announcer.o : announcer.cpp announcer.h message.o ports.h chat.h common
+announcer.o : announcer.cpp announcer.h announce_message.o ports.h chat.h common.o
 	$(CCO) announcer.cpp
 
-common : $(CF).cpp $(CF).h
+sender.o : sender.cpp sender.h ma.o chat_message.o
+	$(CCO) sender.cpp
+
+receiver.o : receiver.cpp receiver.h ma.o chat_message.o
+	$(CCO) receiver.cpp
+
+listener.o : listener.cpp listener.h ports.h common.o ma.o announce_message.o 
+	$(CCO) listener.cpp
+
+# messages
+
+announce_message.o : announce_message.cpp announce_message.h ma.o common.o
+	$(CCO) announce_message.cpp
+
+chat_message.o : chat_message.cpp chat_message.h
+	$(CCO) chat_message.cpp
+
+# common
+
+user.o : user.cpp user.h announce_message.o
+	$(CCO) user.cpp
+
+common.o : $(CF).cpp $(CF).h
 	$(CCO) $(CF).cpp
 
 ma.o : ma.cpp ma.h
 	$(CCO) ma.cpp
 
-sender.o : sender.cpp sender.h message.o
-	$(CCO) sender.cpp
-
-receiver.o : receiver.cpp receiver.h ma.o
-	$(CCO) receiver.cpp
-
-listener.o : listener.cpp listener.h ports.h common ma.o message.o 
-	$(CCO) listener.cpp
-
-user.o : user.cpp user.h message.o
-	$(CCO) user.cpp
+kbhit.o : kbhit.cpp kbhit.h
+	$(CCO) kbhit.cpp
 

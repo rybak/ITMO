@@ -4,6 +4,7 @@
 #include <string>
 
 #include "ma.h"
+#include "announce_message.h"
 
 struct user
 {

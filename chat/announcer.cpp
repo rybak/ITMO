@@ -5,7 +5,7 @@
 
 #include "common.h"
 #include "chat.h"
-#include "message.h"
+#include "announce_message.h"
 
 #include "announcer.h"
 

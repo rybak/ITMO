@@ -1,10 +1,12 @@
 #include <cstdint>
-#include <ctime>
 #include <cstring>
 #include <cstdio>
 
+#include "unistd.h"
+#include <ctime>
+
+#include "chat_message.h"
 #include "sender.h"
-#include "message.h"
 
 sender::sender(uint16_t port)
     : port(port)
@@ -14,9 +16,10 @@ sender::sender(uint16_t port)
 
 sender::~sender()
 {
+    close(sock);
 }
 
-void sender::send_message(int ip)
+void sender::send_message(const user &u, const std::string &text)
 {
     // connect to all computers
 }
