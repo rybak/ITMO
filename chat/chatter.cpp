@@ -83,7 +83,7 @@ void chatter::receive_am()
     {
         printf("New user. MAC = ");
         print_mac(msg.mac_addr);
-        printf("\n");
+        printf(" ip = %d\n", msg.ip);
         users[id] = msg;
     }
 }
@@ -109,7 +109,7 @@ namespace
 
     void print_entry(const announce_message msg)
     {
-        printf("%10lld ", msg.timestamp);
+        printf("%10lld %10d ", msg.timestamp, msg.ip);
         print_mac(msg.mac_addr);
         printf("\n");
     }

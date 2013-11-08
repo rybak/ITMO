@@ -32,8 +32,8 @@ listener::~listener()
 announce_message listener::receive_message()
 {
     printf("listener::receive_message\n");
-    packed_message msg;
-    int msg_len = recvfrom(sock, &msg, sizeof(msg), 0,
+    packed_message pmsg;
+    int msg_len = recvfrom(sock, &pmsg, sizeof(pmsg), 0,
             (struct sockaddr *) &sock_in, &si_len);
     if (msg_len == -1)
     {
@@ -44,7 +44,8 @@ announce_message listener::receive_message()
     char ip_str[1024];
     inet_ntop(AF_INET, &(sock_in.sin_addr.s_addr), ip_str, sizeof(ip_str));
     printf("ip = '%s' == %d\n", ip_str, new_ip);
-    announce_message amsg(msg);
+    announce_message amsg(pmsg);
+    amsg.ip = new_ip;
     amsg.to_host();
     return amsg;
 }

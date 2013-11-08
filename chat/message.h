@@ -22,6 +22,7 @@ struct announce_message
     announce_message(const packed_message &);
     mac_addr_t mac_addr;
     long long timestamp;
+    int ip;
 };
 
 void copy_packed_message(packed_message &, const announce_message &);
