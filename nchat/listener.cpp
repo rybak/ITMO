@@ -12,7 +12,6 @@
 listener::listener(const uint16_t port = UDP_PORT)
     : port(port)
 {
-    std::cout << "listener contructor" << std::endl;
     make_udp_socket(sock, sock_in, port);
     struct timeval tv;
     tv.tv_sec = 0;

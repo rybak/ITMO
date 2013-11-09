@@ -64,10 +64,9 @@ void sl::receive_am()
 {
     announce_message msg = L.receive_message();
     std::string ip_str = ip_string(msg.ip);
-    std::cout << "received announce " << std::endl;
     print_mac(msg.mac_addr);
     std::cout << ' ' << ip_string(msg.ip);
-    std::cout << ' ' << time_string(msg.timestamp);
+    std::cout << ' ' << time_string(msg.timestamp) << std::endl;
     long long id = msg.mac_addr.id;
     if (users.count(id) > 0)
     {
