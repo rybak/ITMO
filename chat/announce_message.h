@@ -11,8 +11,8 @@ struct
     __attribute__ ((packed))
     packed_message
 {
-    _mac_addr_t ma;
     long long timestamp;
+    _mac_addr_t ma;
 };
 
 struct announce_message

@@ -13,6 +13,7 @@
 #include "chat.h"
 #include "common.h"
 #include "announce_message.h"
+#include "chat_message.h"
 #include "user.h"
 #include "chatter.h"
 
@@ -33,9 +34,9 @@ chatter::~chatter()
 void chatter::start()
 {
     FD_ZERO(&fds);
-//    FD_SET(R.sock, &fds);
     FD_SET(L.sock, &fds);
-    maxfd = L.sock;
+    FD_SET(R.sock, &fds);
+    maxfd = R.sock;
 }
 
 void chatter::cycle()
@@ -66,7 +67,11 @@ void chatter::cycle()
             }
             else
             {
-                // receive_cm();
+                if (i == R.sock)
+                {
+                    printf("new chat_message\n");
+                    receive_cm();
+                }
             }
         }
     }
@@ -91,6 +96,9 @@ void chatter::receive_am()
 
 void chatter::receive_cm()
 {
+    chat_message msg = R.receive_message();
+    print_mac(msg.mac_addr);
+    std::cout << " : " << msg.text << std::endl;
 }
 
 namespace
@@ -99,7 +107,7 @@ namespace
     {
         printf("read_message\n");
         char *msg = new char[MSG_MAX_LEN];
-        printf("Enter message (max length of a message is %ld):\n", MSG_MAX_LEN);
+        printf("Enter message :\n");
         int cnt = scanf("%s", msg);
         if (cnt < 0)
         {
@@ -120,7 +128,13 @@ void chatter::send_message()
     }
     for (auto it = users.begin(); it != users.end(); ++it)
     {
-        S.send_message(it->second, text);
+        printf("sending to ");
+        print_mac(it->second.mac_addr);
+        printf("\n");
+        if (it->second.mac_addr.id != mac_addr.id)
+        {
+            S.send_message(it->second, text);
+        }
     }
 }
 
