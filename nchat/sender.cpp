@@ -36,7 +36,9 @@ void sender::send_message(const user &u, const std::string &text)
     addr.sin_addr.s_addr = u.ip;
     if (connect(sock, (sockaddr *) &addr, sizeof(addr)) < 0)
     {
-        die("sender::send_message : connect");
+        dontdie("sender::send_message : connect");
+        close(sock);
+        return;
     }
     chat_message msg(text);
     msg.to_user_time(u.offset);

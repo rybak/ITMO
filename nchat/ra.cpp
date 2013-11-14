@@ -44,9 +44,6 @@ ra::~ra()
 
 void ra::start()
 {
-    FD_ZERO(&fds);
-    FD_SET(R.sock, &fds);
-    maxfd = R.sock;
 }
 
 const size_t MAX_EVENTS = 20;
@@ -69,10 +66,19 @@ void ra::cycle()
     }
 }
 
+namespace
+{
+    void print_time(long long t)
+    {
+        std::cout << " [" << time_string(t) << "] ";
+    }
+}
+
 void ra::receive_cm()
 {
     chat_message msg = R.receive_message();
     print_mac(msg.mac_addr);
+    print_time(msg.timestamp);
     std::cout << " : (" << msg.len << ") " << msg.text << std::endl;
 }
 

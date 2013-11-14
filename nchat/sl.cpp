@@ -38,6 +38,7 @@ void sl::start()
 
 void sl::cycle()
 {
+    mark_dead_users();
     fd_set read_fds;
     FD_ZERO(&read_fds);
     memcpy(&read_fds, &fds, sizeof(fds));
@@ -70,6 +71,7 @@ void sl::receive_am()
     long long id = msg.mac_addr.id;
     if (users.count(id) > 0)
     {
+        users.at(id).dead = false;
         users.at(id).timestamp = msg.timestamp;
         users.at(id).update();
     } else
@@ -88,17 +90,36 @@ namespace
         return msg;
     }
 }
+
+void sl::save_message(const std::string &text)
+{
+    history.push_back(make_pair(host_time(), text));
+}
+
+void sl::print_history()
+{
+    for (auto it = history.begin(); it != history.end(); ++it)
+    {
+        std::cout << "[" << time_string((*it).first) << "] "
+            << (*it).second << std::endl;
+    }
+}
+
 void sl::send_message()
 {
-    long long ht = host_time();
     std::string text = read_message();
-    std::cout << "message to send : " << text << std::endl;
     if (text.length() == 0)
     {
         return;
     }
+    save_message(text);
+    std::cout << "message to send : " << text << std::endl;
     for (auto it = users.begin(); it != users.end(); ++it)
     {
+        if (it->second.dead)
+        {
+            continue;
+        }
         std::cout << "sending to ";
         print_mac(it->second.mac_addr);
         std::cout << std::endl;
@@ -106,22 +127,23 @@ void sl::send_message()
     }
 }
 
-
 namespace
 {
     void print_header()
     {
         printf("Current time : %ld\n", time(NULL));
-        printf("%10s%18s%10s\n", "time", "mac", "nick");
+        printf("%10s%18s%10s\n", "time", "mac", "ip (%%d)");
     }
 
     void print_entry(const user &u)
     {
-        printf("%10lld ", u.timestamp);
+        printf("%10lld ", u.timestamp / 1000);
         print_mac(u.mac_addr);
-        printf("%.10s", u.nickname.c_str());
         printf(" %d ", u.ip);
-        printf("\n");
+        if (u.dead)
+        {
+            std::cout << "[dead]" << std::endl;
+        }
     }
 }
 
@@ -147,21 +169,14 @@ bool is_dead_user(const user &u)
     return (ht - u.timestamp) / 1000l > TIME_GAP;
 }
 
-void sl::erase_dead_users()
+void sl::mark_dead_users()
 {
-    std::vector<long long> to_erase;
-    for (auto it = users.begin();
-            it != users.end(); ++it)
+    for (auto it = users.begin(); it != users.end(); ++it)
     {
         if (is_dead_user(it->second))
         {
-            to_erase.push_back(it->first);
+            it->second.dead = true;
         }
-    }
-    for (auto it = to_erase.begin();
-            it != to_erase.end(); ++it)
-    {
-        users.erase(*it);
     }
 }
 

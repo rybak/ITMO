@@ -17,6 +17,7 @@ struct user
     int ip;
     long long timestamp;
     long long offset;
+    bool dead;
 };
 
 #endif

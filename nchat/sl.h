@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include <utility>
 
 #include "ports.h"
 
@@ -26,6 +27,7 @@ struct sl
     ~sl();
     void send_message();
     void print_users();
+    void print_history();
 private:
     mac_addr_t mac_addr;
 
@@ -36,8 +38,11 @@ private:
     fd_set fds;
     int maxfd;
 
+    std::vector<std::pair<long long, std::string> > history;
+    void save_message(const std::string &);
+
     std::unordered_map<long long, user> users;
-    void erase_dead_users();
+    void mark_dead_users();
 };
 
 #endif

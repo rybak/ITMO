@@ -8,7 +8,7 @@
 user::user(const announce_message &amsg)
     : mac_addr(amsg.mac_addr),
     timestamp(amsg.timestamp),
-    ip(amsg.ip)
+    ip(amsg.ip), dead(false)
 {
     this->update();
 }

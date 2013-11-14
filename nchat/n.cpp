@@ -22,6 +22,7 @@ void print_usage(char *cmd)
 const int MSG_KEY = 's';
 const int QUIT_KEY = 'q';
 const int PRINT_KEY = 'p';
+const int HISTORY_KEY = 'l';
 
 void quit()
 {
@@ -60,7 +61,7 @@ int main(int argc, char *argv[])
                             optopt);
                 return 1;
             default:
-                abort ();
+                abort();
         }
     }
     for (index = optind; index < argc; index++)
@@ -81,7 +82,6 @@ int main(int argc, char *argv[])
         if (kbhit())
         {
             int ch = getchar();
-            printf("\rKey %d = '%c' is pressed\n", (int) ch, ch);
             switch(ch)
             {
                 case MSG_KEY:
@@ -93,11 +93,14 @@ int main(int argc, char *argv[])
                 case PRINT_KEY:
                     SL.print_users();
                     break;
+                case HISTORY_KEY:
+                    SL.print_history();
+                    break;
                 default:
                     break;
             }
         }
         SL.cycle();
-    } 
+    }
 }
 
