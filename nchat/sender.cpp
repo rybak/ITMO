@@ -39,6 +39,7 @@ void sender::send_message(const user &u, const std::string &text)
         die("sender::send_message : connect");
     }
     chat_message msg(text);
+    msg.to_user_time(u.offset);
     msg.to_net();
     cm_header h;
     make_header(h, msg);

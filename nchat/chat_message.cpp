@@ -39,3 +39,8 @@ void make_header(cm_header &h, const chat_message &msg)
     mov(h.ma, msg.mac_addr.ma);
 }
 
+void chat_message::to_user_time(long long offset)
+{
+    timestamp += offset;
+}
+

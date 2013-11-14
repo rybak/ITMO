@@ -22,7 +22,7 @@ sl::sl(const uint16_t udp_port, const uint16_t tcp_port)
 {
     get_mac(mac_addr);
     print_mac(mac_addr);
-    printf("\n");
+    std::cout << std::endl;
 }
 
 sl::~sl()
@@ -65,7 +65,7 @@ void sl::receive_am()
     announce_message msg = L.receive_message();
     std::string ip_str = ip_string(msg.ip);
     print_mac(msg.mac_addr);
-    std::cout << ' ' << ip_string(msg.ip);
+    std::cout << ' ' << ip_str;
     std::cout << ' ' << time_string(msg.timestamp) << std::endl;
     long long id = msg.mac_addr.id;
     if (users.count(id) > 0)
@@ -82,17 +82,10 @@ namespace
 {
     std::string read_message()
     {
-        printf("read_message\n");
-        char *msg = new char[MSG_MAX_LEN];
-        printf("Enter message :\n");
-        int cnt = scanf("%s", msg);
-        if (cnt < 0)
-        {
-            perror("scanf gone wrong");
-            return std::string("");
-        }
-        char ch = getchar();
-        return std::string(msg);
+        std::cout << "Enter message :" << std::endl;
+        std::string msg;
+        std::getline(std::cin, msg);
+        return msg;
     }
 }
 void sl::send_message()
@@ -106,13 +99,10 @@ void sl::send_message()
     }
     for (auto it = users.begin(); it != users.end(); ++it)
     {
-        printf("sending to ");
+        std::cout << "sending to ";
         print_mac(it->second.mac_addr);
-        printf("\n");
-        // if (it->second.mac_addr.id != mac_addr.id)
-        {
-            S.send_message(it->second, text);
-        }
+        std::cout << std::endl;
+        S.send_message(it->second, text);
     }
 }
 
@@ -174,5 +164,4 @@ void sl::erase_dead_users()
         users.erase(*it);
     }
 }
-
 
