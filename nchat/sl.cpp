@@ -153,18 +153,22 @@ namespace
     void print_header()
     {
         printf("Current time : %ld\n", time(NULL));
-        printf("%10s%18s%10s\n", "time", "mac", "ip (%%d)");
+        printf("%10s%18s%16s\n", "time", "mac", "ip");
     }
 
     void print_entry(const user &u)
     {
         printf("%10lld ", u.timestamp / 1000);
         print_mac(u.mac_addr);
-        printf(" %d ", u.ip);
+        std::cout << ' ' << ip_string(u.ip) << ' ';
         if (u.dead)
         {
-            std::cout << "[dead]" << std::endl;
+            std::cout << "[dead]";
+        } else
+        {
+            std::cout << "[ok]";
         }
+        std::cout << std::endl;
     }
 }
 
@@ -184,10 +188,13 @@ void sl::print_users()
     std::cout << std::endl;
 }
 
-bool is_dead_user(const user &u)
+namespace
 {
-    long long ht = host_time();
-    return (ht - u.timestamp) / 1000l > TIME_GAP;
+    bool is_dead_user(const user &u)
+    {
+        long long ht = host_time();
+        return (ht - u.timestamp) / 1000l > TIME_GAP;
+    }
 }
 
 void sl::mark_dead_users()
