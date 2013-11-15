@@ -1,5 +1,6 @@
 #include <cstring>
 #include <iostream>
+#include <stdexcept>
 
 #include "chat.h"
 #include "common.h"
@@ -9,7 +10,7 @@
 #include "sl.h"
 
 sl::sl(const uint16_t udp_port, const uint16_t tcp_port)
-    : S(tcp_port), L(udp_port)
+    : L(udp_port), tcp_port(tcp_port)
 {
     get_mac(mac_addr);
     print_mac(mac_addr);
@@ -52,6 +53,17 @@ void sl::cycle()
     }
 }
 
+void sl::revive(user &u, long long timestamp)
+{
+    u.dead = false;
+    if (history.size() > u.message_sent)
+    {
+        // TODO forward send missed history
+    }
+    u.timestamp = timestamp;
+    u.update();
+}
+
 void sl::receive_am()
 {
     announce_message msg = L.receive_message();
@@ -62,9 +74,7 @@ void sl::receive_am()
     long long id = msg.mac_addr.id;
     if (users.count(id) > 0)
     {
-        users.at(id).dead = false;
-        users.at(id).timestamp = msg.timestamp;
-        users.at(id).update();
+        revive(users.at(id), msg.timestamp);
     } else
     {
         users.emplace(id, user(msg));
@@ -111,10 +121,25 @@ void sl::send_message()
         {
             continue;
         }
+        send_message_to_user(it->second, text);
+    }
+}
+
+void sl::send_message_to_user(user &u, const std::string &text)
+{
+    try
+    {
         std::cout << "sending to ";
-        print_mac(it->second.mac_addr);
+        print_mac(u.mac_addr);
         std::cout << std::endl;
-        S.send_message(it->second, text);
+        sender S(tcp_port);
+        S.send_message(u, text);
+        u.message_sent++;
+    }
+    catch (std::runtime_error &e)
+    {
+        perror("sl::send_message : ");
+        std::cerr << e.what() << std::endl;
     }
 }
 

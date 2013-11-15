@@ -18,6 +18,7 @@ struct user
     long long timestamp;
     long long offset;
     bool dead;
+    size_t message_sent;
 };
 
 #endif

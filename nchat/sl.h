@@ -26,9 +26,11 @@ struct sl
 private:
     mac_addr_t mac_addr;
 
+    uint16_t tcp_port;
+    void send_message_to_user(user &, const std::string &);
     listener L;
     void receive_am();
-    sender S;
+    void revive(user &, long long);
 
     fd_set fds;
     int maxfd;

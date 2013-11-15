@@ -7,6 +7,7 @@
 #include <netinet/in.h>
 #include <ctime>
 #include <iostream>
+#include <stdexcept>
 
 #include "chat_message.h"
 #include "common.h"
@@ -16,6 +17,13 @@
 sender::sender(uint16_t port)
     : port(port)
 {
+    struct addrinfo *servinfo;
+    sock = tcp_socket(servinfo, port);
+    freeaddrinfo(servinfo);
+    if (sock < 0)
+    {
+        throw std::runtime_error("sender::send_message : socket");
+    }
 }
 
 sender::~sender()
@@ -25,20 +33,11 @@ sender::~sender()
 
 void sender::send_message(const user &u, const std::string &text)
 {
-    struct addrinfo *servinfo;
-    int sock = tcp_socket(servinfo, port);
-    freeaddrinfo(servinfo);
-    if (sock < 0)
-    {
-        die("sender::send_message : socket");
-    }
     sockaddr_in addr = {AF_INET, htons(port), 0, 0};
     addr.sin_addr.s_addr = u.ip;
     if (connect(sock, (sockaddr *) &addr, sizeof(addr)) < 0)
     {
-        dontdie("sender::send_message : connect");
-        close(sock);
-        return;
+        throw std::runtime_error("sender::send_message : connect");
     }
     chat_message msg(text);
     msg.to_user_time(u.offset);
@@ -52,8 +51,7 @@ void sender::send_message(const user &u, const std::string &text)
     int cnt = sendto(sock, buffer, msg.len + sizeof(h), 0, (struct sockaddr *) &addr, si_len);
     if (cnt < 0)
     {
-        std::cerr << "send to error" << std::endl;
+        throw std::runtime_error("sender::send_message : sendto");
     }
-    close(sock);
 }
 
