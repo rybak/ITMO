@@ -46,10 +46,9 @@ void ra::start()
 {
 }
 
-const size_t MAX_EVENTS = 20;
-
 void ra::cycle()
 {
+    const size_t MAX_EVENTS = 20;
     A.announce();
     epoll_event events[MAX_EVENTS];
     int cnt = epoll_wait(epollfd, events, MAX_EVENTS, 1);
