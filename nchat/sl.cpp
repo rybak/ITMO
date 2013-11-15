@@ -56,12 +56,16 @@ void sl::cycle()
 void sl::revive(user &u, long long timestamp)
 {
     u.dead = false;
-    if (history.size() > u.message_sent)
-    {
-        // TODO forward send missed history
-    }
     u.timestamp = timestamp;
     u.update();
+    if (history.size() > u.message_sent)
+    {
+        for (auto it = history.begin() + u.message_sent;
+                it != history.end() && !u.dead; ++it)
+        {
+            send_message_to_user(u, it->second);
+        }
+    }
 }
 
 void sl::receive_am()
@@ -140,6 +144,7 @@ void sl::send_message_to_user(user &u, const std::string &text)
     {
         perror("sl::send_message : ");
         std::cerr << e.what() << std::endl;
+        u.dead = true;
     }
 }
 
