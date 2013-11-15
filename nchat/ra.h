@@ -2,10 +2,6 @@
 #define RA_H
 
 #include <cstdint>
-#include <unistd.h>
-
-#include <sys/types.h>
-
 #include <unordered_map>
 
 #include "receiver.h"

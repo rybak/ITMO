@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <cstring>
 
-// #include <cstdio>
+#include <stdexcept>
 #include <iostream>
 #include <unordered_map>
 #include <vector>
@@ -76,9 +76,17 @@ namespace
 
 void ra::receive_cm()
 {
-    chat_message msg = R.receive_message();
-    print_mac(msg.mac_addr);
-    print_time(msg.timestamp);
-    std::cout << " : (" << msg.len << ") " << msg.text << std::endl;
+    try
+    {
+        chat_message msg = R.receive_message();
+        print_mac(msg.mac_addr);
+        print_time(msg.timestamp);
+        std::cout << " : (" << msg.len << ") " << msg.text << std::endl;
+    }
+    catch (std::runtime_error &e)
+    {
+        perror("receiver::receive_message");
+        std::cerr << e.what() << std::endl;
+    }
 }
 

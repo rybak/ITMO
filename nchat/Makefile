@@ -6,10 +6,14 @@ CF=$(INCLUDE)/common
 all : chat nchat
 
 chat: chat.cpp common.o kbhit.o ra.o ports.h user.o
-	$(CC) chat.cpp kbhit.o ra.o ma.cpp announce_message.o receiver.o announcer.o tcp_socket.o user.o common.o chat_message.o -o chat
+	$(CC) chat.cpp\
+		kbhit.o common.o ma.o\
+		ra.o user.o chat_message.o announce_message.o\
+		receiver.o tcp_socket.o announcer.o little_receiver.o\
+		-o chat
 
 nchat: n.cpp common.o kbhit.o sl.o ports.h user.o
-	$(CC) n.cpp kbhit.o sl.o ma.cpp announce_message.o sender.o listener.o tcp_socket.o user.o common.o chat_message.o -o nchat
+	$(CC) n.cpp kbhit.o sl.o ma.o announce_message.o sender.o listener.o tcp_socket.o user.o common.o chat_message.o -o nchat
 
 ra.o : ra.cpp ra.h receiver.o announcer.o announce_message.o chat.h common.o ma.o user.o
 	$(CCO) ra.cpp
@@ -23,8 +27,11 @@ announcer.o : announcer.cpp announcer.h announce_message.o ports.h chat.h common
 sender.o : sender.cpp sender.h ma.o chat_message.o tcp_socket.o
 	$(CCO) sender.cpp
 
-receiver.o : receiver.cpp receiver.h ma.o chat_message.o tcp_socket.o
+receiver.o : receiver.cpp receiver.h ma.o chat_message.o tcp_socket.o little_receiver.o
 	$(CCO) receiver.cpp
+
+little_receiver.o : little_receiver.cpp little_receiver.h
+	$(CCO) little_receiver.cpp
 
 listener.o : listener.cpp listener.h ports.h common.o ma.o announce_message.o 
 	$(CCO) listener.cpp
