@@ -1,9 +1,3 @@
-#include <cstdint>
-#include <cstdio>
-
-#include <ctype.h>
-#include <cstdlib>
-
 #include "common.h"
 #include "kbhit.h"
 

@@ -1,8 +1,3 @@
-#include <endian.h>
-#include <arpa/inet.h>
-#include <ctime>
-
-#include "ma.h"
 #include "chat_message.h"
 #include "common.h"
 

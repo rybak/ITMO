@@ -1,8 +1,5 @@
-#include <cstdint>
+#include <unistd.h>
 #include <cstdio>
-
-#include <ctype.h>
-#include <cstdlib>
 
 #include "common.h"
 #include "kbhit.h"

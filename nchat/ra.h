@@ -1,16 +1,12 @@
 #ifndef RA_H
 #define RA_H
 
-#include <netinet/in.h>
+#include <cstdint>
 #include <unistd.h>
 
 #include <sys/types.h>
 
 #include <unordered_map>
-#include <vector>
-#include <string>
-
-#include "ports.h"
 
 #include "receiver.h"
 #include "announcer.h"

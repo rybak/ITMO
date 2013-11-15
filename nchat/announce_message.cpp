@@ -1,6 +1,3 @@
-#include <endian.h>
-#include <ctime>
-
 #include "common.h"
 #include "announce_message.h"
 

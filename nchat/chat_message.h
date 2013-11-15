@@ -1,7 +1,6 @@
 #ifndef CHAT_MESSAGE_H
 #define CHAT_MESSAGE_H
 
-#include <cstdint>
 #include <string>
 
 #include "ma.h"

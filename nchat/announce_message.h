@@ -1,9 +1,6 @@
 #ifndef ANNOUNCE_MESSAGE_H
 #define ANNOUNCE_MESSAGE_H
 
-#include <cstddef>
-#include <iostream>
-
 #include "ma.h"
 
 const size_t MSG_MAX_LEN = 1024;

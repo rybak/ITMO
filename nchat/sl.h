@@ -1,23 +1,18 @@
 #ifndef SL_H
 #define SL_H
 
-#include <netinet/in.h>
-#include <unistd.h>
-
-#include <sys/types.h>
-
-#include <unordered_map>
-#include <vector>
-#include <string>
+#include <cstdint>
 #include <utility>
+#include <string>
+#include <vector>
+#include <unordered_map>
 
-#include "ports.h"
-
-#include "sender.h"
-#include "listener.h"
 
 #include "ma.h"
 #include "user.h"
+
+#include "sender.h"
+#include "listener.h"
 
 struct sl
 {
@@ -46,3 +41,4 @@ private:
 };
 
 #endif
+

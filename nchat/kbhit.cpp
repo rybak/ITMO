@@ -2,8 +2,6 @@
 #include <termios.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <algorithm>
-#include <ctime>
 
 #include "kbhit.h"
  

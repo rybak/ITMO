@@ -2,6 +2,8 @@
 #include <netdb.h>
 #include <cstdio>
 
+#include <string>
+
 #include "common.h"
 
 #include "tcp_socket.h"

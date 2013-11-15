@@ -1,6 +1,5 @@
 #include <ctime>
 
-#include "announce_message.h"
 #include "common.h"
 
 #include "user.h"
