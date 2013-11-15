@@ -13,8 +13,8 @@ void chat_message::to_host()
     len = be32toh(len);
 }
 
-chat_message::chat_message(const std::string &text)
-    : timestamp(host_time()), text(text), len(text.length())
+chat_message::chat_message(const std::string &text, long long timestamp)
+    : timestamp(timestamp), text(text), len(text.length())
 {
     mac_addr.id = 0;
     get_mac(mac_addr);

@@ -63,7 +63,7 @@ void sl::revive(user &u, long long timestamp)
         for (auto it = history.begin() + u.message_sent;
                 it != history.end() && !u.dead; ++it)
         {
-            send_message_to_user(u, it->second);
+            send_message_to_user(u, it->second, it->first);
         }
     }
 }
@@ -125,11 +125,11 @@ void sl::send_message()
         {
             continue;
         }
-        send_message_to_user(it->second, text);
+        send_message_to_user(it->second, text, host_time());
     }
 }
 
-void sl::send_message_to_user(user &u, const std::string &text)
+void sl::send_message_to_user(user &u, const std::string &text, long long t)
 {
     try
     {
@@ -137,13 +137,14 @@ void sl::send_message_to_user(user &u, const std::string &text)
         print_mac(u.mac_addr);
         std::cout << std::endl;
         sender S(tcp_port);
-        S.send_message(u, text);
+        S.send_message(u, text, t);
         u.message_sent++;
     }
     catch (std::runtime_error &e)
     {
         perror("sl::send_message : ");
-        std::cerr << e.what() << std::endl;
+        std::cout << e.what() << std::endl;
+        std::cout << ip_string(u.ip) << " is dead" << std::endl;
         u.dead = true;
     }
 }
@@ -203,7 +204,7 @@ void sl::mark_dead_users()
     {
         if (is_dead_user(it->second))
         {
-            it->second.dead = true;
+//            it->second.dead = true;
         }
     }
 }

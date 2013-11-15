@@ -16,7 +16,7 @@ cm_header
 
 struct chat_message
 {
-    chat_message(const std::string &);
+    chat_message(const std::string &, long long);
     chat_message(const cm_header &);
     void to_user_time(long long);
     long long timestamp;

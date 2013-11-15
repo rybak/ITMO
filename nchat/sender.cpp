@@ -31,7 +31,7 @@ sender::~sender()
     close(sock);
 }
 
-void sender::send_message(const user &u, const std::string &text)
+void sender::send_message(const user &u, const std::string &text, long long timestamp)
 {
     sockaddr_in addr = {AF_INET, htons(port), 0, 0};
     addr.sin_addr.s_addr = u.ip;
@@ -39,7 +39,7 @@ void sender::send_message(const user &u, const std::string &text)
     {
         throw std::runtime_error("sender::send_message : connect");
     }
-    chat_message msg(text);
+    chat_message msg(text, timestamp);
     msg.to_user_time(u.offset);
     msg.to_net();
     cm_header h;

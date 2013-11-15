@@ -27,7 +27,7 @@ private:
     mac_addr_t mac_addr;
 
     uint16_t tcp_port;
-    void send_message_to_user(user &, const std::string &);
+    void send_message_to_user(user &, const std::string &, long long);
     listener L;
     void receive_am();
     void revive(user &, long long);

@@ -31,7 +31,6 @@ void make_udp_socket(int &fd, struct sockaddr_in &sock, uint16_t port)
     {
         die("socket");
     }
-
     socklen_t si_len = sizeof(sock);
     memset(&sock, 0, si_len);
     sock.sin_family = AF_INET;
