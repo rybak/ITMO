@@ -67,7 +67,7 @@ void ra::cycle()
 
 namespace
 {
-    void print_time(long long t)
+    void print_time(chat_time_t t)
     {
         std::cout << " [" << time_string(t) << "] ";
     }
@@ -115,7 +115,7 @@ void ra::save_message(const chat_message &msg)
     history.at(msg.timestamp).push_back(msg);
 }
 
-long long ra::last_timestamp()
+chat_time_t ra::last_timestamp()
 {
     if (history.empty())
     {

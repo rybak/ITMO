@@ -2,6 +2,7 @@
 #define ANNOUNCE_MESSAGE_H
 
 #include "ma.h"
+#include "chat.h"
 
 const size_t MSG_MAX_LEN = 1024;
 
@@ -9,7 +10,7 @@ struct
     __attribute__ ((packed))
     packed_message
 {
-    long long timestamp;
+    chat_time_t timestamp;
     _mac_addr_t ma;
 };
 
@@ -23,7 +24,7 @@ struct announce_message
     announce_message(const packed_message &);
 
     mac_addr_t mac_addr;
-    long long timestamp;
+    chat_time_t timestamp;
     int ip;
 };
 

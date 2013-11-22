@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "chat.h"
 #include "ma.h"
 
 struct
@@ -16,13 +17,13 @@ cm_header
 
 struct chat_message
 {
-    chat_message(const std::string &, long long);
+    chat_message(const std::string &, chat_time_t);
     chat_message(const cm_header &);
-    void to_user_time(long long);
+    void to_user_time(chat_time_t);
     long long timestamp;
     mac_addr_t mac_addr;
-    uint32_t len;
     std::string text;
+    uint32_t len;
     void to_host();
     void to_net();
 

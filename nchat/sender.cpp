@@ -31,9 +31,9 @@ sender::~sender()
     close(sock);
 }
 
-void sender::send_message(const user &u, const std::string &text, long long timestamp)
+void sender::send_message(const user &u, const std::string &text, chat_time_t timestamp)
 {
-    sockaddr_in addr = {AF_INET, htons(port), 0, 0};
+    sockaddr_in addr = {AF_INET, htons(port), {0}, {0,0,0,0,0,0,0,0}};
     addr.sin_addr.s_addr = u.ip;
     if (connect(sock, (sockaddr *) &addr, sizeof(addr)) < 0)
     {

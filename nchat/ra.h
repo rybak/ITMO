@@ -24,8 +24,8 @@ private:
     receiver R;
     void receive_cm();
     void save_message(const chat_message &);
-    std::map<long long, std::vector<chat_message> > history;
-    long long last_timestamp();
+    std::map<chat_time_t, std::vector<chat_message> > history;
+    chat_time_t last_timestamp();
 
     announcer A;
 

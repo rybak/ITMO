@@ -13,7 +13,7 @@ void chat_message::to_host()
     len = be32toh(len);
 }
 
-chat_message::chat_message(const std::string &text, long long timestamp)
+chat_message::chat_message(const std::string &text, chat_time_t timestamp)
     : timestamp(timestamp), text(text), len(text.length())
 {
     mac_addr.id = 0;
@@ -34,7 +34,7 @@ void make_header(cm_header &h, const chat_message &msg)
     mov(h.ma, msg.mac_addr.ma);
 }
 
-void chat_message::to_user_time(long long offset)
+void chat_message::to_user_time(chat_time_t offset)
 {
     timestamp += offset;
 }

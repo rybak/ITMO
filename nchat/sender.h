@@ -10,7 +10,7 @@ struct sender
     sender(const uint16_t);
     ~sender();
 
-    void send_message(const user &, const std::string &, long long);
+    void send_message(const user &, const std::string &, chat_time_t);
 
 private:
 

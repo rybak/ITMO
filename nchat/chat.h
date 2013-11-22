@@ -3,7 +3,9 @@
 
 #define CHAT_STR "chat : "
 
-const long long TIME_INTERVAL = 5;
-const long long TIME_GAP = 15;
+typedef long long chat_time_t;
+
+const chat_time_t TIME_INTERVAL = 5;
+const chat_time_t TIME_GAP = 15;
 
 #endif
