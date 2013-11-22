@@ -21,4 +21,3 @@ int tcp_socket(addrinfo * &servinfo, uint16_t port)
     return socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
 }
 
-

@@ -4,7 +4,6 @@
 
 #include "ma.h"
 #include "announce_message.h"
-// #include "chat.h"
 
 struct listener
 {
@@ -19,3 +18,4 @@ private:
 };
 
 #endif
+

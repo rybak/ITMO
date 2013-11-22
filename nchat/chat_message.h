@@ -32,3 +32,4 @@ struct chat_message
 void make_header(cm_header &, const chat_message &);
 
 #endif
+

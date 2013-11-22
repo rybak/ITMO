@@ -2,6 +2,7 @@
 #define MA_H
 
 typedef unsigned char _mac_addr_t[6];
+
 typedef union
 {
     _mac_addr_t ma;

@@ -13,5 +13,5 @@ private:
     char *buffer;
 };
 
-
 #endif
+
