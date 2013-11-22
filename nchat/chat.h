@@ -3,7 +3,7 @@
 
 #define CHAT_STR "chat : "
 
-const size_t TIME_INTERVAL = 5;
-const size_t TIME_GAP = 15;
+const long long TIME_INTERVAL = 5;
+const long long TIME_GAP = 15;
 
 #endif

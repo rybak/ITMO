@@ -10,7 +10,7 @@
 #include "sl.h"
 
 sl::sl(const uint16_t udp_port, const uint16_t tcp_port)
-    : L(udp_port), tcp_port(tcp_port)
+    : tcp_port(tcp_port), L(udp_port)
 {
     get_mac(mac_addr);
     print_mac(mac_addr);

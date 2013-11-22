@@ -14,8 +14,8 @@ struct user
 
     mac_addr_t mac_addr;
     std::string nickname;
-    int ip;
     long long timestamp;
+    int ip;
     long long offset;
     bool dead;
     size_t message_sent;

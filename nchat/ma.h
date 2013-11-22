@@ -16,3 +16,4 @@ void print_mac(const mac_addr_t &);
 void mov(_mac_addr_t &, const _mac_addr_t &);
 
 #endif
+

@@ -1,5 +1,5 @@
 INCLUDE=../common
-CC=g++ -std=c++11 -O2 -I"$(INCLUDE)"
+CC=g++ -std=c++11 -O2 -I"$(INCLUDE)" -Wall
 CCO=$(CC) -g -c
 CF=$(INCLUDE)/common
 
