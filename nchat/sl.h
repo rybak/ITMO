@@ -7,7 +7,6 @@
 #include <vector>
 #include <unordered_map>
 
-
 #include "ma.h"
 #include "user.h"
 
@@ -21,16 +20,16 @@ struct sl
     void cycle();
     ~sl();
     void send_message();
-    void print_users();
-    void print_history();
+    void print_users() const;
+    void print_history() const;
 private:
     mac_addr_t mac_addr;
 
     uint16_t tcp_port;
-    void send_message_to_user(user &, const std::string &, long long);
+    void send_message_to_user(user &, const std::string &, long long) const;
     listener L;
     void receive_am();
-    void revive(user &, long long);
+    void revive(user &, long long) const;
 
     fd_set fds;
     int maxfd;

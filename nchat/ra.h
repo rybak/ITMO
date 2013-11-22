@@ -3,6 +3,8 @@
 
 #include <cstdint>
 #include <unordered_map>
+#include <map>
+#include <vector>
 
 #include "receiver.h"
 #include "announcer.h"
@@ -16,11 +18,15 @@ struct ra
     void start();
     void cycle();
     ~ra();
-    void print_users();
+    void print_history();
 private:
     mac_addr_t mac_addr;
     receiver R;
     void receive_cm();
+    void save_message(const chat_message &);
+    std::map<long long, std::vector<chat_message> > history;
+    long long last_timestamp();
+
     announcer A;
 
     int epollfd;
@@ -31,3 +37,4 @@ private:
 };
 
 #endif
+

@@ -13,9 +13,8 @@ void print_usage(char *cmd)
     printf("\t%s \n", cmd);
 }
 
-const int MSG_KEY = 's';
 const int QUIT_KEY = 'q';
-const int PRINT_KEY = 'p';
+const int HISTORY_KEY = 'l';
 
 void quit()
 {
@@ -75,11 +74,13 @@ int main(int argc, char *argv[])
         if (kbhit())
         {
             int ch = getchar();
-            printf("\rKey %d = '%c' is pressed\n", (int) ch, ch);
             switch(ch)
             {
                 case QUIT_KEY:
                     quit();
+                    break;
+                case HISTORY_KEY:
+                    RA.print_history();
                     break;
                 default:
                     break;

@@ -53,7 +53,7 @@ void sl::cycle()
     }
 }
 
-void sl::revive(user &u, long long timestamp)
+void sl::revive(user &u, long long timestamp) const
 {
     u.dead = false;
     u.timestamp = timestamp;
@@ -101,7 +101,7 @@ void sl::save_message(const std::string &text)
     history.push_back(make_pair(host_time(), text));
 }
 
-void sl::print_history()
+void sl::print_history() const
 {
     for (auto it = history.begin(); it != history.end(); ++it)
     {
@@ -129,7 +129,7 @@ void sl::send_message()
     }
 }
 
-void sl::send_message_to_user(user &u, const std::string &text, long long t)
+void sl::send_message_to_user(user &u, const std::string &text, long long t) const
 {
     try
     {
@@ -173,7 +173,7 @@ namespace
     }
 }
 
-void sl::print_users()
+void sl::print_users() const
 {
     print_header();
     if (users.empty())

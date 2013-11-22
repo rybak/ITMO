@@ -48,3 +48,4 @@ chat_message little_receiver::receive_message()
     msg.text = buffer;
     return msg;
 }
+
