@@ -11,30 +11,15 @@ import Prelude ( Show(..)
                , Monad(..) )
 import qualified Prelude as P
  
-import Control.Monad.Trans (liftIO)
-import Data.IORef
-import qualified Data.Set as S
-import Data.Time.Clock.POSIX
-import Graphics.UI.Gtk hiding (drawPolygon,Arrow)
-import Graphics.UI.Gtk.Gdk.Events
-import qualified Graphics.Rendering.Cairo as C
 import qualified Graphics.Rendering.Cairo.Matrix as M
-import System.IO.Unsafe (unsafePerformIO)
- 
 
 -- Rybak imports
 import Text.Printf
 import Data.List
 import Control.Monad hiding(mzero)
-import Data.Binary.IEEE754
-import Data.Binary
 import System.Environment(getArgs)
+import Data.Sequence (index, iterateN)
 
--- Holes
- 
-data Hole = Hole
-hole = error "hole"
- 
 -- Algebra
  
 class Monoid a where
@@ -44,18 +29,6 @@ class Monoid a where
   mconcat = P.foldr mappend mzero
  
 -- Instances
- 
-newtype Any = Any { unAny :: Bool }
- 
-instance Monoid Any where
-  mzero = Any False
-  mappend (Any x) (Any y) = Any (x || y)
- 
-newtype All = All { unAll :: Bool }
- 
-instance Monoid All where
-  mzero = All True
-  mappend (All x) (All y) = All (x && y)
  
 instance Monoid Float where
   mzero = 0
@@ -327,20 +300,17 @@ notNaN :: Vector3 Float -> Bool
 notNaN (Vector3 x y z) = P.not ((P.isNaN x) P.|| (P.isNaN y) P.|| (P.isNaN z))
 
 explicitEuler, implicitEuler, rungeKutta4 :: Float -> Float -> Float -> Float -> Vector3 Float -> Vector3 Float
-explicitEuler s r b dt v@(Vector3 x y z) = Vector3 (x + dt * (dx v)) (y + dt * (dy v)) (z + dt * (dz v)) where
-                dx = fx s r b
-                dy = fy s r b
-                dz = fz s r b
+explicitEuler s r b dt v@(Vector3 x y z) = Vector3 (x + dt * dx) (y + dt * dy) (z + dt * dz) where
+                (Vector3 dx dy dz) = applyf s r b v
 
-implicitEuler s r b h = (oneIter s r b h) . (oneIter s r b h) . (explicitEuler s r b h)
-                        where
-    oneIter s r b h (Vector3 x y z) = Vector3
-        ((x + h * s * y) / (1.0 + s * h))
-        ((y + h * x * (r - z)) / (1.0 + h))
-        ((h * x * y + z) / (1.0 + b * h))
- 
+ieK = 100
+implicitEuler s r b h v = simpleIter (explicitEuler s r b h v)  where
+    simpleIter v = index (iterateN ieK (oneIter v) v) (ieK P.- 1)
+    oneIter v0@(Vector3 x y z) vs = Vector3 (x + h * dx) (y + h * dy) (z + h * dz) where
+        (Vector3 dx dy dz) = applyf s r b vs
+
 rungeKutta4 s r b h v = let
-  f v@(Vector3 x y z) = Vector3 (fx s r b v)(fy s r b v)(fz s r b v)
+  f vv = applyf s r b vv
   k1 = h ^* f v
   k2 = h ^* f (v + 0.5 ^* k1)
   k3 = h ^* f (v + 0.5 ^* k2)
@@ -356,35 +326,44 @@ explicitEulerList = lorenz explicitEuler
 implicitEulerList = lorenz implicitEuler
 rungeKutta4List = lorenz rungeKutta4
 
+adamsK :: Int
 adamsK = 4
 
-adamsOne :: Float -> [Float] -> Float -> Float
-adamsOne h [y3', y2', y1', y0'] yi = yi + (h / 24.0) * (55 * y0' - 59 * y1' + 37 * y2' - 9 * y3')
-adamsOne _ _ _ = error "adamsOne"
+adamsOne2, adamsOne3, adamsOne4 :: Float -> [Vector3 Float] -> Vector3 Float -> Vector3 Float
+adamsOne4 h [y0', y1', y2', y3'] y3 = y3 + h ^* (55.0 P./ 24.0 ^* y3' - 59.0 P./ 24.0 ^* y2' + 37.0 P./ 24.0 ^* y1' - 9.0 P./ 24.0 ^* y0')
+adamsOne3 h [y0', y1', y2', y3'] y3 = y3 + h ^* (23.0 P./ 12.0 ^* y3' - 16.0 P./ 12.0 ^* y2' + 5.0 P./ 12.0 ^* y1') 
+adamsOne2 h [y0', y1', y2', y3'] y3 = y3 + h ^* (1.5 ^* y3' - 0.5 ^* y2')
+--adamsOne _ _ _ = error "adamsOne"
 
+-- to R: calc first four derivativies (y') and pass y_4 too
 adams :: Float -> Float -> Float -> Float -> [Vector3 Float] -> Vector3 Float -> [Vector3 Float]
-adams s r b h [v3, v2', v1', v0'] v = let
-    nextv = v
-    in nextv : (adams s r b h [v2', v1', v0', applyf s r b v] v)
-adams _ _ _ _ _ _ = error "adams method"
+adams s r b h dvs@[_ , v1', v2', v3'] v3 = let
+    v4 = adamsOne2 h dvs v3
+    in v4 : (adams s r b h [v1', v2', v3', applyf s r b v4] v4)
+adams _ _ _ _ _ _ = error "adams"
 
 applyf :: Float -> Float -> Float -> Vector3 Float -> Vector3 Float
 applyf s r b v = Vector3 (fx s r b v) (fy s r b v) (fz s r b v)
 
 adamsList s r b h start = let
-    sl = map (applyf s r b) (take adamsK (rungeKutta4List s r b h start))
-    v4 = last sl
-    in adams s r b h sl v4
+    -- vs = take adamsK (explicitEulerList s r b h start)
+    m = 10
+    vs = drop (m P.- adamsK) (take m (explicitEulerList s r b h start))
+    dvs = map (applyf s r b) vs
+    v3 = last vs
+    in vs ++ adams s r b h dvs v3
 
+toTuple :: Vector3 a -> (a, a, a)
 toTuple (Vector3 x y z) = (x, y, z)
 
 list r method = take n $ map toTuple $ method s r b dt start where
-    dt = 0.005
+    dt = 0.01
     s = 10
     b = 2.6666666
-    start = Vector3 3.051522 1.582542 15.62388
+    start = Vector3 10.0 10.0 10.0
 
-n = 20000
+n :: Int
+n = 3000
 
 output filename method = P.mapM_ (\r -> P.writeFile (filename ++ show r) $ join [printf "%f %f %f\n" x y z | (x, y, z) <- list r method])
 
@@ -395,3 +374,4 @@ main = do
       output "euler" explicitEulerList l
       >> output "implicit" implicitEulerList l
       >> output "rk" rungeKutta4List l
+      >> output "adams" adamsList l
