@@ -1261,7 +1261,7 @@ The technical part of the idea of this definition is that the principle of explo
     contraposition¬ = λ a→b b a → a→b a b
 
     →¬² : ∀ {α} {A : Set α} → A → ¬ (¬ A)
-    →¬² a = λ ¬¬a → ¬¬a a
+    →¬² = contradiction
 
     ¬³→¬ : ∀ {α} {A : Set α} → ¬ (¬ (¬ A)) → ¬ A
     ¬³→¬ = λ ¬¬¬a → λ a → ¬¬¬a (λ ¬a → ¬a a)
