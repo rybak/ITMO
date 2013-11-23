@@ -25,6 +25,12 @@ void quit()
     exit(0);
 }
 
+void my_sleep()
+{
+    static timespec sleep_time = {0 , 100l * 1000l * 1000l};
+    nanosleep(&sleep_time, NULL);
+}
+
 int main(int argc, char *argv[])
 {
     char *udp_port_val = NULL;
@@ -65,14 +71,11 @@ int main(int argc, char *argv[])
     uint16_t udp_port = udp_port_val != NULL ? atoi(udp_port_val) : UDP_PORT;
     uint16_t tcp_port = tcp_port_val != NULL ? atoi(tcp_port_val) : TCP_PORT;
 
-    timespec sleep_time;
-    sleep_time.tv_sec = 0; /// 0
-    sleep_time.tv_nsec = 100l * 1000l * 1000l;
     ra RA(udp_port, tcp_port);
     RA.start();
     for(;;)
     {
-        nanosleep(&sleep_time, NULL);
+        my_sleep();
         if (kbhit())
         {
             int ch = getchar();
