@@ -1,8 +1,12 @@
 HC=ghc -O2
 RM=rm -f
 
-euler : Euler.hs
+build : Euler.hs
 	$(HC) Euler.hs -o euler
+
+clean :
+	$(RM) *.hi
+	$(RM) euler
 
 calc=Euler.hs mv.sh all.sh oneE.gp oneA.gp oneR.gp oneI.gp
 
