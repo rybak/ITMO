@@ -132,6 +132,7 @@ chat_time_t ra::last_timestamp()
 
 void ra::print_history()
 {
+    std::cout << "Received messages : " << std::endl;
     for(auto &v : history)
     {
         for (auto &p : v.second)
