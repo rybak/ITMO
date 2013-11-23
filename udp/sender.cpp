@@ -95,7 +95,6 @@ long long time_to_net()
 
 int main(int argc, char *argv[])
 {
-    signal(SIGCHANGEIP, got_new_ip);
     if (argc < 3)
     {
         print_usage(argv[0]);

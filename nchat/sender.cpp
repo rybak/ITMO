@@ -39,6 +39,13 @@ void sender::send_message(const user &u, const std::string &text, chat_time_t ti
     {
         throw std::runtime_error("sender::send_message : connect");
     }
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 200000;
+    if (setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv)) < 0)
+    {
+        throw std::runtime_error("sender::send_message : setsockopt : timeval");
+    }
     chat_message msg(text, timestamp);
     msg.to_user_time(u.offset);
     msg.to_net();

@@ -103,6 +103,7 @@ void sl::save_message(const std::string &text)
 
 void sl::print_history() const
 {
+    std::cout << "Sent messages:" << std::endl;
     for (auto it = history.begin(); it != history.end(); ++it)
     {
         std::cout << "[" << time_string((*it).first) << "] "

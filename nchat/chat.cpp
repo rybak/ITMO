@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "common.h"
 #include "kbhit.h"
 
@@ -83,6 +85,8 @@ int main(int argc, char *argv[])
                     RA.print_history();
                     break;
                 default:
+                    std::cout << "not a command : '"
+                        << ((char) ch) << std::endl;
                     break;
             }
         }

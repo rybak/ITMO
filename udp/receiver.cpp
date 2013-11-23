@@ -64,8 +64,7 @@ struct server_t
         struct timeval tv;
         tv.tv_sec = TIME_INTERVAL;
         tv.tv_usec = 0;
-        if (setsockopt(sock,
-                    SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
+        if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
         {
             die("setsockopt : timeval");
         }
