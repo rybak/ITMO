@@ -1,5 +1,5 @@
 #include <cstdlib>
-#include <sys/time.h>
+#include <ctime>
 #include <sys/types.h>
 #include <unistd.h>
 #include <cstring>

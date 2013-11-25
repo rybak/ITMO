@@ -6,8 +6,7 @@
 
 const size_t MSG_MAX_LEN = 1024;
 
-struct
-    __attribute__ ((packed))
+struct __attribute__ ((packed))
     packed_message
 {
     chat_time_t timestamp;

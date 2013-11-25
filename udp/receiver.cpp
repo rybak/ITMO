@@ -1,14 +1,6 @@
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <stddef.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstring>
 #include <unistd.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
-#include <netdb.h>
 
 #include <iostream>
 #include <time.h>
@@ -55,11 +47,8 @@ struct server_t
     struct sockaddr_in sock_in;
     socklen_t si_len;
 
-    int sender_pid = 0;
-
-    void start(uint16_t port, int s_pid)
+    void start(uint16_t port)
     {
-        sender_pid = s_pid;
         make_udp_socket(sock, sock_in, port);
         struct timeval tv;
         tv.tv_sec = TIME_INTERVAL;
@@ -155,7 +144,7 @@ int main(int argc, char* argv[])
         execl(sender_path, sender_path, argv[1], argv[2], argv[3], NULL);
         die("execl");
     }
-    server.start(atoi(argv[1]), sender_pid);
+    server.start(atoi(argv[1]));
     while(true)
     {
         server.cycle();

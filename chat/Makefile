@@ -1,24 +1,36 @@
+# directories
 INCLUDE=../common
-CC=g++ -std=c++11 -O2 -I"$(INCLUDE)" -Wall
-CCO=$(CC) -g -c
 CF=$(INCLUDE)/common
 
-all : chat nchat
+# binaries
+CC=g++ -std=c++11 -O2 -I"$(INCLUDE)" -Wall
+CCO=$(CC) -c
+RM=rm -f
+
+build : chat nchat
+
+rebuild : clean build
 
 clean :
-	rm *.o
-	rm chat
-	rm nchat
+	$(RM) *.o
+	$(RM) chat
+	$(RM) nchat
 
 chat : chat.cpp common.o kbhit.o ra.o ports.h user.o
 	$(CC) chat.cpp\
 		kbhit.o common.o ma.o\
-		ra.o user.o chat_message.o announce_message.o\
-		receiver.o tcp_socket.o announcer.o little_receiver.o\
+		ra.o user.o chat_message.o\
+		receiver.o little_receiver.o tcp_socket.o\
+		announcer.o announce_message.o\
 		-o chat
 
 nchat : n.cpp common.o kbhit.o sl.o ports.h user.o
-	$(CC) n.cpp kbhit.o sl.o ma.o announce_message.o sender.o listener.o tcp_socket.o user.o common.o chat_message.o -o nchat
+	$(CC) n.cpp\
+		kbhit.o common.o ma.o\
+		sl.o user.o chat_message.o\
+		sender.o tcp_socket.o\
+		listener.o announce_message.o\
+		-o nchat
 
 ra.o : ra.cpp ra.h receiver.o announcer.o announce_message.o chat.h common.o ma.o user.o
 	$(CCO) ra.cpp
@@ -38,7 +50,7 @@ receiver.o : receiver.cpp receiver.h ma.o chat_message.o tcp_socket.o little_rec
 little_receiver.o : little_receiver.cpp little_receiver.h
 	$(CCO) little_receiver.cpp
 
-listener.o : listener.cpp listener.h ports.h common.o ma.o announce_message.o 
+listener.o : listener.cpp listener.h ports.h common.o ma.o announce_message.o
 	$(CCO) listener.cpp
 
 # messages

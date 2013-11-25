@@ -1,16 +1,6 @@
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <stddef.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstring>
 #include <unistd.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
-
-#include <iostream>
-#include <algorithm>
 
 #include <ifaddrs.h>
 #include <time.h>

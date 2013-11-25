@@ -1,16 +1,13 @@
 #include <sys/ioctl.h>
 #include <net/if.h> 
 #include <netinet/in.h> 
-#include <string.h>
-#include <cstdlib>
+#include <cstring>
+
+#include <cstdio>
 
 #include "common.h"
 
 #include "ma.h"
-
-#include <cstdio>
-#include <iostream>
-#include <iomanip>
 
 void mov(_mac_addr_t &to, const _mac_addr_t &from)
 {
