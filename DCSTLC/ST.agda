@@ -195,6 +195,14 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
            ≡ wk (sub M [ γ ↦ s ]) f
   lemma-wk f M s = {!!}
 
+  lemma-sub₀ : ∀ {Γ Δ τ σ}
+               → (γs : List Type)
+               → (M : Term (γs ++ (σ ∷ Γ)) τ) (N : Term Γ σ)
+               → (ss : Sub Γ Δ)
+               → sub (sub M (γs ⋯ σ ∷⋯ ss)) (γs ⋯ [ σ ↦ sub N ss ])
+               ≡ sub (sub M (γs ⋯ [ σ ↦ N ])) (γs ⋯ ss)
+  lemma-sub₀ γs M N ss = {!!}
+
   -- The Substitution Lemma: substitution commutes with itself
   -- This is general.
   lemma-sub : ∀ {Γ Δ σ τ}
