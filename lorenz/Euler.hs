@@ -1,5 +1,6 @@
-{-# LANGUAGE TypeSynonymInstances, FlexibleInstances, TypeOperators, MultiParamTypeClasses, RankNTypes, UnboxedTuples, FunctionalDependencies, RecordWildCards #-}
- 
+{-# LANGUAGE TypeSynonymInstances, FlexibleInstances, TypeOperators, MultiParamTypeClasses, RankNTypes, UnboxedTuples, FunctionalDependencies, RecordWildCards, ExistentialQuantification, BangPatterns #-}
+
+
 import Prelude ( Show(..)
                , error, undefined
                , Bool(..), (&&), (||), not
@@ -8,7 +9,7 @@ import Prelude ( Show(..)
                , Float, Double
                , fromIntegral, realToFrac
                , pi, sin, cos, asin, acos, atan, atan2, sqrt
-               , Monad(..) )
+               , Monad(..), (.), ($) )
 import qualified Prelude as P
  
 import qualified Graphics.Rendering.Cairo.Matrix as M
@@ -19,7 +20,7 @@ import Data.List
 import Control.Monad hiding(mzero)
 import System.Environment(getArgs)
 import Data.Sequence (index, iterateN)
-
+import Fusion
 -- Algebra
  
 class Monoid a where
@@ -122,70 +123,16 @@ instance (Field s, BasicVector v) => VectorSpace (v s) s where
   (^*) s = vmap (s *)
   (^/) v s = vmap (/ s) v
  
---instance (Ring s, BasicVector v) => Ring (v s) where
---  rone = diagonal rone
---  rmult = vzip rmult
---
---instance (Field s, BasicVector v) => Field (v s) where
---  recip = vmap recip
---  (/) = vzip (/)
- 
--- pointwise product
-(.*) :: (Field s, BasicVector v) => v s -> v s -> v s
-(.*) x y = vzip (*) x y
- 
--- inner product
-(**) :: (Field s, BasicVector v) => v s -> v s -> s
-(**) x y = vfold (+) (x .* y)
- 
-norm :: (Field s, BasicVector v, P.Floating s) => v s -> s
-norm v = sqrt $ v ** v
- 
-normalize v = v ^/ (norm v)
- 
--- Matices
- 
-type Matrix = M.Matrix
- 
-instance Monoid Matrix where
-  mzero = M.Matrix 0 0 0 0 0 0
-  mappend = (P.+)
- 
-instance Group Matrix where
-  ginv = negate
- 
-instance VectorSpace Matrix Double where
-  (^*) = M.scalarMultiply
- 
-instance Ring Matrix where
-  rone = M.identity
-  rmult = (P.*)
- 
-instance Field Matrix where
-  recip = M.invert
- 
-rotationMatrix a = M.Matrix (cos a) (negate $ sin a) (sin a) (cos a) 0 0
- 
 -- 2D Vectors
  
 data Vector2 a = Vector2 !a !a
                 deriving Show
- 
- 
-uncurryVector2 f (Vector2 x y) = f x y
  
 instance BasicVector Vector2 where
   diagonal s = Vector2 s s
   vmap f (Vector2 x y) = Vector2 (f x) (f y)
   vzip f (Vector2 x y) (Vector2 x' y') = Vector2 (f x x') (f y y')
   vfold o (Vector2 x y) = x `o` y
- 
-angleVector2 (Vector2 x y) = atan2 y x
- 
-angleBetweenVector2 p t = angleVector2 p - angleVector2 t
- 
-transformVector2 m (Vector2 x y) = Vector2 a b where
-  (a, b) = M.transformPoint m (x, y)
  
 -- 3D Vectors
  
@@ -200,17 +147,6 @@ instance BasicVector Vector3 where
  
 --
  
-data Color3 a = Color3 !a !a !a
-                deriving Show
- 
-instance BasicVector Color3 where
-  diagonal s = Color3 s s s
-  vmap f (Color3 x y z) = Color3 (f x) (f y) (f z)
-  vzip f (Color3 x y z) (Color3 x' y' z') = Color3 (f x x') (f y y') (f z z')
-  vfold o (Color3 x y z) = x `o` y `o` z
- 
---
- 
 data Color4 a = Color4 !a !a !a !a
                 deriving Show
  
@@ -219,47 +155,6 @@ instance BasicVector Color4 where
   vmap f (Color4 x y z a) = Color4 (f x) (f y) (f z) (f a)
   vzip f (Color4 x y z a) (Color4 x' y' z' a') = Color4 (f x x') (f y y') (f z z') (f a a')
   vfold o (Color4 x y z a) = x `o` y `o` z `o` a
- 
--- Function
- 
-infixr 0 $
- 
-($) :: (a -> b) -> a -> b
-($) f x = f x
- 
--- Category and Arrow
- 
-class Category cat where
-  id  :: cat a a
-  (.) :: cat b c -> cat a b -> cat a c
- 
-(>>>) :: Category cat => cat a b -> cat b c -> cat a c
-(>>>) = P.flip (.)
- 
-instance Category (->) where
-  id x = x
-  (.) f g x = f (g x)
- 
-class Category cat => Arrow cat where
-  arr    :: (a -> b) -> cat a b
-  first  :: cat a b -> cat (a, c) (b, c)
-  second :: cat a b -> cat (c, a) (c, b)
-  (***)  :: cat a b -> cat a' b' -> cat (a, a') (b, b')
-  (***) f g = first f >>> second g
-  (&&&)  :: cat a b -> cat a b' -> cat a (b, b')
-  (&&&) f g = arr (\x -> (x, x)) >>> (f *** g)
- 
-instance Arrow (->) where
-  arr = id
-  first  f (x, y)  = (f x, y)
-  second f (x, y)  = (x, f y)
-  (***) f g (x, y) = (f x, g y)
-  (&&&) f g x      = (f x, g x)
- 
--- Functor
- 
-class Functor f where
-  fmap :: (a -> b) -> f a -> f b
  
 -- instance Functor [] where
 --   fmap = P.map
@@ -291,10 +186,10 @@ fz _ _ b (Vector3 x y z) =  x * y - b * z
 
 -- toList (Vector3 a b c) = [a, b, c]
 
-takeWhile1 :: (a -> Bool) -> [a] -> [a]
-takeWhile1 _ [] = []
-takeWhile1 p (x:xs) | p x = x : takeWhile1 p xs
-                    | P.otherwise = [x]
+--takeWhile1 :: (a -> Bool) -> [a] -> [a]
+--takeWhile1 _ [] = []
+--takeWhile1 p (x:xs) | p x = x : takeWhile1 p xs
+--                    | P.otherwise = [x]
 
 notNaN :: Vector3 Float -> Bool
 notNaN (Vector3 x y z) = P.not ((P.isNaN x) P.|| (P.isNaN y) P.|| (P.isNaN z))
@@ -303,10 +198,11 @@ explicitEuler, implicitEuler, rungeKutta4 :: Float -> Float -> Float -> Float ->
 explicitEuler s r b dt v@(Vector3 x y z) = Vector3 (x + dt * dx) (y + dt * dy) (z + dt * dz) where
                 (Vector3 dx dy dz) = applyf s r b v
 
+ieK :: Int
 ieK = 100
 implicitEuler s r b h v = simpleIter (explicitEuler s r b h v)  where
-    simpleIter v = index (iterateN ieK (oneIter v) v) (ieK P.- 1)
-    oneIter v0@(Vector3 x y z) vs = Vector3 (x + h * dx) (y + h * dy) (z + h * dz) where
+    simpleIter vi = index (iterateN ieK (oneIter vi) vi) (ieK P.- 1)
+    oneIter (Vector3 x y z) vs = Vector3 (x + h * dx) (y + h * dy) (z + h * dz) where
         (Vector3 dx dy dz) = applyf s r b vs
 
 rungeKutta4 s r b h v = let
@@ -318,8 +214,10 @@ rungeKutta4 s r b h v = let
   d = (1.0 / 6.0) ^* (k1 + 2 ^* k2 + 2 ^* k3 + k4)
   in v + d
   
+myIterate f = unstreamList . iterateStream f
+
 lorenz :: (Float -> Float -> Float -> Float -> (Vector3 Float) -> Vector3 Float) -> Float -> Float -> Float -> Float -> (Vector3 Float) -> [Vector3 Float]
-lorenz next s r b h start = takeWhile1 notNaN $ P.iterate (next s r b h) start
+lorenz next s r b h start = takeWhile1 notNaN $ myIterate (next s r b h) start
 
 explicitEulerList, implicitEulerList, rungeKutta4List, adamsList :: Float -> Float -> Float -> Float -> Vector3 Float -> [Vector3 Float]
 explicitEulerList = lorenz explicitEuler
