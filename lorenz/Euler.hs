@@ -19,6 +19,9 @@ import Control.Monad hiding(mzero)
 import System.Environment(getArgs)
 import Data.Sequence (index, iterateN)
 import Fusion
+import Graphics.EasyPlot
+import System.Process
+import Control.Concurrent.ParallelIO
 -- Algebra
  
 class Monoid a where
@@ -264,38 +267,36 @@ list r method = take n $ map toTuple $ method s r b dt start where
 n :: Int
 n = 3000
 
-output :: P.FilePath -> MethodType -> [Float] -> P.IO ()
-output filename method = P.mapM_ (\r -> P.writeFile (filename ++ show r) $ join [printf "%f %f %f\n" x y z | (x, y, z) <- list r method])
-
 type Writer = Float -> String -> [(Float, Float, Float)] -> P.IO ()
 generalOutput :: Writer -> [Float] -> String -> MethodType -> P.IO ()
 generalOutput writer rs methodName method = P.mapM_ (\r -> writer r methodName (list r method)) rs
 
-main3 :: P.IO ()
-main3 = do
-    argv <- getArgs
-    let l = if null argv then [1.0, 2.0 .. 30.0] :: [Float] else map P.read argv in
-        P.mapM_ (P.uncurry (generalOutput writeToFile l)) methods
+rlist :: [String] -> [Float]
+rlist [] = [24.0, 28.0] --[1.0, 2.0 .. 30.0]
+rlist as = map P.read as
 
+mainGeneral :: Writer -> [Float] -> P.IO ()
+mainGeneral w rs = P.mapM_ (P.uncurry (generalOutput w rs)) methods
+
+mainG, mainF :: [Float] -> P.IO ()
+mainG = mainGeneral plotX11
+plotX11 :: Writer
+plotX11 r methodName vs =
+  do
+    _ <- system "xdotool type 'exit'"
+    result <- plot' [Interactive] X11 $ Data3D [Color Red, Style Lines, Title (methodName ++ " r = " ++ show r)] [] vs
+--    kr <- system "xdotool type 'exit'"
+    P.putStrLn (if result then "success" else "fail")
+
+mainF = mainGeneral writeToFile
 writeToFile :: Writer
 writeToFile r methodName vs = P.writeFile (methodName ++ show r) $ join [printf "%f %f %f\n" x y z | (x, y, z) <- vs]
 
--- Data3D       [Option] [Option3D x y z] [(x, y, z)]
--- plot' [Interactive] X11 $ Gnuplot3D [Color Red, Style Lines] [] "x ** 2 + y ** 3"
---main = do
---    argv <- getArgs
---    let l = if null argv then [1.0, 2.0 .. 30.0] else map P.read argv in
---      output "euler" explicitEulerList l
---      >> output "implicit" implicitEulerList l
---      >> output "rk" rungeKutta4List l
---      >> output "adams" adamsList l
---      >> generalOutput writeToFile l "adams-new" adamsList
-
 main :: P.IO ()
-main = main3
-
---myplot :: String -> MethodType -> [Float] -> P.IO()
---myplot name method = P.mapM_ (\r -> 
+main = do
+  args <- getArgs
+  let l = rlist args in
+    mainG l
 
 methods :: [(String, MethodType)]
 methods = [
