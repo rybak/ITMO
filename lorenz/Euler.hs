@@ -290,7 +290,10 @@ plotX11 r methodName vs =
 
 mainF = mainGeneral writeToFile
 writeToFile :: Writer
-writeToFile r methodName vs = P.writeFile (methodName ++ show r) $ join [printf "%f %f %f\n" x y z | (x, y, z) <- vs]
+writeToFile r methodName vs = P.writeFile (methodName ++ (getFileName r)) $ join [printf "%f %f %f\n" x y z | (x, y, z) <- vs]
+
+getFileName :: Float -> P.FilePath
+getFileName r = printf "%.1f" r
 
 usage :: P.IO ()
 usage = P.putStrLn "euler (f|g) [rs]"
