@@ -266,23 +266,41 @@ n = 3000
 
 output :: P.FilePath -> MethodType -> [Float] -> P.IO ()
 output filename method = P.mapM_ (\r -> P.writeFile (filename ++ show r) $ join [printf "%f %f %f\n" x y z | (x, y, z) <- list r method])
+
+type Writer = Float -> String -> [(Float, Float, Float)] -> P.IO ()
+generalOutput :: Writer -> [Float] -> String -> MethodType -> P.IO ()
+generalOutput writer rs methodName method = P.mapM_ (\r -> writer r methodName (list r method)) rs
+
+main3 :: P.IO ()
+main3 = do
+    argv <- getArgs
+    let l = if null argv then [1.0, 2.0 .. 30.0] :: [Float] else map P.read argv in
+        P.mapM_ (P.uncurry (generalOutput writeToFile l)) methods
+
+writeToFile :: Writer
+writeToFile r methodName vs = P.writeFile (methodName ++ show r) $ join [printf "%f %f %f\n" x y z | (x, y, z) <- vs]
+
 -- Data3D       [Option] [Option3D x y z] [(x, y, z)]
 -- plot' [Interactive] X11 $ Gnuplot3D [Color Red, Style Lines] [] "x ** 2 + y ** 3"
+--main = do
+--    argv <- getArgs
+--    let l = if null argv then [1.0, 2.0 .. 30.0] else map P.read argv in
+--      output "euler" explicitEulerList l
+--      >> output "implicit" implicitEulerList l
+--      >> output "rk" rungeKutta4List l
+--      >> output "adams" adamsList l
+--      >> generalOutput writeToFile l "adams-new" adamsList
+
 main :: P.IO ()
-main = do
-    argv <- getArgs
-    let l = if null argv then [1.0, 2.0 .. 30.0] else map P.read argv in
-      output "euler" explicitEulerList l
-      >> output "implicit" implicitEulerList l
-      >> output "rk" rungeKutta4List l
-      >> output "adams" adamsList l
+main = main3
 
-main2 :: P.IO ()
-main2 = do
-    argv <- getArgs
-    let l = if null argv then [1.0, 2.0 .. 30.0] else map P.read argv in
-      output "euler" explicitEulerList l
-      >> output "implicit" implicitEulerList l
-      >> output "rk" rungeKutta4List l
-      >> output "adams" adamsList l
+--myplot :: String -> MethodType -> [Float] -> P.IO()
+--myplot name method = P.mapM_ (\r -> 
 
+methods :: [(String, MethodType)]
+methods = [
+  ("euler", explicitEulerList),
+  ("implicit", implicitEulerList),
+  ("rk", rungeKutta4List),
+  ("adams", adamsList)
+           ]
