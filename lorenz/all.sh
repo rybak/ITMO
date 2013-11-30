@@ -7,8 +7,15 @@ fi
 
 ./euler f $RS
 
+function call_gnuplot {
+    r=$1
+    m=$2
+    gnuplot -e "NUM=$r" -p "one$m.gp"
+}
 for i in $RS; do
     echo $i
-    gnuplot -e "NUM=$1" -p oneE.gp;
+    for m in "EE RK A IE"; do
+        call_gnuplot $i $m
+    done
 done
 
