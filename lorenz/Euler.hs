@@ -12,8 +12,6 @@ import Prelude ( Show(..)
                , Monad(..), (.), ($) )
 import qualified Prelude as P
  
-import qualified Graphics.Rendering.Cairo.Matrix as M
-
 -- Rybak imports
 import Text.Printf
 import Data.List
@@ -254,6 +252,7 @@ adamsList s r b h start = let
 toTuple :: Vector3 a -> (a, a, a)
 toTuple (Vector3 x y z) = (x, y, z)
 
+-- list :: FPType -> (FPType -> FPType -> FPType) -> [(FPType, FPType, FPType)]
 list r method = take n $ map toTuple $ method s r b dt start where
     dt = 0.01
     s = 10
@@ -263,8 +262,10 @@ list r method = take n $ map toTuple $ method s r b dt start where
 n :: Int
 n = 3000
 
+--output :: FilePath -> () -> IO ()
 output filename method = P.mapM_ (\r -> P.writeFile (filename ++ show r) $ join [printf "%f %f %f\n" x y z | (x, y, z) <- list r method])
-
+-- Data3D       [Option] [Option3D x y z] [(x, y, z)]
+-- plot' [Interactive] X11 $ Gnuplot3D [Color Red, Style Lines] [] "x ** 2 + y ** 3"
 main :: P.IO ()
 main = do
     argv <- getArgs

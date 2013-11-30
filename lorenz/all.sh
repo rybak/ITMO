@@ -3,5 +3,5 @@
 
 for i in $@
 do
-    gnuplot oneE.gp
+    export NUM=$i; gnuplot oneE.gp
 done
