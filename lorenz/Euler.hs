@@ -292,11 +292,19 @@ mainF = mainGeneral writeToFile
 writeToFile :: Writer
 writeToFile r methodName vs = P.writeFile (methodName ++ show r) $ join [printf "%f %f %f\n" x y z | (x, y, z) <- vs]
 
+usage :: P.IO ()
+usage = P.putStrLn "euler (f|g) [rs]"
 main :: P.IO ()
 main = do
   args <- getArgs
-  let l = rlist args in
-    mainG l
+  let l = rlist (tail args) in
+    if null args
+      then usage
+      else (case head args of
+        "f" -> mainF
+        "g" -> mainG
+        _   -> (\_ -> usage)
+           ) l
 
 methods :: [(String, MethodType)]
 methods = [
