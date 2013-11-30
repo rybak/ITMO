@@ -1,4 +1,4 @@
 load "common.gp"
-set title sprintf("EE r = %.2f", n)
-fn=sprintf("euler%.1f", n)
+set title sprintf("EE %s", t)
+fn=sprintf("euler%s", sn)
 splot fn with lines

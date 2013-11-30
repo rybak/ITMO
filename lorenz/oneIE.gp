@@ -1,4 +1,4 @@
 load "common.gp"
-set title sprintf("IE r = %.2f", n)
-fn=sprintf("implicit%.1f", n)
+set title sprintf("IE %s", t)
+fn=sprintf("implicit%s", sn)
 splot fn with lines

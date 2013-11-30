@@ -293,7 +293,7 @@ writeToFile :: Writer
 writeToFile r methodName vs = P.writeFile (methodName ++ (getFileName r)) $ join [printf "%f %f %f\n" x y z | (x, y, z) <- vs]
 
 getFileName :: Float -> P.FilePath
-getFileName r = printf "%.1f" r
+getFileName r = printf "%.2f" r
 
 usage :: P.IO ()
 usage = P.putStrLn "euler (f|g) [rs]"
