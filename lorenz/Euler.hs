@@ -212,12 +212,14 @@ rungeKutta4 s r b h v = let
   d = (1.0 / 6.0) ^* (k1 + 2 ^* k2 + 2 ^* k3 + k4)
   in v + d
   
+myIterate :: (a -> a) -> a -> [a]
 myIterate f = unstreamList . iterateStream f
 
 lorenz :: (Float -> Float -> Float -> Float -> (Vector3 Float) -> Vector3 Float) -> Float -> Float -> Float -> Float -> (Vector3 Float) -> [Vector3 Float]
 lorenz next s r b h start = takeWhile1 notNaN $ myIterate (next s r b h) start
 
-explicitEulerList, implicitEulerList, rungeKutta4List, adamsList :: Float -> Float -> Float -> Float -> Vector3 Float -> [Vector3 Float]
+type MethodType = Float -> Float -> Float -> Float -> Vector3 Float -> [Vector3 Float]
+explicitEulerList, implicitEulerList, rungeKutta4List, adamsList :: MethodType
 explicitEulerList = lorenz explicitEuler
 implicitEulerList = lorenz implicitEuler
 rungeKutta4List = lorenz rungeKutta4
@@ -252,7 +254,7 @@ adamsList s r b h start = let
 toTuple :: Vector3 a -> (a, a, a)
 toTuple (Vector3 x y z) = (x, y, z)
 
--- list :: FPType -> (FPType -> FPType -> FPType) -> [(FPType, FPType, FPType)]
+list :: Float -> MethodType -> [(Float, Float, Float)]
 list r method = take n $ map toTuple $ method s r b dt start where
     dt = 0.01
     s = 10
@@ -262,7 +264,7 @@ list r method = take n $ map toTuple $ method s r b dt start where
 n :: Int
 n = 3000
 
---output :: FilePath -> () -> IO ()
+output :: P.FilePath -> MethodType -> [Float] -> P.IO ()
 output filename method = P.mapM_ (\r -> P.writeFile (filename ++ show r) $ join [printf "%f %f %f\n" x y z | (x, y, z) <- list r method])
 -- Data3D       [Option] [Option3D x y z] [(x, y, z)]
 -- plot' [Interactive] X11 $ Gnuplot3D [Color Red, Style Lines] [] "x ** 2 + y ** 3"
@@ -274,3 +276,13 @@ main = do
       >> output "implicit" implicitEulerList l
       >> output "rk" rungeKutta4List l
       >> output "adams" adamsList l
+
+main2 :: P.IO ()
+main2 = do
+    argv <- getArgs
+    let l = if null argv then [1.0, 2.0 .. 30.0] else map P.read argv in
+      output "euler" explicitEulerList l
+      >> output "implicit" implicitEulerList l
+      >> output "rk" rungeKutta4List l
+      >> output "adams" adamsList l
+
