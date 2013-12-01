@@ -21,7 +21,6 @@ import Data.Sequence (index, iterateN)
 import Fusion
 import Graphics.EasyPlot
 import System.Process
-import Control.Concurrent.ParallelIO
 -- Algebra
  
 class Monoid a where
@@ -236,7 +235,6 @@ adamsOne3 h [y0', y1', y2', y3'] y3 = y3 + h ^* (23.0 P./ 12.0 ^* y3' - 16.0 P./
 adamsOne2 h [y0', y1', y2', y3'] y3 = y3 + h ^* (1.5 ^* y3' - 0.5 ^* y2')
 --adamsOne _ _ _ = error "adamsOne"
 
--- to R: calc first four derivativies (y') and pass y_4 too
 adams :: Float -> Float -> Float -> Float -> [Vector3 Float] -> Vector3 Float -> [Vector3 Float]
 adams s r b h dvs@[_ , v1', v2', v3'] v3 = let
     v4 = adamsOne2 h dvs v3
@@ -247,7 +245,6 @@ applyf :: Float -> Float -> Float -> Vector3 Float -> Vector3 Float
 applyf s r b v = Vector3 (fx s r b v) (fy s r b v) (fz s r b v)
 
 adamsList s r b h start = let
-    -- vs = take adamsK (explicitEulerList s r b h start)
     m = 10
     vs = drop (m P.- adamsK) (take m (explicitEulerList s r b h start))
     dvs = map (applyf s r b) vs
@@ -285,7 +282,6 @@ plotX11 r methodName vs =
   do
     _ <- system "xdotool type 'exit'"
     result <- plot' [Interactive] X11 $ Data3D [Color Red, Style Lines, Title (methodName ++ " r = " ++ show r)] [] vs
---    kr <- system "xdotool type 'exit'"
     P.putStrLn (if result then "success" else "fail")
 
 mainF = mainGeneral writeToFile
