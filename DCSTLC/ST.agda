@@ -1,6 +1,10 @@
 {-
   Author: Jan Malakhovski
   Date: Nov 17, 2013
+
+  ? : Andrey Rybak 
+  Date: 17.11.2013 — 28.11.2013
+
 -}
 
 -- An excercise on de Bruijn Church-style Simply Typed Lambda Calculus
@@ -195,13 +199,14 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
            ≡ wk (sub M [ γ ↦ s ]) f
   lemma-wk f M s = {!!}
 
+-- Λ   : ∀ {A B} → Term (A ∷ Γ) B → Term Γ (A →' B)
   lemma-sub₀ : ∀ {Γ Δ τ σ}
-               → (γs : List Type)
-               → (M : Term (γs ++ (σ ∷ Γ)) τ) (N : Term Γ σ)
+               → (ts : List Type)
+               → (M : Term (ts ++ (σ ∷ Γ)) τ) (N : Term Γ σ)
                → (ss : Sub Γ Δ)
-               → sub (sub M (γs ⋯ σ ∷⋯ ss)) (γs ⋯ [ σ ↦ sub N ss ])
-               ≡ sub (sub M (γs ⋯ [ σ ↦ N ])) (γs ⋯ ss)
-  lemma-sub₀ γs M N ss = {!!}
+               → sub (sub M (ts ⋯ σ ∷⋯ ss)) (ts ⋯ [ σ ↦ sub N ss ])
+               ≡ sub (sub M (ts ⋯ [ σ ↦ N ])) (ts ⋯ ss)
+  lemma-sub₀ ts M N ss = {!!}
 
   -- The Substitution Lemma: substitution commutes with itself
   -- This is general.
@@ -210,12 +215,9 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
               → (ss : Sub Γ Δ)
               → sub (sub M (σ ∷⋯ ss)) [ σ ↦ sub N ss ]
               ≡ sub (sub M [ σ ↦ N ]) ss
-  lemma-sub (⋆ pos) N ss = {!!}
-  lemma-sub (Λ {A} M) N ss = cong Λ {!!}
+  lemma-sub (⋆ pos) N ss = lemma-sub₀ [] (⋆ pos) N ss
+  lemma-sub (Λ {A} M) N ss = cong Λ (lemma-sub₀ {_} {_} {_} {_} (A ∷ []) M N ss)
   lemma-sub (M ∙ M₁) N ss rewrite lemma-sub M N ss | lemma-sub M₁ N ss = refl
---  sub : ∀ {Γ Δ τ} → Term Γ τ → Sub Γ Δ → Term Δ τ
---  sub (⋆ x) ss = ss ! x
---  sub (Λ {A} M) ss = Λ (sub M (A ∷⋯ ss))
 
   -- β-reduction
   data _→β_ {Γ} : ∀ {τ} → Term Γ τ → Term Γ τ → Set where
@@ -257,20 +259,25 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
     -- ?
 
     {- TechnicalReductionLemmas end -}
+--  lemma-sub : ∀ {Γ Δ σ τ}
+--              → (M : Term (σ ∷ Γ) τ) (N : Term Γ σ)
+--              → (ss : Sub Γ Δ)
+--              → sub (sub M (σ ∷⋯ ss)) [ σ ↦ sub N ss ]
+--              ≡ sub (sub M [ σ ↦ N ]) ss
 
   -- Substitution is substitutive for →β✴
   →β✴-sub : ∀ {Γ τ γ}
           → {M M' : Term (γ ∷ Γ) τ} → M →β✴ M'
           → {N N' : Term Γ γ} → N →β✴ N'
           → sub M [ γ ↦ N ] →β✴ sub M' [ γ ↦ N' ]
-  →β✴-sub = {!!}
+  →β✴-sub {γ = γ} {M} ms {N = N} ns = map✴ (λ z → sub z [ γ ↦ N ]) {!!} ms ++✴ map✴ (λ z → sub _ [ γ ↦ z ]) {!!} ns
 
   -- Substitution is substitutive for ⇉β
   ⇉β-sub : ∀ {Γ τ γ}
          → {M M' : Term (γ ∷ Γ) τ} → M ⇉β M'
          → {N N' : Term Γ γ} → N ⇉β N'
          → sub M [ γ ↦ N ] ⇉β sub M' [ γ ↦ N' ]
-  ⇉β-sub = {!!}
+  ⇉β-sub m n = {!!}
 
   -- ⇉β is confluent
   ⇉β-confluent : ∀ {Γ τ} → Confluent {Term Γ τ} _⇉β_
@@ -318,7 +325,21 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
   →β-⇉β✴ = map✴ id →β-⇉β
 
   ⇉β-→β : ∀ {Γ τ} {M N : Term Γ τ} → M ⇉β N → M →β✴ N
-  ⇉β-→β = {!!}
+  ⇉β-→β {M = M} .{M} parsame = ε
+  ⇉β-→β (parreduce {M = M} {M'} {N} {N'} m n) with ⇉β-→β m | ⇉β-→β n
+  ⇉β-→β (parreduce {M = M} .{M} m n) | ε | ε = reduce ∷✴ ε
+  ⇉β-→β (parreduce {M = M} .{M} m n) | ε | ns with →β✴-sub {M = M} {M} ε ns
+  ... | sn = reduce ∷✴ sn
+  ⇉β-→β (parreduce {N = N} .{N} m n) | ms | ε with →β✴-sub ms {N = N} {N} ε
+  ... | sm = reduce ∷✴ sm
+  ⇉β-→β (parreduce m n) | ms | ns with →β✴-sub ms ns
+  ... | snm = reduce ∷✴ snm
+
+  ⇉β-→β (parunder mn) with ⇉β-→β mn
+  ⇉β-→β (parunder mn) | mns = map✴ Λ under mns
+
+  ⇉β-→β (parapp m n) with ⇉β-→β m | ⇉β-→β n
+  ⇉β-→β (parapp m n) | ms | ns = map✴ (λ z → z ∙ _) (λ {x} {y} → left) ms ++✴ map✴ (_∙_ _) (λ {x} {y} → right) ns
 
   ⇉β-→β✴ : ∀ {Γ τ} {M N : Term Γ τ} → M ⇉β✴ N → M →β✴ N
   ⇉β-→β✴ = concat✴ ∘ map✴ id ⇉β-→β
