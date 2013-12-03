@@ -1,10 +1,10 @@
 HC=ghc -O9
 RM=rm -f
 
-build : fusion euler
+build : fusion main
 
-euler : Euler.hs
-	$(HC) Euler.hs -o euler
+main : main.hs
+	$(HC) main.hs -o main
 
 rebuild : clean build
 
@@ -13,7 +13,8 @@ fusion : Fusion.hs
 
 clean :
 	$(RM) *.hi
-	$(RM) euler
+	$(RM) *.o
+	$(RM) main
 
 fresh :
 	ls | grep -E "\\.[0-9][0-9]$$" | xargs -t -I{} rm {}
@@ -21,15 +22,15 @@ fresh :
 calc=build all.sh oneEE.gp oneA.gp oneRK.gp oneIE.gp
 
 28 : $(calc)
-	make euler
-	./euler 28.0
+	make main
+	./main 28.0
 	./mv.sh
 	./all.sh 28.0
 
 good : $(calc)
-	make euler
-	./euler f 0.5 0.9 5.0 14.0 15.0 24.0 28.0
+	make main
+	./main f 0.5 0.9 5.0 14.0 15.0 24.0 28.0
 
 diff : $(calc)
-	make euler
-	./euler f 19.65
+	make main
+	./main f 19.65
