@@ -302,7 +302,7 @@ main = do
       else (case head args of
         "f" -> mainF
         "g" -> mainG
-        _   -> (\_ -> usage)
+        _   -> (P.const usage)
            ) l
 
 methods :: [(String, MethodType)]
