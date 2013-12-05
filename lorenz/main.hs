@@ -18,7 +18,7 @@ import Data.List
 import Control.Monad hiding(mzero)
 import System.Environment(getArgs)
 import Data.Sequence (index, iterateN)
-import Fusion
+import qualified Fusion as F
 import Graphics.EasyPlot
 import System.Process
 -- Algebra
@@ -215,10 +215,10 @@ rungeKutta4 s r b h v = let
   in v + d
   
 myIterate :: (a -> a) -> a -> [a]
-myIterate f = unstreamList . iterateStream f
+myIterate f = F.unstreamList . F.iterateStream f
 
 lorenz :: (Float -> Float -> Float -> Float -> (Vector3 Float) -> Vector3 Float) -> Float -> Float -> Float -> Float -> (Vector3 Float) -> [Vector3 Float]
-lorenz next s r b h start = takeWhile1 notNaN $ myIterate (next s r b h) start
+lorenz next s r b h start = F.takeWhile1 notNaN $ myIterate (next s r b h) start
 
 type MethodType = Float -> Float -> Float -> Float -> Vector3 Float -> [Vector3 Float]
 explicitEulerList, implicitEulerList, rungeKutta4List, adamsList :: MethodType
