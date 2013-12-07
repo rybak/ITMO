@@ -264,20 +264,38 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
 --              → (ss : Sub Γ Δ)
 --              → sub (sub M (σ ∷⋯ ss)) [ σ ↦ sub N ss ]
 --              ≡ sub (sub M [ σ ↦ N ]) ss
+--  sub : ∀ {Γ Δ τ} → Term Γ τ → Sub Γ Δ → Term Δ τ
+--  sub (⋆ x) ss = ss ! x
+--  sub (Λ {A} M) ss = Λ (sub M (A ∷⋯ ss))
+--  sub (M ∙ N) ss = sub M ss ∙ sub N ss
+
+  →β-sub₁ : ∀ {Γ τ γ}
+          → {M : Term (γ ∷ Γ) τ}
+          → {N N' : Term Γ γ} → N →β N'
+          → sub M [ γ ↦ N ] →β sub M [ γ ↦ N' ]
+
+  →β-sub₁ {Γ} {τ} {γ} {M} nn = {!!}
+
+  →β-sub₂ : ∀ {Γ τ γ}
+          → {M M' : Term (γ ∷ Γ) τ}
+          → {N : Term Γ γ}
+          → M →β M'
+          → sub M [ γ ↦ N ] →β sub M' [ γ ↦ N ]
+  →β-sub₂ mm = {!!}
 
   -- Substitution is substitutive for →β✴
   →β✴-sub : ∀ {Γ τ γ}
           → {M M' : Term (γ ∷ Γ) τ} → M →β✴ M'
           → {N N' : Term Γ γ} → N →β✴ N'
           → sub M [ γ ↦ N ] →β✴ sub M' [ γ ↦ N' ]
-  →β✴-sub {γ = γ} {M} ms {N = N} ns = map✴ (λ z → sub z [ γ ↦ N ]) {!!} ms ++✴ map✴ (λ z → sub _ [ γ ↦ z ]) {!!} ns
+  →β✴-sub {Γ} {γ = γ} {M = M} {M'} ms {N} ns = map✴ (λ z → sub z [ γ ↦ N ]) (λ {x} {y} → →β-sub₂) ms ++✴ map✴ (λ z → sub M' [ γ ↦ z ]) (→β-sub₁ {Γ} {_} {γ = γ} {M = M'} {N = _} {N' = _}) {x = _} {y = _} ns
 
   -- Substitution is substitutive for ⇉β
   ⇉β-sub : ∀ {Γ τ γ}
          → {M M' : Term (γ ∷ Γ) τ} → M ⇉β M'
          → {N N' : Term Γ γ} → N ⇉β N'
          → sub M [ γ ↦ N ] ⇉β sub M' [ γ ↦ N' ]
-  ⇉β-sub m n = {!!}
+  ⇉β-sub ms ns = {! !}
 
   -- ⇉β is confluent
   ⇉β-confluent : ∀ {Γ τ} → Confluent {Term Γ τ} _⇉β_
