@@ -259,28 +259,26 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
     -- ?
 
     {- TechnicalReductionLemmas end -}
---  lemma-sub : ∀ {Γ Δ σ τ}
---              → (M : Term (σ ∷ Γ) τ) (N : Term Γ σ)
---              → (ss : Sub Γ Δ)
---              → sub (sub M (σ ∷⋯ ss)) [ σ ↦ sub N ss ]
---              ≡ sub (sub M [ σ ↦ N ]) ss
---  sub : ∀ {Γ Δ τ} → Term Γ τ → Sub Γ Δ → Term Δ τ
---  sub (⋆ x) ss = ss ! x
---  sub (Λ {A} M) ss = Λ (sub M (A ∷⋯ ss))
---  sub (M ∙ N) ss = sub M ss ∙ sub N ss
 
+  
   →β-sub₁ : ∀ {Γ τ γ}
-          → {M : Term (γ ∷ Γ) τ}
-          → {N N' : Term Γ γ} → N →β N'
-          → sub M [ γ ↦ N ] →β sub M [ γ ↦ N' ]
-
-  →β-sub₁ {Γ} {τ} {γ} {M} nn = {!!}
+          → (ts : List Type)
+          → {M : Term (ts ++ (γ ∷ Γ)) τ}
+          → {N N' : Term Γ γ} → N →β✴ N'
+          → sub M (ts ⋯ [ γ ↦ N ]) →β✴ sub M (ts ⋯ [ γ ↦ N' ])
+  →β-sub₁ [] {⋆ here refl} nn = nn
+  →β-sub₁ [] {⋆ there pa} nn = ε
+  →β-sub₁ (t ∷ ts) {⋆ here refl} nn = ε
+  →β-sub₁ (t ∷ ts) {⋆ there pa} nn = map✴ (λ x → wk x (_ ↓w⋯ id)) {!!} (→β-sub₁ ts {⋆ pa} nn)
+  →β-sub₁ {Γ} {(A →' B)} {γ} ts {Λ M} nn = map✴ Λ under (→β-sub₁ (A ∷ ts) {M} nn)
+  →β-sub₁ {Γ} {τ} {γ} ts {M ∙ M₁} nn = map✴ (λ z → z ∙ _) left (→β-sub₁ ts {M = M} nn) ++✴ map✴ (_∙_ _) right (→β-sub₁ ts {M = M₁} nn)
 
   →β-sub₂ : ∀ {Γ τ γ}
-          → {M M' : Term (γ ∷ Γ) τ}
+          → (ts : List Type)
+          → {M M' : Term (ts ++ (γ ∷ Γ)) τ}
           → {N : Term Γ γ}
           → M →β M'
-          → sub M [ γ ↦ N ] →β sub M' [ γ ↦ N ]
+          → sub M (ts ⋯ [ γ ↦ N ]) →β sub M' (ts ⋯ [ γ ↦ N ])
   →β-sub₂ mm = {!!}
 
   -- Substitution is substitutive for →β✴
@@ -288,7 +286,7 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
           → {M M' : Term (γ ∷ Γ) τ} → M →β✴ M'
           → {N N' : Term Γ γ} → N →β✴ N'
           → sub M [ γ ↦ N ] →β✴ sub M' [ γ ↦ N' ]
-  →β✴-sub {Γ} {γ = γ} {M = M} {M'} ms {N} ns = map✴ (λ z → sub z [ γ ↦ N ]) (λ {x} {y} → →β-sub₂) ms ++✴ map✴ (λ z → sub M' [ γ ↦ z ]) (→β-sub₁ {Γ} {_} {γ = γ} {M = M'} {N = _} {N' = _}) {x = _} {y = _} ns
+  →β✴-sub {Γ} {γ = γ} {M = M} {M'} ms {N} ns = {!!}
 
   -- Substitution is substitutive for ⇉β
   ⇉β-sub : ∀ {Γ τ γ}
