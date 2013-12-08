@@ -10,6 +10,10 @@ little_receiver::little_receiver(int sock)
     struct timeval tv;
     tv.tv_sec = 0;
     tv.tv_usec = 200000;
+    if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
+    {
+        throw std::runtime_error("little_receiver::little_receiver : setsockopt : sock");
+    }
     conn_sock = accept(sock, NULL, NULL);
     if (conn_sock < 0)
     {
@@ -17,7 +21,7 @@ little_receiver::little_receiver(int sock)
     }
     if (setsockopt(conn_sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
     {
-        throw std::runtime_error("little_receiver::little_receiver : setsockopt : timeval");
+        throw std::runtime_error("little_receiver::little_receiver : setsockopt : conn_sock");
     }
 }
 
