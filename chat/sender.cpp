@@ -33,18 +33,18 @@ sender::~sender()
 
 void sender::send_message(const user &u, const std::string &text, chat_time_t timestamp)
 {
-    sockaddr_in addr = {AF_INET, htons(port), {0}, {0,0,0,0,0,0,0,0}};
-    addr.sin_addr.s_addr = u.ip;
-    if (connect(sock, (sockaddr *) &addr, sizeof(addr)) < 0)
-    {
-        throw std::runtime_error("sender::send_message : connect");
-    }
     struct timeval tv;
     tv.tv_sec = 0;
     tv.tv_usec = 200000;
     if (setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv)) < 0)
     {
         throw std::runtime_error("sender::send_message : setsockopt : timeval");
+    }
+    sockaddr_in addr = {AF_INET, htons(port), {0}, {0,0,0,0,0,0,0,0}};
+    addr.sin_addr.s_addr = u.ip;
+    if (connect(sock, (sockaddr *) &addr, sizeof(addr)) < 0)
+    {
+        throw std::runtime_error("sender::send_message : connect");
     }
     chat_message msg(text, timestamp);
     msg.to_user_time(u.offset);

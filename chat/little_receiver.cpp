@@ -7,19 +7,18 @@
 little_receiver::little_receiver(int sock)
     : buffer(NULL)
 {
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 200000;
     conn_sock = accept(sock, NULL, NULL);
     if (conn_sock < 0)
     {
         throw std::runtime_error("little_receiver::little_receiver : accept");
     }
-    struct timeval tv;
-    tv.tv_sec = 0;
-    tv.tv_usec = 200000;
-    if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
+    if (setsockopt(conn_sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
     {
         throw std::runtime_error("little_receiver::little_receiver : setsockopt : timeval");
     }
-
 }
 
 little_receiver::~little_receiver()
