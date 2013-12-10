@@ -259,18 +259,34 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
     -- ?
 
     {- TechnicalReductionLemmas end -}
+
   wk-test : ∀ {Γ Δ τ ts} → {x y : Term (ts ++ Γ) τ}
           → (f : (ts ++ Γ) ⊆ (ts ++ Δ))
           → x →β y → wk x f →β wk y f
-  wk-test {Γ} {Δ} {τ} {ts} {⋆ x} {⋆ y} f ()
-  wk-test {Γ} {Δ} {A →' B} {ts} {⋆ x} {Λ y} f ()
-  wk-test {Γ} {Δ} {τ} {ts} {⋆ x} {y ∙ y₁} f ()
-  wk-test {Γ} {Δ} {A →' B} {ts} {Λ x} {⋆ y} f ()
-  wk-test {Γ} {Δ} {A →' B} {ts} {Λ x} {Λ y} f (under xy) = under (wk-test {Γ} {ts = A ∷ ts} {_} {_} _ xy)
-  wk-test {Γ} {Δ} {A →' B} {ts} {Λ x} {y ∙ y₁} f ()
-  wk-test {Γ} {Δ} {τ} {ts} {x ∙ x₁} {⋆ y} f xy = {!!}
-  wk-test {Γ} {Δ} {(A₁ →' B)} {ts} {x ∙ x₁} {Λ y} f xy = {!!}
-  wk-test {Γ} {Δ} {τ} {ts} {x ∙ x₁} {y ∙ y₁} f xy = {!!}
+  wk-test {Γ} {Δ} {τ} {ts} {⋆ n} {⋆ x} f ()
+  wk-test {Γ} {Δ} {A →' B} {ts} {⋆ n} {Λ x} f ()
+  wk-test {Γ} {Δ} {τ} {ts} {⋆ n} {x ∙ y} f ()
+  wk-test {Γ} {Δ} {A →' B} {ts} {Λ n} {⋆ y} f ()
+  wk-test {Γ} {Δ} {A →' B} {ts} {Λ n} {Λ y} f (under bs) = under (wk-test {Γ} {ts = A ∷ ts} {_} {_} _ bs)
+  wk-test {Γ} {Δ} {A →' B} {ts} {Λ n} {x ∙ y} f ()
+
+  wk-test {Γ} {Δ} {τ} {ts} {m ∙ n} {⋆ x} f bs = {!!}
+  wk-test {Γ} {Δ} {(A₁ →' B)} {ts} {m ∙ n} {Λ x} f bs = {!!}
+  wk-test {Γ} {Δ} {τ} {ts} {m ∙ n} {x ∙ y} f bs = {!!}
+
+
+  wk-test₂ : ∀ {Γ Δ τ ts} → {x y : Term (ts ++ Γ) τ}
+          → (f : (ts ++ Γ) ⊆ (ts ++ Δ))
+          → x →β✴ y → wk x f →β✴ wk y f
+  wk-test₂ {Γ} {Δ} {τ} {ts} {⋆ n} {⋆ x} f xy = {!!}
+  wk-test₂ {Γ} {Δ} {(A →' B)} {ts} {⋆ n} {Λ x} f xy = {!!}
+  wk-test₂ {Γ} {Δ} {τ} {ts} {⋆ n} {x ∙ y} f xy = {!!}
+  wk-test₂ {Γ} {Δ} {(A →' B)} {ts} {Λ n} {⋆ x} f xy = {!!}
+  wk-test₂ {Γ} {Δ} {(A →' B)} {ts} {Λ n} {Λ x} f xy = {!!}
+  wk-test₂ {Γ} {Δ} {(A →' B)} {ts} {Λ n} {x ∙ y} f xy = {!!}
+  wk-test₂ {Γ} {Δ} {τ} {ts} {n ∙ m} {⋆ x} f xy = {!!}
+  wk-test₂ {Γ} {Δ} {(A →' B)} {ts} {n ∙ m} {Λ x} f xy = {!!}
+  wk-test₂ {Γ} {Δ} {τ} {ts} {n ∙ m} {x ∙ y} f xy = {!!}
 
   →β-sub₁ : ∀ {Γ τ γ}
           → (ts : List Type)
@@ -280,7 +296,7 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
   →β-sub₁ [] {⋆ here refl} nn = nn
   →β-sub₁ [] {⋆ there pa} nn = ε
   →β-sub₁ (t ∷ ts) {⋆ here refl} nn = ε
-  →β-sub₁ {Γ} {τ} {γ} (t ∷ ts) {⋆ there pa} nn = map✴ (λ x → wk x (_ ↓w⋯ id)) (λ {x} {y} xy → wk-test {Γ} {Γ} {τ} {{!!}} {x} {y} (λ n → there n) xy) (→β-sub₁ ts {⋆ pa} nn)
+  →β-sub₁ {Γ} {τ} {γ} (t ∷ ts) {⋆ there pa} nn = {!!} -- map✴ (λ x → wk x (_ ↓w⋯ id)) (λ {x} {y} xy → wk-test {Γ} {Γ} {τ} {{! ts ++ Γ!}} {x} {y} (λ n → there n) xy) (→β-sub₁ ts {⋆ pa} nn)
   →β-sub₁ {Γ} {(A →' B)} {γ} ts {Λ M} nn = map✴ Λ under (→β-sub₁ (A ∷ ts) {M} nn)
   →β-sub₁ {Γ} {τ} {γ} ts {M ∙ M₁} nn = map✴ (λ z → z ∙ _) left (→β-sub₁ ts {M = M} nn) ++✴ map✴ (_∙_ _) right (→β-sub₁ ts {M = M₁} nn)
 
