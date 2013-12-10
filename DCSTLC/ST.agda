@@ -259,8 +259,19 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
     -- ?
 
     {- TechnicalReductionLemmas end -}
+  wk-test : ∀ {Γ Δ τ ts} → {x y : Term (ts ++ Γ) τ}
+          → (f : (ts ++ Γ) ⊆ (ts ++ Δ))
+          → x →β y → wk x f →β wk y f
+  wk-test {Γ} {Δ} {τ} {ts} {⋆ x} {⋆ y} f ()
+  wk-test {Γ} {Δ} {A →' B} {ts} {⋆ x} {Λ y} f ()
+  wk-test {Γ} {Δ} {τ} {ts} {⋆ x} {y ∙ y₁} f ()
+  wk-test {Γ} {Δ} {A →' B} {ts} {Λ x} {⋆ y} f ()
+  wk-test {Γ} {Δ} {A →' B} {ts} {Λ x} {Λ y} f (under xy) = under (wk-test {Γ} {ts = A ∷ ts} {_} {_} _ xy)
+  wk-test {Γ} {Δ} {A →' B} {ts} {Λ x} {y ∙ y₁} f ()
+  wk-test {Γ} {Δ} {τ} {ts} {x ∙ x₁} {⋆ y} f xy = {!!}
+  wk-test {Γ} {Δ} {(A₁ →' B)} {ts} {x ∙ x₁} {Λ y} f xy = {!!}
+  wk-test {Γ} {Δ} {τ} {ts} {x ∙ x₁} {y ∙ y₁} f xy = {!!}
 
-  
   →β-sub₁ : ∀ {Γ τ γ}
           → (ts : List Type)
           → {M : Term (ts ++ (γ ∷ Γ)) τ}
@@ -269,7 +280,7 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
   →β-sub₁ [] {⋆ here refl} nn = nn
   →β-sub₁ [] {⋆ there pa} nn = ε
   →β-sub₁ (t ∷ ts) {⋆ here refl} nn = ε
-  →β-sub₁ (t ∷ ts) {⋆ there pa} nn = map✴ (λ x → wk x (_ ↓w⋯ id)) {!!} (→β-sub₁ ts {⋆ pa} nn)
+  →β-sub₁ {Γ} {τ} {γ} (t ∷ ts) {⋆ there pa} nn = map✴ (λ x → wk x (_ ↓w⋯ id)) (λ {x} {y} xy → wk-test {Γ} {Γ} {τ} {{!!}} {x} {y} (λ n → there n) xy) (→β-sub₁ ts {⋆ pa} nn)
   →β-sub₁ {Γ} {(A →' B)} {γ} ts {Λ M} nn = map✴ Λ under (→β-sub₁ (A ∷ ts) {M} nn)
   →β-sub₁ {Γ} {τ} {γ} ts {M ∙ M₁} nn = map✴ (λ z → z ∙ _) left (→β-sub₁ ts {M = M} nn) ++✴ map✴ (_∙_ _) right (→β-sub₁ ts {M = M₁} nn)
 
@@ -344,15 +355,11 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
   ⇉β-→β {M = M} .{M} parsame = ε
   ⇉β-→β (parreduce {M = M} {M'} {N} {N'} m n) with ⇉β-→β m | ⇉β-→β n
   ⇉β-→β (parreduce {M = M} .{M} m n) | ε | ε = reduce ∷✴ ε
-  ⇉β-→β (parreduce {M = M} .{M} m n) | ε | ns with →β✴-sub {M = M} {M} ε ns
-  ... | sn = reduce ∷✴ sn
-  ⇉β-→β (parreduce {N = N} .{N} m n) | ms | ε with →β✴-sub ms {N = N} {N} ε
-  ... | sm = reduce ∷✴ sm
-  ⇉β-→β (parreduce m n) | ms | ns with →β✴-sub ms ns
-  ... | snm = reduce ∷✴ snm
+  ⇉β-→β (parreduce {M = M} .{M} m n) | ε | ns = reduce ∷✴ →β✴-sub {M = M} {M} ε ns
+  ⇉β-→β (parreduce {N = N} .{N} m n) | ms | ε = reduce ∷✴ →β✴-sub ms {N = N} {N} ε
+  ⇉β-→β (parreduce m n) | ms | ns = reduce ∷✴ →β✴-sub ms ns
 
-  ⇉β-→β (parunder mn) with ⇉β-→β mn
-  ⇉β-→β (parunder mn) | mns = map✴ Λ under mns
+  ⇉β-→β (parunder mn) = map✴ Λ under (⇉β-→β mn)
 
   ⇉β-→β (parapp m n) with ⇉β-→β m | ⇉β-→β n
   ⇉β-→β (parapp m n) | ms | ns = map✴ (λ z → z ∙ _) (λ {x} {y} → left) ms ++✴ map✴ (_∙_ _) (λ {x} {y} → right) ns
@@ -364,4 +371,4 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
   →β✴-confluent : ∀ {Γ τ} → Confluent (_→β✴_ {Γ = Γ} {τ = τ})
   →β✴-confluent ra rx with CR ⇉β-confluent (→β-⇉β✴ ra) (→β-⇉β✴ rx)
   ... | L , (rb , ry) = L , (⇉β-→β✴ rb , ⇉β-→β✴ ry)
-  
+
