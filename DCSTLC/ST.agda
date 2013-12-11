@@ -269,15 +269,9 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
   wk-test {Γ} {Δ} {A →' B} {ts} {Λ n} {⋆ y} f ()
   wk-test {Γ} {Δ} {A →' B} {ts} {Λ n} {Λ y} f (under bs) = under (wk-test {Γ} {ts = A ∷ ts} {_} {_} _ bs)
   wk-test {Γ} {Δ} {A →' B} {ts} {Λ n} {x ∙ y} f ()
---  lemma-wk : ∀ {Γ Δ τ γ}
---           → (f : Γ ⊆ Δ)
---           → (M : Term (γ ∷ Γ) τ) (s : Term Γ γ)
---           → sub (wk M (γ ∷w⋯ f)) [ γ ↦ wk s f ]
---           ≡ wk (sub M [ γ ↦ s ]) f
   wk-test {Γ} {Δ} {τ} {ts} {(Λ {A} M) ∙ n} f reduce rewrite sym $ lemma-wk {ts ++ Γ} {ts ++ Δ} f M n = reduce
   wk-test {Γ} {Δ} {τ} {ts} {m ∙ n} f (left bs) = left (wk-test {Γ} {Δ} {_} {ts} f bs)
   wk-test {Γ} {Δ} {τ} {ts} {m ∙ n} f (right bs) = right (wk-test {Γ} {Δ} {_} {ts} f bs)
-
 
   wk-test₂ : ∀ {Γ Δ τ ts} → {x y : Term (ts ++ Γ) τ}
           → (f : (ts ++ Γ) ⊆ (ts ++ Δ))
