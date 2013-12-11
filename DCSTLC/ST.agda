@@ -269,15 +269,14 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
   wk-test {Γ} {Δ} {A →' B} {ts} {Λ n} {⋆ y} f ()
   wk-test {Γ} {Δ} {A →' B} {ts} {Λ n} {Λ y} f (under bs) = under (wk-test {Γ} {ts = A ∷ ts} {_} {_} _ bs)
   wk-test {Γ} {Δ} {A →' B} {ts} {Λ n} {x ∙ y} f ()
-
---  wk-test {Γ} {Δ} {τ} {ts} {(⋆ x) ∙ n} {⋆ x₁} f ()
---   wk-test {Γ} {Δ} {τ} {ts} {Λ m ∙ n} {⋆ x} f bs = {! !}
---   wk-test {Γ} {Δ} {τ} {ts} {(m ∙ m₁) ∙ n} {⋆ x} f ()
---   wk-test {Γ} {Δ} {(A₁ →' B)} {ts} {m ∙ n} {Λ x} f bs = {!!}
---   wk-test {Γ} {Δ} {τ} {ts} {m ∙ n} {x ∙ y} f bs = {!!}
-  wk-test {Γ} {Δ} {τ} {ts} {(Λ M) ∙ n} f reduce = {!!}
-  wk-test {Γ} {Δ} {τ} {ts} {m ∙ n} f (left bs) = {!!}
-  wk-test {Γ} {Δ} {τ} {ts} {m ∙ n} f (right bs) = {!!}
+--  lemma-wk : ∀ {Γ Δ τ γ}
+--           → (f : Γ ⊆ Δ)
+--           → (M : Term (γ ∷ Γ) τ) (s : Term Γ γ)
+--           → sub (wk M (γ ∷w⋯ f)) [ γ ↦ wk s f ]
+--           ≡ wk (sub M [ γ ↦ s ]) f
+  wk-test {Γ} {Δ} {τ} {ts} {(Λ {A} M) ∙ n} f reduce rewrite sym $ lemma-wk {ts ++ Γ} {ts ++ Δ} f M n = reduce
+  wk-test {Γ} {Δ} {τ} {ts} {m ∙ n} f (left bs) = left (wk-test {Γ} {Δ} {_} {ts} f bs)
+  wk-test {Γ} {Δ} {τ} {ts} {m ∙ n} f (right bs) = right (wk-test {Γ} {Δ} {_} {ts} f bs)
 
 
   wk-test₂ : ∀ {Γ Δ τ ts} → {x y : Term (ts ++ Γ) τ}
@@ -293,7 +292,7 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
   →β-sub₁ [] {⋆ here refl} nn = nn
   →β-sub₁ [] {⋆ there pa} nn = ε
   →β-sub₁ (t ∷ ts) {⋆ here refl} nn = ε
-  →β-sub₁ {Γ} {τ} {γ} (t ∷ ts) {⋆ there pa} nn = map✴ (λ x → wk x (_ ↓w⋯ id)) (wk-test {ts = []} there) (→β-sub₁ ts {⋆ pa} nn)
+  →β-sub₁ {Γ} {τ} {γ} (t ∷ ts) {⋆ there pa} nn = map✴ (λ x → wk x (_ ↓w⋯ id)) (wk-test {ts ++ Γ} {(t ∷ ts) ++ Γ} {ts = []} there) (→β-sub₁ ts {⋆ pa} nn)
   →β-sub₁ {Γ} {(A →' B)} {γ} ts {Λ M} nn = map✴ Λ under (→β-sub₁ (A ∷ ts) {M} nn)
   →β-sub₁ {Γ} {τ} {γ} ts {M ∙ M₁} nn = map✴ (λ z → z ∙ _) left (→β-sub₁ ts {M = M} nn) ++✴ map✴ (_∙_ _) right (→β-sub₁ ts {M = M₁} nn)
 
@@ -301,9 +300,18 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
           → (ts : List Type)
           → {M M' : Term (ts ++ (γ ∷ Γ)) τ}
           → {N : Term Γ γ}
+          → M →β✴ M'
+          → sub M (ts ⋯ [ γ ↦ N ]) →β✴ sub M' (ts ⋯ [ γ ↦ N ])
+  →β-sub₂ mm = {!!}
+
+  →β-sub₂' : ∀ {Γ τ γ}
+          → (ts : List Type)
+          → {M M' : Term (ts ++ (γ ∷ Γ)) τ}
+          → {N : Term Γ γ}
           → M →β M'
           → sub M (ts ⋯ [ γ ↦ N ]) →β sub M' (ts ⋯ [ γ ↦ N ])
-  →β-sub₂ mm = {!!}
+  →β-sub₂' mm = {!!}
+
 
   -- Substitution is substitutive for →β✴
   →β✴-sub : ∀ {Γ τ γ}
@@ -317,7 +325,7 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
          → {M M' : Term (γ ∷ Γ) τ} → M ⇉β M'
          → {N N' : Term Γ γ} → N ⇉β N'
          → sub M [ γ ↦ N ] ⇉β sub M' [ γ ↦ N' ]
-  ⇉β-sub ms ns = {! !}
+  ⇉β-sub ms ns = {!!}
 
   -- ⇉β is confluent
   ⇉β-confluent : ∀ {Γ τ} → Confluent {Term Γ τ} _⇉β_
