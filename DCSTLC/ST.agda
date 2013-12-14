@@ -290,13 +290,12 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
   →β-sub₁ {Γ} {(A →' B)} {γ} ts {Λ M} nn = map✴ Λ under (→β-sub₁ (A ∷ ts) {M} nn)
   →β-sub₁ {Γ} {τ} {γ} ts {M ∙ M₁} nn = map✴ (λ z → z ∙ _) left (→β-sub₁ ts {M = M} nn) ++✴ map✴ (_∙_ _) right (→β-sub₁ ts {M = M₁} nn)
 
-  →β-sub₂ : ∀ {Γ τ γ}
+  →β-sub₁' : ∀ {Γ τ γ}
           → (ts : List Type)
-          → {M M' : Term (ts ++ (γ ∷ Γ)) τ}
-          → {N : Term Γ γ}
-          → M →β✴ M'
-          → sub M (ts ⋯ [ γ ↦ N ]) →β✴ sub M' (ts ⋯ [ γ ↦ N ])
-  →β-sub₂ mm = {!!}
+          → {M : Term (ts ++ (γ ∷ Γ)) τ}
+          → {N N' : Term Γ γ} → N →β N'
+          → sub M (ts ⋯ [ γ ↦ N ]) →β sub M (ts ⋯ [ γ ↦ N' ])
+  →β-sub₁' {Γ} {γ = γ} ts {M} {N} {N'} ns = {!!}
 
   →β-sub₂' : ∀ {Γ τ γ}
           → (ts : List Type)
@@ -304,22 +303,34 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
           → {N : Term Γ γ}
           → M →β M'
           → sub M (ts ⋯ [ γ ↦ N ]) →β sub M' (ts ⋯ [ γ ↦ N ])
-  →β-sub₂' mm = {!!}
+  →β-sub₂' ts {⋆ x} ()
+  →β-sub₂' {γ = γ} ts {Λ {A} x} (under mm) = under (→β-sub₂' (A ∷ ts) mm)
+  →β-sub₂' {γ = γ} ts {(Λ {A} x) ∙ y} {N = N} reduce rewrite sym $ lemma-sub x y (ts ⋯ [ γ ↦ N ]) = reduce
+  →β-sub₂' ts {x ∙ y} {x' ∙ .y} (left mm) = left (→β-sub₂' ts mm)
+  →β-sub₂' ts {x ∙ y} {.x ∙ y'} (right mm) = right (→β-sub₂' ts mm)
 
+  →β-sub₂ : ∀ {Γ τ γ}
+          → (ts : List Type)
+          → {M M' : Term (ts ++ (γ ∷ Γ)) τ}
+          → {N : Term Γ γ}
+          → M →β✴ M'
+          → sub M (ts ⋯ [ γ ↦ N ]) →β✴ sub M' (ts ⋯ [ γ ↦ N ])
+  →β-sub₂ {γ = γ} ts {N = N} ms = map✴ (λ z → sub z (ts ⋯ [ γ ↦ N ])) (→β-sub₂' ts) ms
 
   -- Substitution is substitutive for →β✴
   →β✴-sub : ∀ {Γ τ γ}
           → {M M' : Term (γ ∷ Γ) τ} → M →β✴ M'
           → {N N' : Term Γ γ} → N →β✴ N'
           → sub M [ γ ↦ N ] →β✴ sub M' [ γ ↦ N' ]
-  →β✴-sub {Γ} {γ = γ} {M = M} {M'} ms {N} ns = {!!}
+  →β✴-sub {Γ} {τ} {γ} {M} {M'} ms {N} {N'} ns = map✴ (λ z → sub z [ γ ↦ N ] ) (λ {x} {y} → →β-sub₂' []) ms ++✴ →β-sub₁ [] {M = M'} ns
 
   -- Substitution is substitutive for ⇉β
   ⇉β-sub : ∀ {Γ τ γ}
          → {M M' : Term (γ ∷ Γ) τ} → M ⇉β M'
          → {N N' : Term Γ γ} → N ⇉β N'
          → sub M [ γ ↦ N ] ⇉β sub M' [ γ ↦ N' ]
-  ⇉β-sub ms ns = {!!}
+         -- 1) M ¬) N 2) ns
+  ⇉β-sub ms ns = {! !}
 
   -- ⇉β is confluent
   ⇉β-confluent : ∀ {Γ τ} → Confluent {Term Γ τ} _⇉β_
