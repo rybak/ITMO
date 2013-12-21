@@ -1,11 +1,4 @@
-# directories
-INCLUDE=../common
-CF=$(INCLUDE)/common
-
-# binaries
-CC=g++ -std=c++11 -O2 -I"$(INCLUDE)" -Wall
-CCO=$(CC) -c
-RM=rm -f
+include ../common/common.mk
 
 build : chat nchat
 
