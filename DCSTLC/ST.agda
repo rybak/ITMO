@@ -345,7 +345,14 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
   ⇉β-sub' [] {⋆ there x} parsame ns = parsame
   ⇉β-sub' (t ∷ ts) {⋆ here refl} parsame ns = parsame
 
-  ⇉β-sub' {γ = γ} (t ∷ ts) {⋆ there x} parsame {N} {N'} ns = {!!}
+--  _!_ : ∀ {Γ Δ τ} → Sub Γ Δ → τ ∈ Γ → Term Δ τ
+--  wk : ∀ {Γ Δ τ} → Term Γ τ → (Γ ⊆ Δ) → Term Δ τ
+--  wk-test : ∀ {Γ Δ τ ts} → {x y : Term (ts ++ Γ) τ}
+--          → (f : (ts ++ Γ) ⊆ (ts ++ Δ))
+--          → x →β y → wk x f →β wk y f
+--  →β-sub₁ {Γ} {τ} {γ} (t ∷ ts) {⋆ there pa} nn = map✴ (λ x → wk x (_ ↓w⋯ id)) (wk-test {ts ++ Γ} {(t ∷ ts) ++ Γ} {ts = []} there) (→β-sub₁ ts {⋆ pa} nn)
+
+  ⇉β-sub' (t ∷ ts) {⋆ there x} parsame {N} {N'} ns = {!!}
 
   ⇉β-sub' ts {Λ {A} M} parsame ns = parunder (⇉β-sub' (A ∷ ts) {M} parsame ns)
   ⇉β-sub' ts {Λ {A} M} {Λ M'} (parunder ms) ns = parunder (⇉β-sub' (A ∷ ts) ms ns)
