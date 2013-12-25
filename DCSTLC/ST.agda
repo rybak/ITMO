@@ -335,11 +335,25 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
   ⇉β-sub' : ∀ {Γ τ γ}
          → (ts : List Type)
          → {M M' : Term (ts ++ (γ ∷ Γ)) τ}
-         → {N N' : Term Γ γ}
          → M ⇉β M'
+         → {N N' : Term Γ γ}
          → N ⇉β N'
          → sub M (ts ⋯ [ γ ↦ N ]) ⇉β sub M' (ts ⋯ [ γ ↦ N' ])
-  ⇉β-sub' ts {M} {N = N} ms ns = {!!}
+  ⇉β-sub' ts ms parsame = ⇉β-sub₁ ts ms
+
+  ⇉β-sub' [] {⋆ here refl} parsame ns = ns
+  ⇉β-sub' [] {⋆ there x} parsame ns = parsame
+  ⇉β-sub' (t ∷ ts) {⋆ here refl} parsame ns = parsame
+
+  ⇉β-sub' {γ = γ} (t ∷ ts) {⋆ there x} parsame {N} {N'} ns = {!!}
+
+  ⇉β-sub' ts {Λ {A} M} parsame ns = parunder (⇉β-sub' (A ∷ ts) {M} parsame ns)
+  ⇉β-sub' ts {Λ {A} M} {Λ M'} (parunder ms) ns = parunder (⇉β-sub' (A ∷ ts) ms ns)
+
+  ⇉β-sub' ts {x ∙ y} parsame ns = parapp (⇉β-sub' ts {x} parsame ns) (⇉β-sub' ts {y} parsame ns)
+  ⇉β-sub' {Γ} {τ} {γ} ts {(Λ {A} x) ∙ y} (parreduce .{M = x} {x'} .{y} {y'} xs ys) {N} {N'} ns with ⇉β-sub' (A ∷ ts) {x} xs ns | ⇉β-sub' ts {y} ys ns
+  ... | l | a = ⇉β-≡ refl (lemma-sub x' y' (ts ⋯ [ γ ↦ N' ])) (parreduce l a)
+  ⇉β-sub' ts {x ∙ y} (parapp xs ys) ns = parapp (⇉β-sub' ts xs ns) (⇉β-sub' ts ys ns)
 
   -- Substitution is substitutive for ⇉β
   ⇉β-sub : ∀ {Γ τ γ}
@@ -349,25 +363,7 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
          → N ⇉β N'
          → sub M [ γ ↦ N ] ⇉β sub M' [ γ ↦ N' ]
          -- 1) M ¬) N 2) ns
-  ⇉β-sub parsame parsame = parsame
-  ⇉β-sub {Γ} {.γ} {γ} {⋆ here refl} parsame ns = ns
-  ⇉β-sub {Γ} {τ} {γ} {⋆ there x} parsame ns = parsame
-
-  ⇉β-sub {Γ} {A →' B} {γ} {Λ .{A} .{B} M} {Λ M'} (parunder ms) {N} .{N} parsame = parunder (⇉β-sub₁ (A ∷ []) {M} {M'} {N = N} ms)
-  ⇉β-sub {Γ} {A →' B} {γ} {Λ M} ms (parreduce ns ns₁) = {!!}
-  ⇉β-sub {Γ} {A →' B} {(γ →' τ)} {Λ M} ms (parunder ns) = {!!}
-  ⇉β-sub {Γ} {A →' B} {γ} {Λ M} ms (parapp ns ns₁) = {!  !}
-
-  ⇉β-sub {Γ} {τ} {γ} {M ∙ M₁} ms parsame = {!!}
-  ⇉β-sub {Γ} {τ} {γ} {M ∙ M₁} ms (parreduce ns ns₁) = {!!}
-  ⇉β-sub {Γ} {τ} {(γ →' τ₁)} {M ∙ M₁} ms (parunder ns) = {!!}
-  ⇉β-sub {Γ} {τ} {γ} {M ∙ M₁} ms (parapp ns ns₁) = {!!}
-
---  ⇉β-sub {Γ} {τ} {γ} {F ∙ X} (parapp ms ms₁) {N} .{N} parsame = parapp (⇉β-sub ms {N} {N} parsame ) (⇉β-sub ms₁ {N} {N} parsame)
-
---  ⇉β-sub {Γ} {τ} {γ} {F ∙ X} parsame (parreduce ns ns₁) = parapp (⇉β-sub {M = F} parsame (parreduce ns ns₁)) (⇉β-sub {M = X} parsame (parreduce ns ns₁)) 
---  ⇉β-sub {Γ} {τ} {γ} {F ∙ X} parsame ns = parapp (⇉β-sub {M = F} parsame ns) (⇉β-sub {M = X} parsame ns) 
---  ⇉β-sub {Γ} {τ} {γ} {F ∙ X} (parapp ms ms₁) (parreduce ns ns₁) = parapp (⇉β-sub ms (parreduce ns ns₁)) (⇉β-sub ms₁ (parreduce ns ns₁))
+  ⇉β-sub ms ns = ⇉β-sub' [] ms ns
 
   -- ⇉β is confluent
   ⇉β-confluent : ∀ {Γ τ} → Confluent {Term Γ τ} _⇉β_
