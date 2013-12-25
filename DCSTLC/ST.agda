@@ -328,14 +328,10 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
          → sub M (ts ⋯ [ γ ↦ N ]) ⇉β sub M' (ts ⋯ [ γ ↦ N ])
   ⇉β-sub₁ ts parsame = parsame
   ⇉β-sub₁ ts {Λ {A} M} (parunder ms) = parunder (⇉β-sub₁ (A ∷ ts) ms)
-
   ⇉β-sub₁ {Γ} {τ} {γ} ts {(Λ {A} x) ∙ y} .{sub x' [ A ↦ y' ]} {N = N} (parreduce .{M = x} {x'} .{y} {y'} xs ys) with ⇉β-sub₁ (A ∷ ts) {x} {x'} {N = N} xs | ⇉β-sub₁ ts {N = N} ys
-  ... | l | a with sym $ lemma-sub x y (ts ⋯ [ γ ↦ N ]) | sym $ lemma-sub x' y' (ts ⋯ [ γ ↦ N ])
-  ... | l1 | l2 = ⇉β-≡ refl (sym l2) (parreduce l a)
-
-  --→β-sub₂' {γ = γ} ts {(Λ {A} x) ∙ y} {N = N} reduce rewrite sym $ lemma-sub x y (ts ⋯ [ γ ↦ N ]) = reduce {ts ++ Γ} {τ} {A} {sub x (A ∷⋯ ts ⋯ [ γ ↦ N ])} {sub y (ts ⋯ [ γ ↦ N ])}
-
+  ... | l | a = ⇉β-≡ refl (lemma-sub x' y' (ts ⋯ [ γ ↦ N ]))(parreduce l a)
   ⇉β-sub₁ ts {M ∙ M₁} (parapp ms ms₁) = parapp (⇉β-sub₁ ts ms) (⇉β-sub₁ ts ms₁) 
+
   -- Substitution is substitutive for ⇉β
   ⇉β-sub : ∀ {Γ τ γ}
          → {M M' : Term (γ ∷ Γ) τ}
