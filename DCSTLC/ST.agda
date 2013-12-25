@@ -332,6 +332,15 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
   ... | l | a = ⇉β-≡ refl (lemma-sub x' y' (ts ⋯ [ γ ↦ N ]))(parreduce l a)
   ⇉β-sub₁ ts {M ∙ M₁} (parapp ms ms₁) = parapp (⇉β-sub₁ ts ms) (⇉β-sub₁ ts ms₁) 
 
+  ⇉β-sub' : ∀ {Γ τ γ}
+         → (ts : List Type)
+         → {M M' : Term (ts ++ (γ ∷ Γ)) τ}
+         → {N N' : Term Γ γ}
+         → M ⇉β M'
+         → N ⇉β N'
+         → sub M (ts ⋯ [ γ ↦ N ]) ⇉β sub M' (ts ⋯ [ γ ↦ N' ])
+  ⇉β-sub' ts {M} {N = N} ms ns = {!!}
+
   -- Substitution is substitutive for ⇉β
   ⇉β-sub : ∀ {Γ τ γ}
          → {M M' : Term (γ ∷ Γ) τ}
