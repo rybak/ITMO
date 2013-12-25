@@ -298,7 +298,9 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
           → sub M (ts ⋯ [ γ ↦ N ]) →β sub M' (ts ⋯ [ γ ↦ N ])
   →β-sub₂' ts {⋆ x} ()
   →β-sub₂' {γ = γ} ts {Λ {A} x} (under mm) = under (→β-sub₂' (A ∷ ts) mm)
-  →β-sub₂' {γ = γ} ts {(Λ {A} x) ∙ y} {N = N} reduce rewrite sym $ lemma-sub x y (ts ⋯ [ γ ↦ N ]) = reduce
+  →β-sub₂' {Γ} {τ} {γ = γ} ts {(Λ {A} x) ∙ y} {N = N} reduce rewrite sym $ lemma-sub x y (ts ⋯ [ γ ↦ N ]) = reduce {ts ++ Γ} {τ} {A} {sub x (A ∷⋯ ts ⋯ [ γ ↦ N ])} {sub y (ts ⋯ [ γ ↦ N ])}
+
+    -- reduce : ∀ {τ γ} {M : Term (γ ∷ Γ) τ} {N : Term Γ γ} → ((Λ M) ∙ N) →β (sub M [ γ ↦ N ])
   →β-sub₂' ts {x ∙ y} {x' ∙ .y} (left mm) = left (→β-sub₂' ts mm)
   →β-sub₂' ts {x ∙ y} {.x ∙ y'} (right mm) = right (→β-sub₂' ts mm)
 
@@ -324,7 +326,16 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
          → {N : Term Γ γ}
          → M ⇉β M'
          → sub M (ts ⋯ [ γ ↦ N ]) ⇉β sub M' (ts ⋯ [ γ ↦ N ])
-  ⇉β-sub₁ ts {M} {M'} {N} ms = {!!}
+  ⇉β-sub₁ ts parsame = parsame
+  ⇉β-sub₁ ts {Λ {A} M} (parunder ms) = parunder (⇉β-sub₁ (A ∷ ts) ms)
+
+  ⇉β-sub₁ {Γ} {τ} {γ} ts {(Λ {A} x) ∙ y} .{sub x' [ A ↦ y' ]} {N = N} (parreduce .{M = x} {x'} .{y} {y'} xs ys) with ⇉β-sub₁ (A ∷ ts) {x} {x'} {N = N} xs | ⇉β-sub₁ ts {N = N} ys
+  ... | l | a with sym $ lemma-sub x y (ts ⋯ [ γ ↦ N ]) | sym $ lemma-sub x' y' (ts ⋯ [ γ ↦ N ])
+  ... | l1 | l2 = ⇉β-≡ refl (sym l2) (parreduce l a)
+
+  --→β-sub₂' {γ = γ} ts {(Λ {A} x) ∙ y} {N = N} reduce rewrite sym $ lemma-sub x y (ts ⋯ [ γ ↦ N ]) = reduce {ts ++ Γ} {τ} {A} {sub x (A ∷⋯ ts ⋯ [ γ ↦ N ])} {sub y (ts ⋯ [ γ ↦ N ])}
+
+  ⇉β-sub₁ ts {M ∙ M₁} (parapp ms ms₁) = parapp (⇉β-sub₁ ts ms) (⇉β-sub₁ ts ms₁) 
   -- Substitution is substitutive for ⇉β
   ⇉β-sub : ∀ {Γ τ γ}
          → {M M' : Term (γ ∷ Γ) τ}
@@ -337,10 +348,10 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
   ⇉β-sub {Γ} {.γ} {γ} {⋆ here refl} parsame ns = ns
   ⇉β-sub {Γ} {τ} {γ} {⋆ there x} parsame ns = parsame
 
-  ⇉β-sub {Γ} {A →' B} {γ} {Λ .{A} .{B} M} {Λ M'} (parunder ms) {N} .{N} parsame = parunder {!!}
+  ⇉β-sub {Γ} {A →' B} {γ} {Λ .{A} .{B} M} {Λ M'} (parunder ms) {N} .{N} parsame = parunder (⇉β-sub₁ (A ∷ []) {M} {M'} {N = N} ms)
   ⇉β-sub {Γ} {A →' B} {γ} {Λ M} ms (parreduce ns ns₁) = {!!}
   ⇉β-sub {Γ} {A →' B} {(γ →' τ)} {Λ M} ms (parunder ns) = {!!}
-  ⇉β-sub {Γ} {A →' B} {γ} {Λ M} ms (parapp ns ns₁) = {!!}
+  ⇉β-sub {Γ} {A →' B} {γ} {Λ M} ms (parapp ns ns₁) = {!  !}
 
   ⇉β-sub {Γ} {τ} {γ} {M ∙ M₁} ms parsame = {!!}
   ⇉β-sub {Γ} {τ} {γ} {M ∙ M₁} ms (parreduce ns ns₁) = {!!}
