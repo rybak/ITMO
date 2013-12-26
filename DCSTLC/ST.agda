@@ -332,6 +332,20 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
   ... | l | a = ⇉β-≡ refl (lemma-sub x' y' (ts ⋯ [ γ ↦ N ]))(parreduce l a)
   ⇉β-sub₁ ts {M ∙ M₁} (parapp ms ms₁) = parapp (⇉β-sub₁ ts ms) (⇉β-sub₁ ts ms₁) 
 
+  ⇉wk : ∀ {Γ Δ τ ts} → {x y : Term (ts ++ Γ) τ}
+      → (f : (ts ++ Γ) ⊆ (ts ++ Δ))
+      → x ⇉β y → wk x f ⇉β wk y f
+  ⇉wk {Γ} {Δ} {τ} {ts} {⋆ x} f parsame = parsame
+  ⇉wk {Γ} {Δ} {A →' B} {ts} {Λ y} f parsame = parsame
+  ⇉wk {Γ} {Δ} {A →' B} {ts} {Λ x} {Λ y} f (parunder red) = parunder (⇉wk {Γ} {ts = A ∷ ts} {_} {_} _ red)
+  ⇉wk {Γ} {Δ} {τ} {ts} {Λ x ∙ y} f parsame = parsame
+  ⇉wk {Γ} {Δ} {τ} {ts} {Λ {A} x ∙ y} f (parreduce {M' = x'} {N' = y'} red red₁) with lemma-wk f x' y'
+  ... | lemma with ⇉wk {Γ} {Δ} {A} {ts} {y} {y'} f red₁
+  ... | wky with ⇉wk {Γ} {Δ} {τ} {A ∷ ts} {x} {x'} (A ∷w⋯ f) red
+  ... | wkx = ⇉β-≡ refl lemma (parreduce wkx wky)
+  ⇉wk {Γ} {Δ} {τ} {ts} {x ∙ y} f (parapp .{τ} {σ} xs ys) = parapp (⇉wk {Γ} {Δ} {_} {ts} {x} f xs) (⇉wk {Γ} {Δ} {_} {ts} f ys)
+  ⇉wk {Γ} {Δ} {τ} {ts} {x ∙ y} f parsame = parsame
+
   ⇉β-sub' : ∀ {Γ τ γ}
          → (ts : List Type)
          → {M M' : Term (ts ++ (γ ∷ Γ)) τ}
@@ -340,19 +354,16 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
          → N ⇉β N'
          → sub M (ts ⋯ [ γ ↦ N ]) ⇉β sub M' (ts ⋯ [ γ ↦ N' ])
   ⇉β-sub' ts ms parsame = ⇉β-sub₁ ts ms
-
   ⇉β-sub' [] {⋆ here refl} parsame ns = ns
   ⇉β-sub' [] {⋆ there x} parsame ns = parsame
   ⇉β-sub' (t ∷ ts) {⋆ here refl} parsame ns = parsame
-
+  ⇉β-sub' {Γ} (t ∷ ts) {⋆ there x} parsame {N} {N'} ns with ⇉β-sub' ts {⋆ x} parsame {N} {N'} ns
+  ... | w = {!!}
 --  _!_ : ∀ {Γ Δ τ} → Sub Γ Δ → τ ∈ Γ → Term Δ τ
---  wk : ∀ {Γ Δ τ} → Term Γ τ → (Γ ⊆ Δ) → Term Δ τ
---  wk-test : ∀ {Γ Δ τ ts} → {x y : Term (ts ++ Γ) τ}
---          → (f : (ts ++ Γ) ⊆ (ts ++ Δ))
---          → x →β y → wk x f →β wk y f
+--  ⇉wk : ∀ {Γ Δ τ ts} → {x y : Term (ts ++ Γ) τ}
+--      → (f : (ts ++ Γ) ⊆ (ts ++ Δ))
+--      → x ⇉β y → wk x f ⇉β wk y f
 --  →β-sub₁ {Γ} {τ} {γ} (t ∷ ts) {⋆ there pa} nn = map✴ (λ x → wk x (_ ↓w⋯ id)) (wk-test {ts ++ Γ} {(t ∷ ts) ++ Γ} {ts = []} there) (→β-sub₁ ts {⋆ pa} nn)
-
-  ⇉β-sub' (t ∷ ts) {⋆ there x} parsame {N} {N'} ns = {!!}
 
   ⇉β-sub' ts {Λ {A} M} parsame ns = parunder (⇉β-sub' (A ∷ ts) {M} parsame ns)
   ⇉β-sub' ts {Λ {A} M} {Λ M'} (parunder ms) ns = parunder (⇉β-sub' (A ∷ ts) ms ns)
