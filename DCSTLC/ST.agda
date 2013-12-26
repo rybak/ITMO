@@ -286,7 +286,7 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
   →β-sub₁ [] {⋆ here refl} nn = nn
   →β-sub₁ [] {⋆ there pa} nn = ε
   →β-sub₁ (t ∷ ts) {⋆ here refl} nn = ε
-  →β-sub₁ {Γ} {τ} {γ} (t ∷ ts) {⋆ there pa} nn = map✴ (λ x → wk x (_ ↓w⋯ id)) (wk-test {ts ++ Γ} {(t ∷ ts) ++ Γ} {ts = []} there) (→β-sub₁ ts {⋆ pa} nn)
+  →β-sub₁ {Γ} {τ} {γ} (t ∷ ts) {⋆ there pa} nn = map✴ (λ x → wk x (t ↓w⋯ id)) (wk-test {ts ++ Γ} {(t ∷ ts) ++ Γ} {ts = []} there) (→β-sub₁ ts {⋆ pa} nn)
   →β-sub₁ {Γ} {(A →' B)} {γ} ts {Λ M} nn = map✴ Λ under (→β-sub₁ (A ∷ ts) {M} nn)
   →β-sub₁ {Γ} {τ} {γ} ts {M ∙ M₁} nn = map✴ (λ z → z ∙ _) left (→β-sub₁ ts {M = M} nn) ++✴ map✴ (_∙_ _) right (→β-sub₁ ts {M = M₁} nn)
 
@@ -357,17 +357,12 @@ module SimptyTypedLambdaCalculusAtomicallyTypedWith (T : Set) where
   ⇉β-sub' [] {⋆ here refl} parsame ns = ns
   ⇉β-sub' [] {⋆ there x} parsame ns = parsame
   ⇉β-sub' (t ∷ ts) {⋆ here refl} parsame ns = parsame
-  ⇉β-sub' {Γ} (t ∷ ts) {⋆ there x} parsame {N} {N'} ns with ⇉β-sub' ts {⋆ x} parsame {N} {N'} ns
-  ... | w = {!!}
---  _!_ : ∀ {Γ Δ τ} → Sub Γ Δ → τ ∈ Γ → Term Δ τ
---  ⇉wk : ∀ {Γ Δ τ ts} → {x y : Term (ts ++ Γ) τ}
---      → (f : (ts ++ Γ) ⊆ (ts ++ Δ))
---      → x ⇉β y → wk x f ⇉β wk y f
---  →β-sub₁ {Γ} {τ} {γ} (t ∷ ts) {⋆ there pa} nn = map✴ (λ x → wk x (_ ↓w⋯ id)) (wk-test {ts ++ Γ} {(t ∷ ts) ++ Γ} {ts = []} there) (→β-sub₁ ts {⋆ pa} nn)
+  -- ↓ strange
+  ⇉β-sub' {Γ} {τ} (t ∷ ts) {⋆ there x} parsame {N} {N'} ns with ⇉β-sub' ts {⋆ x} parsame {N} {N'} ns | (λ x → wk {ts ++ Γ} {t ∷ ts ++ Γ} {τ} x (t ↓w⋯ id)) | (λ {x} {y} xs → ⇉wk {ts ++ Γ} {(t ∷ ts) ++ Γ} {τ} {ts = []} {x} {y} (λ {x₁} n → there n) xs)
+  ... | w | f1 | f2 = f2 w
 
   ⇉β-sub' ts {Λ {A} M} parsame ns = parunder (⇉β-sub' (A ∷ ts) {M} parsame ns)
   ⇉β-sub' ts {Λ {A} M} {Λ M'} (parunder ms) ns = parunder (⇉β-sub' (A ∷ ts) ms ns)
-
   ⇉β-sub' ts {x ∙ y} parsame ns = parapp (⇉β-sub' ts {x} parsame ns) (⇉β-sub' ts {y} parsame ns)
   ⇉β-sub' {Γ} {τ} {γ} ts {(Λ {A} x) ∙ y} (parreduce .{M = x} {x'} .{y} {y'} xs ys) {N} {N'} ns with ⇉β-sub' (A ∷ ts) {x} xs ns | ⇉β-sub' ts {y} ys ns
   ... | l | a = ⇉β-≡ refl (lemma-sub x' y' (ts ⋯ [ γ ↦ N' ])) (parreduce l a)
