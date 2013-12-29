@@ -10,6 +10,7 @@
 
 #include "announcer.h"
 
+#include "udp.h"
 
 void announcer::announce()
 {

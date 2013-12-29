@@ -9,20 +9,20 @@ clean :
 	$(RM) chat
 	$(RM) nchat
 
-chat : chat.cpp common.o kbhit.o ra.o ports.h user.o
+chat : chat.cpp common.o kbhit.o ra.o ports.h user.o udp.o
 	$(CC) chat.cpp\
 		kbhit.o common.o ma.o\
 		ra.o user.o chat_message.o\
 		receiver.o little_receiver.o tcp_socket.o\
-		announcer.o announce_message.o\
+		announcer.o announce_message.o udp.o\
 		-o chat
 
-nchat : n.cpp common.o kbhit.o sl.o ports.h user.o
+nchat : n.cpp common.o kbhit.o sl.o ports.h user.o udp.o
 	$(CC) n.cpp\
 		kbhit.o common.o ma.o\
 		sl.o user.o chat_message.o\
 		sender.o tcp_socket.o\
-		listener.o announce_message.o\
+		listener.o announce_message.o udp.o\
 		-o nchat
 
 ra.o : ra.cpp ra.h receiver.o announcer.o announce_message.o chat.h common.o ma.o user.o
@@ -43,7 +43,7 @@ receiver.o : receiver.cpp receiver.h ma.o chat_message.o tcp_socket.o little_rec
 little_receiver.o : little_receiver.cpp little_receiver.h
 	$(CCO) little_receiver.cpp
 
-listener.o : listener.cpp listener.h ports.h common.o ma.o announce_message.o
+listener.o : listener.cpp listener.h ports.h common.o ma.o announce_message.o udp.o
 	$(CCO) listener.cpp
 
 # messages
@@ -70,4 +70,7 @@ tcp_socket.o : tcp_socket.cpp tcp_socket.h common.o
 
 kbhit.o : $(INCLUDE)/kbhit.cpp $(INCLUDE)/kbhit.h
 	$(CCO) $(INCLUDE)/kbhit.cpp
+
+udp.o : udp.h udp.cpp common.o
+	$(CCO) udp.cpp
 

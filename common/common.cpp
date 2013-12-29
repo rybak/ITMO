@@ -1,6 +1,5 @@
 #include <cstdio>
 #include <cstring>
-#include <sys/socket.h>
 #include <sys/types.h>
 
 #include <netinet/in.h>
@@ -22,26 +21,6 @@ void dontdie(const char *s)
 {
     perror(s);
     printf("\n");
-}
-
-void make_udp_socket(int &fd, struct sockaddr_in &sock, uint16_t port)
-{
-    fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    if (fd < 0)
-    {
-        die("socket");
-    }
-    socklen_t si_len = sizeof(sock);
-    memset(&sock, 0, si_len);
-    sock.sin_family = AF_INET;
-    sock.sin_port = htons(port);
-    sock.sin_addr.s_addr = htonl(INADDR_ANY);
-
-    int status = bind(fd, (struct sockaddr *) &sock, si_len);
-    if (status < 0)
-    {
-        die("bind");
-    }
 }
 
 long long host_time()
