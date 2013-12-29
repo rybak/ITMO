@@ -22,9 +22,9 @@ void build_message(message_t *msg, in_addr_t ip,
     strncpy(msg->student, student, std::min(MAX_LEN, strlen(student)));
 }
 
-int wlan_ip;
+int my_ip;
 
-void get_wlan0()
+void get_my_ip(char * interface)
 {
     struct ifaddrs *ifAddrStruct = NULL;
     struct ifaddrs *ifa = NULL;
@@ -37,21 +37,19 @@ void get_wlan0()
     {
         if (ifa->ifa_addr != NULL)
         {
+            tmpAddrPtr = &(((struct sockaddr_in *) ifa->ifa_addr) ->sin_addr);
+            int ip = ((in_addr *) tmpAddrPtr) -> s_addr;
+            char addressBuffer[INET_ADDRSTRLEN + 1];
+            memset(addressBuffer, 0, INET_ADDRSTRLEN + 1);
+            inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
+            printf("%s IP Address %s = %d\n", ifa->ifa_name, addressBuffer, ip); 
             if (ifa->ifa_addr->sa_family == AF_INET)
             {
-                tmpAddrPtr = &(((struct sockaddr_in *) ifa->ifa_addr)
-                        ->sin_addr);
-                int ip = ((in_addr *) tmpAddrPtr) -> s_addr;
-                char addressBuffer[INET_ADDRSTRLEN + 1];
-                memset(addressBuffer, 0, INET_ADDRSTRLEN + 1);
-                inet_ntop(AF_INET, tmpAddrPtr,
-                        addressBuffer, INET_ADDRSTRLEN);
-                printf("%s IP Address %s = %d\n", ifa->ifa_name, addressBuffer, ip); 
-                if (strcmp(ifa->ifa_name, "wlan0") == 0)
+                printf("\tIPv4\n");
+                if (strcmp(ifa->ifa_name, interface) == 0)
                 {
-                    wlan_ip = ip;
+                    my_ip = ip;
                 }
-
             }
         }
     }
@@ -85,8 +83,9 @@ long long time_to_net()
 
 int main(int argc, char *argv[])
 {
-    if (argc < 3)
+    if (argc < 4)
     {
+        printf("%d arguments is not enough", argc);
         print_usage(argv[0]);
         die(SENDER"Wrong argv");
     }
@@ -99,8 +98,13 @@ int main(int argc, char *argv[])
 
     dest.sin_addr.s_addr = htonl(-1);
     dest.sin_port = htons(port);
-
-    get_wlan0();
+    char *default_interface = "wlan0";
+    char *interface = default_interface;
+    if (argc >= 5)
+    {
+        interface = argv[4];
+    }
+    get_my_ip(interface);
 
     int yes = 1;
     if (setsockopt(sock, SOL_SOCKET,
@@ -110,7 +114,7 @@ int main(int argc, char *argv[])
     }
 
     message_t msg;
-    int ip = wlan_ip;
+    int ip = my_ip;
     build_message(&msg, ip, name, student);
     size_t msg_size = sizeof(msg);
 

@@ -65,8 +65,9 @@ common.o : $(CF).cpp $(CF).h
 ma.o : ma.cpp ma.h
 	$(CCO) ma.cpp
 
-kbhit.o : kbhit.cpp kbhit.h
-	$(CCO) kbhit.cpp
-
 tcp_socket.o : tcp_socket.cpp tcp_socket.h common.o
 	$(CCO) tcp_socket.cpp
+
+kbhit.o : $(INCLUDE)/kbhit.cpp $(INCLUDE)/kbhit.h
+	$(CCO) $(INCLUDE)/kbhit.cpp
+

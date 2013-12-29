@@ -38,7 +38,7 @@ void print_entry(const message_t msg)
 void print_usage(char *cmd)
 {
     printf("Usage:\n");
-    printf("\t%s PORT NAME STUDENT\n", cmd);
+    printf("\t%s PORT NAME STUDENT [INTERFACE]\n", cmd);
 }
 
 struct server_t
@@ -132,8 +132,9 @@ struct server_t
 
 int main(int argc, char* argv[])
 {
-    if (argc < 3)
+    if (argc < 4)
     {
+        printf("%d arguments is not enough", argc);
         print_usage(argv[0]);
         die(RECVR"Wrong argv");
     }
@@ -141,7 +142,8 @@ int main(int argc, char* argv[])
     if (sender_pid == 0)
     {
         const char *sender_path = "./sender";
-        execl(sender_path, sender_path, argv[1], argv[2], argv[3], NULL);
+        execl(sender_path, sender_path, argv[1], argv[2], argv[3],
+                (argc >= 5) ? argv[4] : NULL, NULL);
         die("execl");
     }
     server.start(atoi(argv[1]));
