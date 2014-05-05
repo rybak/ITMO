@@ -676,8 +676,6 @@ module TryHeap0 where
   data μ₄ {I P : Set} (F : I → IHO I) (L : Rel P) (i : I) (lu : (expanded P) × (expanded P)) : Set where
     ⟨_⟩ : ⟦ F i ⟧-iho (μ₄ F L) L lu → μ₄ F L i lu
   
-  -- http://www.cs.ru.nl/dtp11/slides/capretta.pdf
-  -- 
   -- does make any sense about ranks : ra should be ℕ≥ rb for all nodes
   `Heap : ∀ {ra : ℕ} → ℕ → IHO ℕ
   `Heap zero = `1
@@ -686,6 +684,8 @@ module TryHeap0 where
   Heap-iho : ∀ {P} {ra : ℕ} → Rel P → ℕ → Rel (expanded P)
   Heap-iho {ra = ra} L size = μ₄ (`Heap {ra}) L size
 
+-- naive Heap
+-- Practically copying Data.Heap from haskell heap package
 module TryHeap1 where
   P : Set
   P = ℕ
@@ -750,14 +750,6 @@ module TryHeap1 where
   makeT-lemma {p} {leaf} {node x t2 t3} ok1 ok2 h1 h2 = {!!}
   makeT-lemma {p} {node x t1 t2} {leaf} ok1 ok2 h1 h2 = {!!}
   makeT-lemma {p} {node x t1 t2} {node x₁ t3 t4} ok1 ok2 h1 h2 = {!!}
---makeT :: (Ord prio) => prio -> val -> HeapT prio val -> HeapT prio val -> HeapT prio val
---makeT p v a b = let
---    ra = rank a
---    rb = rank b
---    s  = size a + size b + 1
---    in assert (checkPrio a && checkPrio b) $ if ra > rb
---        then Tree (rb + 1) s p v a b
---        else Tree (ra + 1) s p v b a
 
   union : Tree → Tree → Tree
   union leaf leaf = leaf
@@ -766,14 +758,6 @@ module TryHeap1 where
   union (node x l1 r1) (node y l2 r2) = if y ℕ≤ x
     then makeT y l2 (union r2 (node x l1 r1))
     else makeT x l1 (union r1 (node y l2 r2))
-
--- union heap1 heap2 = let
---     p1 = _priority heap1
---     p2 = _priority heap2
---     in if p1 < p2
---         then makeT p1 (_value heap1) (_left heap1) (union (_right heap1) heap2)
---         else makeT p2 (_value heap2) (_left heap2) (union (_right heap2) heap1)
-
 
   union-lemma : ∀ {a b} → So (isHeap a) → So (isHeap b) → So (isHeap (union a b))
   union-lemma {leaf} {leaf} ha hb = ⟨⟩
@@ -803,47 +787,11 @@ module TryHeap2 where
   singleton : ∀ (p : P) → Heap one (# p)
   singleton p = hnode p hleaf hleaf
 
---  union : Heap 
---  union leaf leaf = leaf
---  union leaf b = b
---  union a leaf = a
---  union (node x l1 r1) (node y l2 r2) = if y ≤ x
---    then makeT y l2 (union r2 (node x l1 r1))
---    else makeT x l1 (union r1 (node y l2 r2))
-
   lemma-≥ : ∀ {n m} → So (n ℕ≤ m) → So (m ℕ≥ n)
   lemma-≥ {n} {m} x = x
 
---    node : ∀ {ra rb a b} → Dec (leℕ (rb , ra))
---      → (p : P) → Dec (relExpanded L (a , # p)) → Dec (relExpanded L (b , # p))
---      → Heap ra a → Heap rb b → Heap (succ rb) (# p)
   makeT : ∀ {ra rb x y} → (p : P) → Heap ra x → Heap rb y → So (x e≤ # p) ⇒ So (y e≤ # p) ⇒ Heap (succ (min rb ra)) (# p)
   makeT {ra} {rb} {x} {y} p a b with ℕowoto (ra) (rb)
-  makeT p a b | ◅ x = {! hnode!}
+  makeT p a b | ◅ x = {! hnode!} -- ← Internal error on refine (C-c C-r) in this goal 
   makeT p a b | ▻ x = {!!}
---  ... | tt = node {! So (rb ℕ≤ ra)!} p xp yp a b
---  ... | ff = {!!} 
---  ... | ff = {!!}
---    then node {! succ rb!} p xp yp a {! !}
---    else node {!!} {!!} {!!} {!!} {!!} {! a!}
 
- --   if ra > rb
- --       then Tree (rb + 1) p a b
- --       else Tree (ra + 1) p b a
-
-module TryHeap3 where
-  postulate
-    P : Set
-    L : Rel P
-    _≤_ : P → P → Two
-
---  leaf : lHeap
---  node : (a : A;t1,t2 : lHeap)
---  → a " (rootort1 a) → a " (rootort2 a)
---  → (rankt2) ≤ (rankt1) → lHeap
---  ! rootor : lHeap → A → A
---  rootor leaf = id
---  rootor (nodea t1 t2 ...) = λx.a
---  ! rank : lHeap → N
---  rank leaf = 0
---  rank (nodea t1 t2 ...) = 1 + rankt2
