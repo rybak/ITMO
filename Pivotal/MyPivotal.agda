@@ -41,21 +41,29 @@ test = if tt then ff else magic
 data ℕ : Set where
   zero : ℕ
   succ : ℕ → ℕ
-  
-_ℕ≤_ _ℕ≥_ _ℕ>_ : ℕ → ℕ → Two
-zero ℕ≤ y = tt
-succ x ℕ≤ zero = ff
-succ x ℕ≤ succ y = x ℕ≤ y
 
-x ℕ≥ y = y ℕ≤ x
-zero ℕ> y = ff
-succ x ℕ> zero = tt
-succ x ℕ> succ y = x ℕ> y
+-- zero ℕ≤ y = tt
+-- succ x ℕ≤ zero = ff
+-- succ x ℕ≤ succ y = x ℕ≤ y
+-- 
+-- x ℕ≥ y = y ℕ≤ x
+-- zero ℕ> y = ff
+-- succ x ℕ> zero = tt
+-- succ x ℕ> succ y = x ℕ> y
+-- 
+infixl 6 _ℕ+_
+_ℕ+_ : ℕ → ℕ → ℕ
+zero ℕ+ b = b
+succ a ℕ+ b = succ (a ℕ+ b)
 
+data _ℕ≤_ : ℕ → ℕ → Set where
+  z≤n : ∀ {n} → zero ℕ≤ n
+  s≤s : ∀ {n m} → n ℕ≤ m → succ n ℕ≤ succ m
 
-min max : ℕ → ℕ → ℕ
-min x y = if x ℕ≤ y then x else y
-max x y = if x ℕ≥ y then x else y
+_ℕ<_ _ℕ≥_ _ℕ>_ : ℕ → ℕ → Set
+n ℕ< m = succ n ℕ≤ m
+n ℕ> m = m ℕ< n
+n ℕ≥ m = m ℕ≤ n
 
 {-# BUILTIN NATURAL ℕ #-}
 {-# BUILTIN ZERO zero #-}
@@ -309,7 +317,8 @@ relExpanded L (# x , # y) = L (x , y)
 relExpanded L (⊥ , _) = One
 relExpanded L ( _ , _ ) = Zero
 
-provenRel L xy = proven (relExpanded L xy)
+-- prooven relation 
+provenRel L = λ xy → proven (relExpanded L xy)
 
 -- six 6
 
@@ -645,6 +654,41 @@ flatten-io {I} {P} {F} {L} {i} {l , u} ⟨ x ⟩ = go (F i) x ⟨ ◅ ! ⟩ wher
   go (S `+ T) (▻ t) ys = go T t ys
   go (S `∧ T) (s & p & t) ys = go S s (p ∷' (go T t ys))
 
+module TryHeap-1 where
+  HRel : (P : Set) → Set₁ → Set₁
+  HRel P L = P → L → Set
+  
+--  data heapExp (P : Set) : Set where
+--    ⊤ : heapExp P
+--    # : P → heapExp P
+--
+--  data IHO (I : Set) : Set where
+--    `R : I → IHO I
+--    `0 `1 : IHO I
+--    _`+_ _`∧_ : IHO I → IHO I → IHO I
+--
+--  _∧ᴴ_ : ∀ {P} → HRel (heapExp P) → HRel (heapExp P) → HRel (heapExp P)
+--  _∧ᴴ_ {P} S T x = Σ P (λ p → S (# p) × T (# p))
+--
+--  relHExp provenHRel : ∀ {P} → Rel P → Rel (heapExp P)
+--  relHExp L (# x , # y) = L (x , y)
+--  relHExp L (_ , ⊤) = One
+--  relHExp L (⊤ , _) = Zero
+--  
+--  provenHRel L = λ xy → proven (hrelExpanded L xy)
+
+-- ⟦_⟧-io : ∀ {I P} → IO I → (I → Rel (expanded P)) → Rel P → Rel (expanded P)
+--  ⟦_⟧-iho : ∀ {I P} → IHO I → (I → HRel (heapExp P)) → Rel P → HRel (heapExp P)
+--  ⟦_⟧-iho (`R x) R L = R x
+--  ⟦_⟧-iho `0 R L = λ _ → Zero
+--  ⟦_⟧-iho `1 R L = λ x → λ y → provenHRel L (x , y)
+--  ⟦_⟧-iho (S `+ T) R L = ⟦ S ⟧-iho R L +̇ ⟦ T ⟧-iho R L
+--  --           only interestion point ↓↓
+--  ⟦_⟧-iho (S `∧ T) R L = ⟦ S ⟧-iho R L ∧ᴴ ⟦ T ⟧-iho R L
+--
+--  data μ₄ {I P : Set} (F : I → IHO I) (L : Rel P) (i : I) (m : (heapExp P)) : Set where
+--    ⟨_⟩ : ⟦ F i ⟧-iho (μ₄ F L) L m → μ₄ F L i m
+  
 -- Modules TryHeap*
 -- references
 -- http://www.cs.ru.nl/dtp11/slides/capretta.pdf -- Section "Inductive-Recursive Leftist Heaps"
@@ -655,6 +699,7 @@ flatten-io {I} {P} {F} {L} {i} {l , u} ⟨ x ⟩ = go (F i) x ⟨ ◅ ! ⟩ wher
 module TryHeap0 where
   -- Heap order ? : max-priority order
   -- It is just _∧_ with swapped arguments
+  -- "Heaped" pair
   _∧ᴴ_ : ∀ {P} → Rel (expanded P) → Rel (expanded P) → Rel (expanded P)
   _∧ᴴ_ {P} S T (l , r) = Σ P (λ p → S (l , # p) × T (r , # p))
   
@@ -672,18 +717,48 @@ module TryHeap0 where
   ⟦_⟧-iho (S `+ T) R L = ⟦ S ⟧-iho R L +̇ ⟦ T ⟧-iho R L
   --           only interestion point ↓↓
   ⟦_⟧-iho (S `∧ T) R L = ⟦ S ⟧-iho R L ∧ᴴ ⟦ T ⟧-iho R L
-  
+
   data μ₄ {I P : Set} (F : I → IHO I) (L : Rel P) (i : I) (lu : (expanded P) × (expanded P)) : Set where
     ⟨_⟩ : ⟦ F i ⟧-iho (μ₄ F L) L lu → μ₄ F L i lu
   
-  -- does make any sense about ranks : ra should be ℕ≥ rb for all nodes
+  -- does make any sense about relation between ranks 
+  -- ra should be ℕ≥ rb for all nodes
   `Heap : ∀ {ra : ℕ} → ℕ → IHO ℕ
   `Heap zero = `1
   `Heap {ra} (succ rb) = (`R ra) `∧ `R rb
 
   Heap-iho : ∀ {P} {ra : ℕ} → Rel P → ℕ → Rel (expanded P)
   Heap-iho {ra = ra} L size = μ₄ (`Heap {ra}) L size
+  
+  `List-iho : IHO One
+  `List-iho = `1 `+ (`1 `∧ `R ⟨⟩)
+  
+  List-iho : ∀ {P} → Rel P → Rel (expanded P)
+  List-iho L = μ₄ (λ _ → `List-iho) L _
 
+  RepL′ : ∀ {P} → Rel P → Rel (expanded P)
+  RepL′ L (n , u) = ∀ {m} → relExpanded L (m , n) ⇒ List-iho L (m , u)
+  _++′_  : ∀ {P} {L : Rel P} {l n u} → List-iho L (l , n) → RepL′ L (n , u) → List-iho L (l , u)
+  ⟨ ◅ (! {{prf}}) ⟩ ++′ ys = ys
+  ⟨ ▻ (p , ! {{prf}} , t) ⟩ ++′ ys = {! ⟨ ▻ (p , ? , t ++′ ys) ⟩!}
+
+--  union : ∀ {P} {L : Rel P} {r1 r2} {sa sb} → [ Heap-iho {ra = r1} L sa →̇ Heap-iho {ra = r2} L sb →̇ Heap-iho {ra = succ (min r1 r2)} L (sa ℕ+ sb) ]
+--  union {I} {P} {F} {L} a b = {!!}
+
+--  
+--  flatten-iho : ∀ {I P F} {L : Rel P} {i : I} → [ μ₄ F L i →̇ List-iho L ]
+--  flatten-iho {I} {P} {F} {L} {i} {l , u} ⟨ x ⟩ = go (F i) x ⟨ ◅ ! ⟩ where
+--    go : ∀ G {l n} → ⟦ G ⟧-iho (μ₄ F L) L (l , n) →
+--      (∀ {m} → (relExpanded L) (m , n) ⇒ List-iho L (m , u)) → List-iho L (l , u)
+--    go (`R i) ⟨ t ⟩ ys = go (F i) t ys
+--    go `0 () ys
+--    go `1 !  ys = ys
+--    go (S `+ T) (◅ s) ys = go S s ys
+--    go (S `+ T) (▻ t) ys = go T t ys
+--    go (S `∧ T) (p , s , t) ys with go S s ⟨ ◅ ? ⟩ | go T t ⟨ ◅ ! ⟩ --  -- ← error
+--    ... | as | bs = ?
+
+ 
 -- naive Heap
 -- Practically copying Data.Heap from haskell heap package
 module TryHeap1 where
@@ -795,3 +870,83 @@ module TryHeap2 where
   makeT p a b | ◅ x = {! hnode!} -- ← Internal error on refine (C-c C-r) in this goal 
   makeT p a b | ▻ x = {!!}
 
+data Tri {α β γ} (A : Set α) (B : Set β) (C : Set γ) : Set (α ⊔ (β ⊔ γ)) where
+  tri< : ( a :   A) (¬b : ¬ B) (¬c : ¬ C) → Tri A B C
+  tri= : (¬a : ¬ A) ( b :   B) (¬c : ¬ C) → Tri A B C
+  tri> : (¬a : ¬ A) (¬b : ¬ B) ( c :   C) → Tri A B C
+-- ℕ>
+cmpℕ : (a b : ℕ) → Tri (a ℕ< b) (a ≡ b) (b ℕ< a)
+cmpℕ a b = ?
+--min max : ℕ → ℕ → ℕ
+---- min x y = if x ℕ≤ y then x else y
+---- max x y = if x ℕ≥ y then x else y
+
+
+module TryHeap3 (A : Set) (_<_ _==_ : A → A → Set) (cmp : (a b : A) → Tri (a < b) (a == b) (b < a)) where
+
+  Rel₂ : Set → Set₁
+  Rel₂ A = A → A → Set
+  
+  flip₁ : ∀ {A B : Set} {C : Set₁} → (A → B → C) → B → A → C
+  flip₁ f a b = f b a
+  
+  less : (a b : A) → Dec (b < a)
+  less a b with cmp a b
+  less a b | tri< y y' y0 = no y0
+  less a b | tri= y y' y0 = no y0
+  less a b | tri> y y' y0 = yes y0
+  
+  eq : (a b : A) → Dec (a == b)
+  eq a b with cmp a b
+  eq a b | tri< y y' y0 = no y'
+  eq a b | tri= y y' y0 = yes y'
+  eq a b | tri> y y' y0 = no y' 
+  
+  more : (a b : A) → Dec (a < b)
+  more a b with cmp a b
+  more a b | tri< y y' y0 = yes y
+  more a b | tri= y y' y0 = no y
+  more a b | tri> y y' y0 = no y
+
+  data Heap : ℕ → Set where
+    leaf : Heap zero
+    node : ∀ {n m} → A → Heap n → Heap m → Heap (succ (min n m))
+
+--  rank : Heap → ℕ
+--  rank leaf = zero
+--  rank (node a left right) = succ (rank right)
+
+  one : ℕ
+  one = succ zero
+  singleton : A → Heap one
+  singleton p = node p leaf leaf
+
+  makeT : ∀ {n m} → (p : A) → Heap n → Heap m → Heap (succ (min n m))
+  makeT {ra} {rb} p a b = if ra ℕ> rb
+    then node p a b
+    else node p {! b!} a
+
+--
+--  union : Heap → Heap → Heap
+--  union leaf leaf = leaf
+--  union leaf b = b
+--  union a leaf = a
+--  union (node p1 l1 r1) (node p2 l2 r2) with less p1 p2
+--  ... | yes a = makeT p1 l1 (union r1 (node p2 l2 r2))
+--  ... | no ¬a = makeT p2 l2 (union r2 (node p1 l1 r1))
+ 
+--  insert0 : A → Heap → Heap
+--  insert0 x h = union (singleton x) h
+--  insert : A → Heap → Heap
+--  insert x leaf = singleton x
+--  insert x (node p l r) = {! !}
+--
+--  data Maybe (A : Set) : Set where
+--    nothing : Maybe A
+--    just    : A → Maybe A
+--  getMin : Heap → Maybe A
+--  getMin leaf = nothing
+--  getMin (node p _ _) = just p
+--  exctractMin : Heap → (Maybe A) × Heap
+--  exctractMin leaf = nothing , leaf
+--  exctractMin (node p l r) = just p , union l r
