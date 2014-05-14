@@ -1,14 +1,13 @@
 \begin{code}
 module VecSample where
-
 data ℕ : Set where
   zero : ℕ
   succ : ℕ → ℕ
-
 data Vec A : ℕ → Set where
   nil  : Vec A zero
   cons : ∀ {n} → A → Vec A n → Vec A (succ n)
 \end{code}
+
 Такое определение позволяет нам описать функцию $ \F{head} $ для такого списка, которая не может бросить исключение:
 \begin{code}
 head : ∀ {A} {n} → Vec A (succ n) → A

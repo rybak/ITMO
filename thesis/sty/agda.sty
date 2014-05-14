@@ -132,7 +132,10 @@
 \fi
 
 \newenvironment{code}%
-{\noindent\ignorespaces\advance\leftskip\mathindent\AgdaCodeStyle\pboxed}%
+{\noindent\ignorespaces
+   %\advance
+   %\leftskip\mathindent
+\AgdaCodeStyle\pboxed}%
 {\endpboxed\par\noindent%
 \ignorespacesafterend}
 
