@@ -31,7 +31,7 @@
   {\endlist}
   {\item}
 
-% \usepackage{csquotes}
+\usepackage{csquotes}
 %\usepackage{expdlist}
 %\usepackage[nottoc,notbib]{tocbibind}
 \usepackage[pdftex]{graphicx}
@@ -41,80 +41,30 @@
 % \usepackage{verbatim}
 \usepackage{sty/rac}
 % \usepackage{listings}
+
+\input{utils/braces.tex}
 \usepackage{agda}
 \usepackage[singlelinecheck=false]{caption}
+%%% Unicode characters
+\input{utils/unicode-characters.tex}
+%%% Agda helper shortcuts -- Rybak
 
-% \usepackage{fancyvrb}
-% \DefineVerbatimEnvironment
-%   {code}{Verbatim}
-%   {} % Add fancy options here if you like.
-
-% Some characters that are not automatically defined
-% (you figure out by the latex compilation errors you get),
-% and you need to define:
-
-\DeclareUnicodeCharacter{8988}{\ensuremath{\ulcorner}}
-\DeclareUnicodeCharacter{8989}{\ensuremath{\urcorner}}
-\DeclareUnicodeCharacter{8803}{\ensuremath{\overline{\equiv}}}
-
+\newcommand{\D}{\AgdaDatatype}
+\newcommand{\F}{\AgdaFunction}
+\newcommand{\DC}{\AgdaInductiveConstructor}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \captionsetup[figure]{justification=centering,   position=bottom, skip=0pt}
 \captionsetup[table] {justification=raggedright, position=top,    skip=0pt}
 
+%%% Russian captions:
+\input{utils/theorems.tex}
 % % Redefine margins and other page formatting
 % 
 % \setlength{\oddsidemargin}{0.5in}
 
 % Various theorem environments. All of the following have the same numbering
 % system as theorem.
-
-\theoremstyle{plain}
-\newtheorem{theorem}{Теорема}
-\newtheorem{prop}[theorem]{Утверждение}
-\newtheorem{corollary}[theorem]{Следствие}
-\newtheorem{lemma}[theorem]{Лемма}
-\newtheorem{question}[theorem]{Вопрос}
-\newtheorem{conjecture}[theorem]{Гипотеза}
-\newtheorem{assumption}[theorem]{Предположение}
-
-\theoremstyle{definition}
-\newtheorem{definition}[theorem]{Определение}
-\newtheorem{notation}[theorem]{Обозначение}
-\newtheorem{condition}[theorem]{Условие}
-\newtheorem{example}[theorem]{Пример}
-%\newtheorem{algorithm}[theorem]{Алгоритм}
-\floatname{algorithm}{Листинг}
-\renewcommand{\algorithmicrequire}{\textbf{Вход:}}
-
-%\newtheorem{introduction}[theorem]{Introduction}
-
-\renewcommand{\proof}{\\\textbf{Доказательство.}~}
-% \renewcommand{\lstlistingname}{Листинг}
- 
-% \lstnewenvironment{snippet}[1][]%
-% {
-%    \noindent
-%    \minipage{\linewidth} 
-%    \vspace{0.5\baselineskip}
-%    \lstset{basicstyle=\ttfamily\footnotesize,frame=single,#1}}
-% {\endminipage}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\numberwithin{theorem}{chapter}        % Numbers theorems "x.y" where x
-                                        % is the section number, y is the
-                                        % theorem number
-
-%\renewcommand{\thetheorem}{\arabic{chapter}.\arabic{theorem}}
-
-%\makeatletter                          % This sequence of commands will
-%\let\c@equation\c@theorem              % incorporate equation numbering
-%\makeatother                           % into the theorem numbering scheme
-
-%\renewcommand{\theenumi}{(\roman{enumi})}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \binoppenalty=10000
 \relpenalty=10000
@@ -166,7 +116,7 @@
 
 % Chapters
 \startthechapters
-% \input{parts/intro.tex}
+\input{parts/intro.tex}
 \input{parts/chapter1.tex}
 % \input{parts/chapter2.tex}
 % \input{parts/chapter3.tex}

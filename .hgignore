@@ -6,4 +6,5 @@
 .*\~$
 .*\.sh$
 
+thesis/backup
 # " regexp:.*\/[^\.]+$

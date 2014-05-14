@@ -1,7 +1,5 @@
-#!/bin/sh
+#!/bin/bash
 
-
-banner "r.sh"
 echo "first arg == x $1 x"
 
 if [ "x$1" = "xclean" ];
@@ -21,7 +19,11 @@ then
     done
 else
     export TEXINPUTS="$TEXINPUTS:./sty:"
-    agda --latex Agda1.lagda
+    for i in `cat lagda.txt`;
+    do
+        agda --latex $i.lagda
+    done
+    # agda --latex Agda1.lagda
     cd pic
     for i in *.mp
     do

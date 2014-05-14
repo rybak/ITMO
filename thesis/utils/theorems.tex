@@ -1,0 +1,48 @@
+\theoremstyle{plain}
+\newtheorem{theorem}{Теорема}
+\newtheorem{prop}[theorem]{Утверждение}
+\newtheorem{corollary}[theorem]{Следствие}
+\newtheorem{lemma}[theorem]{Лемма}
+\newtheorem{question}[theorem]{Вопрос}
+\newtheorem{conjecture}[theorem]{Гипотеза}
+\newtheorem{assumption}[theorem]{Предположение}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Определение}
+\newtheorem{notation}[theorem]{Обозначение}
+\newtheorem{condition}[theorem]{Условие}
+\newtheorem{example}[theorem]{Пример}
+%\newtheorem{algorithm}[theorem]{Алгоритм}
+\floatname{algorithm}{Листинг}
+\renewcommand{\algorithmicrequire}{\textbf{Вход:}}
+
+%\newtheorem{introduction}[theorem]{Introduction}
+
+\renewcommand{\proof}{\\\textbf{Доказательство.}~}
+% \renewcommand{\lstlistingname}{Листинг}
+ 
+% \lstnewenvironment{snippet}[1][]%
+% {
+%    \noindent
+%    \minipage{\linewidth} 
+%    \vspace{0.5\baselineskip}
+%    \lstset{basicstyle=\ttfamily\footnotesize,frame=single,#1}}
+% {\endminipage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\numberwithin{theorem}{chapter}        % Numbers theorems "x.y" where x
+                                        % is the section number, y is the
+                                        % theorem number
+
+%\renewcommand{\thetheorem}{\arabic{chapter}.\arabic{theorem}}
+
+%\makeatletter                          % This sequence of commands will
+%\let\c@equation\c@theorem              % incorporate equation numbering
+%\makeatother                           % into the theorem numbering scheme
+
+%\renewcommand{\theenumi}{(\roman{enumi})}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
