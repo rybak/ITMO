@@ -1,0 +1,310 @@
+\chapter{Результаты} 
+\label{chapter3}
+
+В данном разделе описываются результаты экспериментов, демонстрирующих работу предложенного метода генерации покрывающего набора тестов. 
+
+\section{Покрытие тестами модельных задач}
+Исследования проводились на пяти модельных задачах, взятых с сайта инструментального средства Microsoft Pex \texttt{http://pexforfun.com}. 
+
+\subsection{Описание модельных задач}
+Для каждой задачи приводится исходный код на языке \textit{C\#}, описывается способ кодирования теста и оператор мутации. Для построения покрывающего набора 
+тестов использовалась \texttt{(1+1)}-эволюционная стратегия.
+
+В рассматриваемых задачах при применении оператора мутации для изменения целого числа \texttt{x} к нему добавлялось число вида $(r(19) - 9) \cdot 10 ^{r(10)}$, 
+где $r(a)$~--- случайное целое число в диапазоне $[0, a)$. Если \texttt{x} должен находиться в диапазоне от $-10^5$ до $10^5$, то он заменяется на $\max(-10^5, 
+\min(10^5, x + (r(19) - 9) \cdot 10^{r(4)}))$. 
+
+\subsubsection{Задача 1}
+\label{pex01}
+Код тестируемой программы приведен на листинге~\ref{lst:pex-1-source}. Наиболее сложным для покрытия является случай, когда сумма элементов массива равняется 
+42. В качестве тестов генерируются целочисленные массивы длины шесть. Оператор мутации выбирает случайный элемент массива и изменяет его описанным ранее 
+способом.
+
+\begin{snippet}[language=C++,caption={Код задачи 1 с сайта pexforfun},label={lst:pex-1-source}]
+using System;
+
+public class Program {
+  //#What values of v to cause the exception? Ask Pex to find out!#
+  public static int Puzzle(int[] v) {
+    int sum = 0;
+    foreach (int x in v)
+      sum += x;
+    if (sum == 42)
+      throw new Exception("hidden bug!");
+    return sum;
+  }
+}
+\end{snippet}
+
+\subsubsection{Задача 2}
+
+Код тестируемой программы приведен на листинге~\ref{lst:pex-2-source}. Сложность данной задачи заключается в покрытии случая, когда элемент списка, следующий 
+за указанным, на единицу больше. Тестом является список, состоящий из шести целых чисел, и число из множества $\{0, 1, 2, 3, 4\}$~--- в качестве индекса 
+элемента в списке. Оператор мутации случайным образом выбирает другой индекс, либо изменяет элемент списка, выбранный случайным образом.  
+
+\begin{snippet}[language=C++,caption={Код задачи 2 с сайта pexforfun},label={lst:pex-2-source}]
+using System;
+using System.Collections.Generic;
+
+public class Program
+{
+  //# What values of list and i can cause exceptions? Ask Pex to find out!#
+  public static void Puzzle(List<int> list, int i)
+  {
+    if (list[i] + 1 == list[i + 1])
+      throw new Exception("hidden bug!"); 
+  }
+}
+\end{snippet}
+
+\subsubsection{Задача 3}
+                   
+Код тестируемой программы приведен на листинге~\ref{lst:pex-3-source}. Сложнее всего покрыть случай, когда сумма выбранного элемента массива и 27277 равняется 
+42. Тест представляется в виде массива из шести целых чисел и числа из множества $\{0, 1, 2, 3, 4, 5\}$~--- индекса элемента в массиве. Оператор мутации 
+случайным образом выбирает другой индекс, либо изменяет элемент массива, выбранный случайным образом.  
+
+\begin{snippet}[language=C++,caption={Код задачи 3 с сайта pexforfun},label={lst:pex-3-source}]
+using System;
+
+public class Program {
+  //# What values of v and i can cause an exception? Ask Pex to find out!#
+  public static void Puzzle(int[] v, int i) {
+    if (v[i] + 27277 == 42)
+      throw new Exception("hidden bug!"); 
+  }
+}
+\end{snippet}
+
+\subsubsection{Задача 4}
+                   
+Код тестируемой программы приведен на листинге~\ref{lst:pex-4-source}. Чтобы полностью покрыть данную задачу, необходимо подобрать корень линейного уравнения. 
+В качестве теста берется целое число в диапазоне от $-10^5$ до $10^5$. Оператор мутации изменяет текущее решение описанным ранее образом.
+
+\begin{snippet}[language=C++,caption={Код задачи 4 с сайта pexforfun},label={lst:pex-4-source}]
+using System;
+
+public class Program 
+{
+  public static void Puzzle(int x)
+  {
+    // What value of x solves this equation? Ask Pex to find out!
+    if (x * 3 + 27 == 153)
+      Console.WriteLine("equation solved");
+  }
+}
+\end{snippet}
+
+\subsubsection{Задача 5}
+                                                            
+Код тестируемой программы приведен на листинге~\ref{lst:pex-5-source}. Сложнее всего покрыть тестом строку, в которой производится вывод на консоль.
+Это эквивалентно решению нелинейного уравнения второй степени в целых числах с двумя переменными и наличием ограничений. Тест представляется в виде кортежа из 
+двух целых чисел в диапазоне от $-10^5$ до $10^5$. Оператор мутации изменяет одно из них.
+
+\begin{snippet}[language=C++,caption={Код задачи 5 с сайта pexforfun},label={lst:pex-5-source}]
+using System;
+
+public class Program {
+  public static void Puzzle(int x, int y) {
+    //# What values of x and y solve this equation? Ask Pex to find out!#
+    if (x >= 0 && x <= 100 &&
+        y >= 0 && y <= 100 &&
+        x * y - 37 * y + 71 * x - 2627 == 0)        
+      Console.WriteLine("equation solved"); 
+  }
+}
+\end{snippet}
+
+\subsection{Результаты эксперимента}
+
+Для каждой из рассмотренных задач было проведено 1000 запусков эволюционного алгоритма. В результате каждого из запусков был сгенерирован покрывающий набор 
+тестов. В таблице~\ref{pexres} приведены минимальное, среднее и максимальное число вычислений функции приспособленности (ФП).
+
+\begin{table}[h!]
+\caption{Число вычислений ФП на модельных задачах} \label{pexres}
+\begin{tabular}{|p{5em}|c|c|c|}
+\hline
+№ задачи & ФП, мин. & ФП, среднее & ФП, макс. \\\hline
+%Pex #01
+1  & 33  &  340 & 1449 \\\hline
+%Pex #02
+2 & 2  &  660& 3909 \\\hline
+%Pex #03
+3  & 286  &  2604 & 13078 \\\hline
+%Pex #04
+4  & 20  &  201 & 679 \\\hline
+%Pex #05
+5  & 298  &  1429 & 4086 \\\hline
+\end{tabular}
+\end{table}
+
+Покрытие модельных задач было осуществлено с помощью тестов, сгенерированных случайным образом. При этом, чтобы было возможным полное покрытие заданного кода, 
+пространство поиска тестов было уменьшено. Так, например, для задачи \ref{pex01} массив заполнялся целыми числами в диапазоне от $-5 \cdot 10^5$ до $5 \cdot 
+10^5$. При этом на каждом запуске генерировалось в $10$ раз больше тестов, чем максимальное число вызовов ФП для соответствующей задачи. В таблице 
+\ref{randompex} приведены полученные результаты, усредненные по 1000 запускам.
+
+\begin{table}
+\caption{Результаты покрытия модельных задач случайными тестами} \label{randompex}
+\begin{tabular}{|p{5em}|c|c|}
+\hline
+№ задачи & Покрытие, \% & Число тестов на каждом запуске\\\hline
+% Pex #01
+1 & 75.3 & 15000\\\hline
+% Pex #02
+2 & 52.7 & 40000\\\hline
+% Pex #03
+3 & 55.6 & 130000\\\hline
+% Pex #04
+4 & 51.4 & 7000\\\hline
+% Pex #05
+5 & 66.7 & 41000\\\hline
+\end{tabular}
+\end{table}
+
+Из результатов эксперимента можно сделать вывод, что применение эволюционного алгоритма для генерации тестов, покрывающих заданные строки кода, весьма 
+эффективно даже для сложных условий.
+
+\section{Покрытие тестами олимпиадных задач}
+Исследования проводились на основе задачи  Huzita Axiom 6, предложенной на NEERC 2011. 
+
+\subsection{Условие задачи}
+Заданы две прямые $l_1$ и $l_2$ и две точки $p_1$ и $p_2$. Необходимо найти прямую, по которой можно сложить плоскость так, что точка $p_1$ попадет на прямую 
+$l_1$, а точка $p_2$ попадет на прямую $l_2$. Прямые задаются с помощью двух точек. Пример условия задачи приведен на рис.~\ref{huzita_pic}.
+\begin{figure}[h!]
+ \center{\includegraphics[width=0.8\textwidth]{huzita.pdf}}
+ \caption{Иллюстрация к задаче  Huzita Axiom 6}
+ \label{huzita_pic}
+\end{figure}
+
+\subsection{Описание эксперимента}
+
+Для тестирования решений задачи был разработан интерфейс \textit{Solution}, приведенный на листинге~\ref{lst:huzita_solution}. Решения реализуют данный 
+интерфейс. Входные данные(тест) передаются в виде строки, а результат выдается в виде списка строк.
+
+\begin{snippet}[language=Java,caption={Интерфейс решения задачи Huzita Axiom 6},label={lst:huzita_solution}]
+public interface Solution {
+    public List<String> solve(String input) throws IOException;
+}
+\end{snippet}
+
+Для построения покрывающего набора тестов использовалась \texttt{(1+1)}-эволюционная стратегия. Пример конфигурации ЭА, приведен на 
+листинге~\ref{lst:huzita_config}.
+
+\begin{snippet}[language=Scala,caption={Конфигурация эволюционного алгоритма для задачи  Huzita Axiom 6},label={lst:huzita_config}]
+class HuzitaConfig[C <: Solution](val cl : Class[C], override val maxGenerationCount : Long) 
+  extends  TargetAwareComputationStateImpl
+  with CoverageConfig[TestData, DistDiffFitness]
+  with OnePlusOneES
+  with TraceProvider
+  with Mutation
+  with FastRandomDelegate
+  with CoverageFitnessComparator.LeastDistLeastAbsDiff[DistDiffFitness]
+  with GenotypeGenerator
+  with GenotypeWrapper
+  with TotalFitnessCallCount
+{
+  private[this] def nestedClasses(top : Class[_]) : Seq[Class[_]] = {
+    top.getDeclaredClasses.toSeq.map(x => nestedClasses(x)).flatten :+ top
+  }
+
+  override def targetMethods: Seq[Method] = nestedClasses(cl).map(_.getDeclaredMethods).flatten
+
+  override def targetConstructors: Seq[Constructor[_]] = nestedClasses(cl).map(_.getDeclaredConstructors).flatten
+
+  def newGenotype(): TestData = TestData.genTestData()
+
+  private[this] lazy val mh =  MethodHandles.lookup().findVirtual(cl, "solve", MethodType.methodType(classOf[java.util.List[String]], classOf[String]))
+
+  def wrap(genotype: TestData): Seq[AnyRef] = genotype.toTestString :: Nil
+
+  def mutate(source: TestData): TestData = source.mutate()
+
+  def evaluateFitness(genotype: TestData): DistDiffFitness = computeFitness(wrap(genotype))
+
+  protected def invoke(args: Seq[AnyRef]) {
+    mh.invokeWithArguments(cl.newInstance() +: args : _*)
+  } 
+} 
+\end{snippet}
+
+Точка задается двумя целочисленными координатами. При мутации точки изменяются обе ее координаты. Линия определяется с помощью двух точек, и при мутации 
+изменяется каждая из них. Тест, используемый в качестве особи ЭА, задается с помощью двух прямых~--- $l_1$ и $l_2$~--- и двух точек~---$p_1$ и $p_2$. 
+Рассматривается пять типов операторов мутации тестовых данных.
+Мутируют:
+\begin{enumerate}
+ \item либо $l_1$ и $p_1$, либо $l_2$ и $p_2$;
+ \item либо $l_1$ и $l_2$, либо $p_1$ и $p_2$;
+ \item одна из $l_1$, $l_2$, $p_1$, $p_2$;
+ \item все прямые и все точки;
+ \item одна из $l_1$ и $p_1$ и одна из $l_2$ и $p_2$.
+\end{enumerate}
+
+\subsection{Результаты}
+
+Для каждого эксперимента было проведено по 1000 запусков. В таблицах~\ref{huzita_10_res}, \ref{huzita_100_res} и \ref{huzita_1000_res} приведены результаты 
+работы ЭА, когда координаты точек лежат в диапазоне от $-10$ до 10, от $-100$ до 100 и от $-1000$ до 1000 соответственно. В первой колонке указан номер 
+оператора мутации, во второй~--- среднее число вычислений ФП, а в третьей~--- усредненный процент покрытия кода. Можно видеть, что лучшие результаты были 
+получены при использовании пятого оператора мутации.
+
+\begin{table}[h!]
+\caption{ЭА, диапазон от $-10$ до 10} \label{huzita_10_res}
+\begin{tabular}{|p{5em}|c|c|}
+\hline
+№ мутации &  ФП, среднее & Покрытие, \% \\\hline
+1  & $2,5 \cdot 10^4$ &  95,8 \\\hline
+2  & $2,9 \cdot 10^4$  &  95  \\\hline
+3  & $4,5 \cdot 10^4$  &  89,3 \\\hline
+4  & $2,5 \cdot 10^4$  &  95,9 \\\hline
+5  & $2,2 \cdot 10^4$  &   \cellcolor{purpur}96,6 \\\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[h!]
+\caption{ЭА, диапазон от $-100$ до 100} \label{huzita_100_res}
+\begin{tabular}{|p{5em}|c|c|}
+\hline
+№ мутации &  ФП, среднее & Покрытие, \% \\\hline
+1  & $5,7 \cdot 10^5$ & 87,3 \\\hline
+2  & $4,7 \cdot 10^5$  &  89,7  \\\hline
+3  & $5,7 \cdot 10^5$  &  87,3 \\\hline
+4  & $6,7 \cdot 10^5$  &  88,3 \\\hline
+5  & $4,2 \cdot 10^5$  &  \cellcolor{purpur}91,3 \\\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[h!]
+\caption{ЭА, диапазон от $-1000$ до 1000} \label{huzita_1000_res}
+\begin{tabular}{|p{5em}|c|c|}
+\hline
+№ мутации &  ФП, среднее & Покрытие, \% \\\hline
+1  & $7,4 \cdot 10^5$  & 81,7 \\\hline
+2  & $6,7 \cdot 10^5$  &  87,3  \\\hline
+3  & $6,2 \cdot 10^5$ & 88 \\\hline
+4  & $7,9 \cdot 10^5$  &  79,3 \\\hline
+5  & $5,9 \cdot 10^5$ &  \cellcolor{purpur}90 \\\hline
+\end{tabular}
+\end{table}
+
+В таблице~\ref{huzita_random_res} приведены результаты покрытия кода случайными тестами в сравнении с результатами ЭА. В первой колонке указан диапазон 
+координат, во второй~--- число случайно генерируемых тестов, в третьей~--- усредненный процент покрытия кода случайными тестами, а в четвертой~--- лучший 
+усредненный процент покрытия кода с помощью ЭА.
+
+\begin{table}
+\caption{Покрытие решения Huzita Axiom 6 случайными тестами} \label{huzita_random_res}
+\begin{tabular}{|p{7em}|c|c|c|}
+\hline
+Диапазон &  Число тестов & Покрытие, \% & Покрытие ЭА, \%\\\hline
+$-10$ до 10  & $5 \cdot 10^5$  & \cellcolor{purpur}97,7  & 96,6 \\\hline
+$-100$ до 100 & $10^6$  &  80,3 & \cellcolor{purpur}91,3 \\\hline
+$-1000$ до 1000  & $10^6$  & 74,3 & \cellcolor{purpur}90 \\\hline
+\end{tabular}
+\end{table}
+
+Из результатов эксперимента можно сделать вывод, что время и качество работы ЭА сильно зависит от выбора оператора мутации. При увеличении множества допустимых 
+тестов, ЭА работает стабильнее и достигает лучших результатов, чем случайная генерация тестов.
+
+\section{Выводы по главе \ref{chapter3}}
+Были проведены эксперименты, демонстрирующие работу предложенного подхода для автоматизированного покрытия кода тестами на основе эволюционных алгоритмов. В 
+результате экспериментов, проведенных на модельных задачах, было получено, что разработанный метод эффективен для покрытия даже сложных условий. Также 
+применимость разработанного подхода была протестирована на олимпиадной задаче Huzita~Axiom~6. Было получено, что эффективность данного метода сильно зависит от 
+выбора эволюционных операторов. Можно видеть, что при увеличении множества допустимых тестов результаты предложенного подхода превосходят результаты, 
+полученные при покрытии кода случайными тестами.

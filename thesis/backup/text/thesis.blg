@@ -1,0 +1,19 @@
+[0] Config.pm:300> INFO - This is Biber 0.9.9
+[0] Config.pm:303> INFO - Logfile is 'thesis.blg'
+[1] biber:145> INFO - === Ð§Ñ. Ð¼Ð°Ñ 15, 2014, 00:11:40
+[1] Biber.pm:271> INFO - Reading 'thesis.bcf'
+[21] Biber.pm:586> INFO - Found 19 citekeys in bib section 0
+[34] Biber.pm:2585> INFO - Processing bib section 0
+[57] Biber.pm:2677> INFO - Looking for bibtex format file 'thesis.bib' for section 0
+[59] bibtex.pm:829> INFO - Decoding LaTeX character macros into UTF-8
+[59] bibtex.pm:833> INFO - Finished Decoding LaTeX character macros into UTF-8
+[59] bibtex.pm:704> INFO - Found BibTeX data source 'thesis.bib'
+[141] Utils.pm:168> WARN - Field 'address' is aliased to field 'location' but both are defined in entry with key 'evolutionary_tonella' - skipping alias
+[153] Utils.pm:168> WARN - Field 'address' is aliased to field 'location' but both are defined in entry with key 'minimization_characterization' - skipping alias
+[196] Biber.pm:2480> INFO - Sorting list 'MAIN' keys
+[196] Biber.pm:2484> INFO - No sort tailoring available for locale 'en_US.UTF-8'
+[218] Biber.pm:2480> INFO - Sorting list 'SHORTHANDS' keys
+[218] Biber.pm:2484> INFO - No sort tailoring available for locale 'en_US.UTF-8'
+[243] bbl.pm:427> INFO - Writing 'thesis.bbl' with encoding 'UTF-8'
+[245] bbl.pm:498> INFO - Output to thesis.bbl
+[245] Biber.pm:106> INFO - WARNINGS: 2
