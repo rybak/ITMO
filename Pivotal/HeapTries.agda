@@ -3,6 +3,7 @@ module HeapTries where
 data ⊥ : Set where
 
 record ⊤ : Set where
+  constructor ⟨⟩
 
 -- function composition
 
@@ -81,6 +82,8 @@ module MLTT where
   infix 4 _≡_
   data _≡_ {a} {A : Set a} (x : A) : A → Set a where
     refl : x ≡ x
+  {-# BUILTIN EQUALITY _≡_ #-}
+  {-# BUILTIN REFL    refl #-}
 
   record Σ {a b} (A : Set a) (B : A → Set b) : Set (a ⊔ b) where
     constructor _,_
@@ -206,17 +209,24 @@ Trans {A} _rel_ = {a b c : A} → (a rel b) → (b rel c) → (a rel c)
 Sym : {A : Set} → Rel₂ A → Set
 Sym {A} _rel_ = {a b : A} → (a rel b) → (b rel a)
 
-min max : ℕ → ℕ → ℕ
-min x y with less cmpℕ x y
-min x y | yes a = x
-min x y | no ¬a = y
-max x y with cmpℕ {x} {y}
-... | tri> _ _ _  = x
-... | _ = y
-
 data OR (A B : Set) : Set where
   orA : A → OR A B
   orB : B → OR A B
+
+data AND (A B : Set) : Set where
+  and : A → B → AND A B
+
+lemma-m1 : ∀ {A} {B} → ¬ (OR A B) → AND (¬ A) (¬ B)
+lemma-m1 x = and (λ x₁ → x (orA x₁)) (λ x₁ → x (orB x₁))
+lemma-m2 : ∀ {A} {B} → AND (¬ A) (¬ B) → ¬ (OR A B)
+lemma-m2 (and a b) (orA x) = a x
+lemma-m2 (and a b) (orB x) = b x
+
+less-eq : {A : Set} {_<_ _==_ : Rel₂ A} → Cmp _<_ _==_ → (a b : A) → Dec (OR (a < b) (a == b))
+less-eq cmp a b with cmp {a} {b}
+less-eq cmp a b | tri< x x₁ x₂ = yes (orA x)
+less-eq cmp a b | tri= x x₁ x₂ = yes (orB x₁)
+less-eq cmp a b | tri> x x₁ x₂ = no (lemma-m2 (and x x₁))
 
 lemma-not< : ∀ {a b : ℕ} → ¬ (a ℕ< b) → OR (a ≡ b) (b ℕ< a)
 lemma-not< {a} {b} ab with cmpℕ {a} {b}
@@ -224,27 +234,107 @@ lemma-not< ab | tri< x x₁ x₂ = contradiction x ab
 lemma-not< ab | tri= x x₁ x₂ = orA x₁
 lemma-not< ab | tri> x x₁ x₂ = orB x₂
 
-module TryHeap (A : Set) (_<_ _==_ : A → A → Set) (cmp : Cmp _<_ _==_) where
+min max : ℕ → ℕ → ℕ
+min x y with cmpℕ {x} {y}
+... | tri< _ _ _ = x
+... | _ = y
+max x y with cmpℕ {x} {y}
+... | tri> _ _ _  = x
+... | _ = y
 
-  data Heap : ℕ → Set where
-    leaf : Heap 0
-    node : ∀ {n m} → A → Heap n → Heap m → Heap (succ (min n m))
+module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_) where
 
---  rank : Heap → ℕ
---  rank leaf = zero
---  rank (node a left right) = succ (rank right)
+  data expanded (A : Set) : Set where
+    # : A → expanded A
+    top : expanded A
+  _<E_ _=E_ : Rel₂ (expanded A)
+  # x <E # y = x < y
+  x <E top = ⊤
+  top <E x = ⊥
 
-  singleton : A → Heap 1
-  singleton p = node p leaf leaf
+  # x =E # y = x == y
+  top =E top = ⊤
+  _ =E _ = ⊥
 
-  makeT : ∀ {n m} → (p : A) → Heap n → Heap m → Heap (succ (min n m))
-  makeT {ra} {rb} p a b with less cmpℕ ra rb
-  ... | yes r = node p {!!} {!!}
-  ... | no r  = node p {!!} {!!}
-  
--- contraposition lemma-succ-≤ r
---  ... | x = node p {! b!} a
---
+  leq : (a b : expanded A) → Set
+  leq a b = Dec (OR (a <E b) (a =E b))
+
+  heapgood : (a b : expanded A) → (p : A) → Set
+  heapgood a b p = (leq (# p) a) × (leq (# p) b)
+
+  data Tree : Set where
+    leaf : Tree
+    fork : Tree → Tree → Tree
+
+  data Path : Tree → Set where
+    end : Path leaf
+    here : ∀ {l r} → Path (fork l r)
+    left : ∀ {l r} → Path l → Path (fork l r)
+    right : ∀ {l r} → Path r → Path (fork l r)
+
+  data Full : ℕ → Tree → Set where
+    none : Full zero leaf
+    fork : ∀ {n l r} → Full n l → Full n r
+      → Full (succ n) (fork l r)
+
+  data Filled : ℕ → Tree → Set where
+    empty : Filled zero leaf
+    left-filled : ∀ {n l r} → Filled (succ n) l → Full n r
+      → Filled (succ (succ n)) (fork l r)
+    left-full : ∀ {n l r} → Full n l → Filled n r
+      → Filled (succ n) (fork l r)
+    
+  data HeapState : Set where
+    full almost : HeapState
+
+  data Heap : (expanded A) → (h : ℕ) → HeapState → Set where
+    eh : Heap top zero full
+    ns : ∀ {n} {x y} → (p : A)
+        → heapgood x y p
+        → (a : Heap x (succ n) full)
+        → (b : Heap y n full)
+        → Heap (# p) (succ (succ n)) almost
+    nf : ∀ {n} {x y} → (p : A)
+        → heapgood x y p
+        → (a : Heap x n full)
+        → (b : Heap y n full)
+        → Heap (# p) (succ n) full
+    nl : ∀ {n} {x y} → (p : A)
+        → heapgood x y p
+        → (a : Heap x (succ n) almost)
+        → (b : Heap y n full)
+        → Heap (# p) (succ (succ n)) almost
+    nr : ∀ {n} {x y} → (p : A)
+        → heapgood x y p
+        → (a : Heap x n full)
+        → (b : Heap y n almost)
+        → Heap (# p) (succ n) almost
+
+  -- rightMost : ∀ {m h t s} → Heap m h t s → Path t
+  -- rightMost leaf = end
+  -- rightMost (nodel p x₁ h h₁) = {!!}
+  -- rightMost (noder p x₁ h h₁) = {!!}
+  -- rightMost (nodef p x₁ h h₁) = {!!}
+
+  -- rank : ∀ {n p} → Heap p n → ℕ
+  -- rank leaf = 0
+  -- rank (node dr p dx dy x₁ x₂) = succ (rank x₂)
+
+--  makeT : ∀ {n m x y} → (p : A) → leq (# p) x → leq (# p) y
+--    → Heap x n → Heap y m → Heap (# p) (succ (min n m))
+--  makeT {ra}{rb}{x}{y} p xp yp a b with cmpℕ {ra} {rb}
+--  ... | tri< d e f = node (yes (orA d)) p yp xp b a
+--  ... | tri= d e f rewrite e = node (yes (orB refl)) p xp yp a b
+--  ... | tri> d e f = node (yes (orA f)) p xp yp a b
+
+  -- ∼ ~ ⇒  ∷
+--   union : ∀ {n m} → Heap n → Heap m → Heap (max n m)
+--   union leaf leaf = leaf
+--   union leaf (node d p a b) = node d p a b
+--   union (node d p a b) leaf = node d p a b
+--   union (node d1 p1 a1 b1) (node d2 p2 a2 b2) with cmp {p1} {p2}
+--   ... | tri> x x₁ x₂ = {!!}
+--   ... | _ = {!!}
 --  union : Heap → Heap → Heap
 --  union leaf leaf = leaf
 --  union leaf b = b
