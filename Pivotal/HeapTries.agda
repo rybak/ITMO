@@ -176,7 +176,7 @@ lemma-succ-≡ refl = refl
 lemma-succ-≤ : ∀ {n} {m} → succ (succ n) ℕ≤ succ m → succ n ℕ≤ m
 lemma-succ-≤ (s≤s r) = r
 
-cmpℕ : {x y : ℕ} → Tri _ℕ<_ _≡_ _ℕ>_ x y
+cmpℕ : Cmp {ℕ} _ℕ<_ _≡_ -- {x y : ℕ} → Tri _ℕ<_ _≡_ _ℕ>_ x y
 cmpℕ {zero} {zero} = tri= (λ ()) refl (λ ())
 cmpℕ {zero} {succ y} = tri< (s≤s z≤n) (λ ()) (λ ())
 cmpℕ {succ x} {zero} = tri> (λ ()) (λ ()) (s≤s z≤n)
@@ -206,9 +206,6 @@ more cmp a b | tri> y y' y0 = yes y0
 Trans : {A : Set} → Rel₂ A → Set
 Trans {A} _rel_ = {a b c : A} → (a rel b) → (b rel c) → (a rel c)
 
-Sym : {A : Set} → Rel₂ A → Set
-Sym {A} _rel_ = {a b : A} → (a rel b) → (b rel a)
-
 data OR (A B : Set) : Set where
   orA : A → OR A B
   orB : B → OR A B
@@ -234,81 +231,113 @@ lemma-not< ab | tri< x x₁ x₂ = contradiction x ab
 lemma-not< ab | tri= x x₁ x₂ = orA x₁
 lemma-not< ab | tri> x x₁ x₂ = orB x₂
 
-min max : ℕ → ℕ → ℕ
-min x y with cmpℕ {x} {y}
+min max : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A} → (cmp : Cmp _<_ _==_) → A → A → A
+min cmp x y with cmp {x} {y}
 ... | tri< _ _ _ = x
 ... | _ = y
-max x y with cmpℕ {x} {y}
-... | tri> _ _ _  = x
+max cmp x y with cmp {x} {y}
+... | tri> _ _ _ = x
 ... | _ = y
 
-module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_) where
+minℕ maxℕ : ℕ → ℕ → ℕ
+minℕ = min cmpℕ
+maxℕ = max cmpℕ
+
+Reflexive : ∀ {A : Set} → Rel₂ A → Set
+Reflexive _∼_ = ∀ {x} → x ∼ x
+
+-- Irreflexivity is defined using an underlying equality.
+Irreflexive : ∀ {A : Set} → Rel₂ A → Rel₂ A → Set
+Irreflexive _≈_ _<_ = ∀ {x y} → x ≈ y → ¬ (x < y)
+
+infixr 4 _⇒_
+-- Implication/containment. Could also be written ⊆.
+_⇒_ : ∀ {A : Set} → Rel₂ A → Rel₂ A → Set
+P ⇒ Q = ∀ {i j} → P i j → Q i j
+
+-- Generalised symmetry.
+Sym : ∀ {A : Set} → Rel₂ A → Rel₂ A → Set
+Sym P Q = P ⇒ flip Q
+
+Symmetric : ∀ {A : Set} → Rel₂ A → Set
+Symmetric _∼_ = Sym _∼_ _∼_
+
+Asymmetric : ∀ {A : Set} → Rel₂ A → Set
+Asymmetric _<_ = ∀ {x y} → x < y → ¬ (y < x)
+
+module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
+  (reflexive : Reflexive _==_) (asym : Asymmetric _<_)
+  where
 
   data expanded (A : Set) : Set where
     # : A → expanded A
     top : expanded A
-  _<E_ _=E_ : Rel₂ (expanded A)
-  # x <E # y = x < y
-  x <E top = ⊤
-  top <E x = ⊥
+  
+  data _<E_ : Rel₂ (expanded A) where
+    base : ∀ {x} {y} → x < y → (# x) <E (# y)
+    ext  : ∀ {x} → (# x) <E top
 
-  # x =E # y = x == y
-  top =E top = ⊤
-  _ =E _ = ⊥
+  lemma-<E : ∀ {x} {y} → (# x) <E (# y) → x < y
+  lemma-<E (base r) = r
+  data _=E_ : Rel₂ (expanded A) where
+    base : ∀ {x y} → x == y → (# x) =E (# y)
+    ext  : top =E top
+
+  lemma-=E : ∀ {x} {y} → (# x) =E (# y) → x == y
+  lemma-=E (base r) = r
+
+  cmpE : Cmp {expanded A} _<E_ _=E_
+  cmpE {# x} {# y} with cmp {x} {y}
+  cmpE {# x} {# y} | tri< a b c = tri< (base a) (contraposition lemma-=E b) (contraposition lemma-<E c)
+  cmpE {# x} {# y} | tri= a b c = tri= (contraposition lemma-<E a) (base b) (contraposition lemma-<E c)
+  cmpE {# x} {# y} | tri> a b c = tri> (contraposition lemma-<E a) (contraposition lemma-=E b) (base c)
+  cmpE {# x} {top} = tri< ext (λ ()) (λ ())
+  cmpE {top} {# y} = tri> (λ ()) (λ ()) ext
+  cmpE {top} {top} = tri= (λ ()) ext (λ ())
 
   leq : (a b : expanded A) → Set
   leq a b = Dec (OR (a <E b) (a =E b))
+  
+  minE : (x y : expanded A) → expanded A
+  minE (# x) (# y) = # (min cmp x y)
+  minE (# x) top = # x
+  minE top (# y) = # y
+  minE top top = top
+  maxE : (x y : expanded A) → expanded A
+  maxE (# x) (# y) = # {! max cmp!}
+  maxE (# x) top = top
+  maxE top (# y) = top
+  maxE top top = top
 
   heapgood : (a b : expanded A) → (p : A) → Set
   heapgood a b p = (leq (# p) a) × (leq (# p) b)
-
-  data Tree : Set where
-    leaf : Tree
-    fork : Tree → Tree → Tree
-
-  data Path : Tree → Set where
-    end : Path leaf
-    here : ∀ {l r} → Path (fork l r)
-    left : ∀ {l r} → Path l → Path (fork l r)
-    right : ∀ {l r} → Path r → Path (fork l r)
-
-  data Full : ℕ → Tree → Set where
-    none : Full zero leaf
-    fork : ∀ {n l r} → Full n l → Full n r
-      → Full (succ n) (fork l r)
-
-  data Filled : ℕ → Tree → Set where
-    empty : Filled zero leaf
-    left-filled : ∀ {n l r} → Filled (succ n) l → Full n r
-      → Filled (succ (succ n)) (fork l r)
-    left-full : ∀ {n l r} → Full n l → Filled n r
-      → Filled (succ n) (fork l r)
-    
+   
   data HeapState : Set where
     full almost : HeapState
 
   data Heap : (expanded A) → (h : ℕ) → HeapState → Set where
     eh : Heap top zero full
-    ns : ∀ {n} {x y} → (p : A)
-        → heapgood x y p
+    nd : ∀ {n} {x y} → (p : A) → (i : heapgood x y p)
         → (a : Heap x (succ n) full)
         → (b : Heap y n full)
         → Heap (# p) (succ (succ n)) almost
-    nf : ∀ {n} {x y} → (p : A)
-        → heapgood x y p
+    nf : ∀ {n} {x y} → (p : A) → (i : heapgood x y p)
         → (a : Heap x n full)
         → (b : Heap y n full)
         → Heap (# p) (succ n) full
-    nl : ∀ {n} {x y} → (p : A)
-        → heapgood x y p
+    nl : ∀ {n} {x y} → (p : A) → (i : heapgood x y p)
         → (a : Heap x (succ n) almost)
         → (b : Heap y n full)
         → Heap (# p) (succ (succ n)) almost
-    nr : ∀ {n} {x y} → (p : A)
-        → heapgood x y p
+    nr : ∀ {n} {x y} → (p : A) → (i : heapgood x y p)
         → (a : Heap x n full)
         → (b : Heap y n almost)
         → Heap (# p) (succ n) almost
+--  finsert : ∀ {m h } → (x : A) → Heap m h full
+--    → Σ HeapState (Heap (minE m (# x)) (succ h))
+--  finsert x eh = full , nf x (yes (orA ⟨⟩) , yes (orA ⟨⟩)) eh eh
+--  finsert x (nf p i eh eh) = almost , nd {!!} {!!} (nf {! max!} {!!} {!!} {!!}) {!!}
+--  finsert x (nf p i (nf p₁ i₁ a a₁) b) = {!!}
 
   -- rightMost : ∀ {m h t s} → Heap m h t s → Path t
   -- rightMost leaf = end
