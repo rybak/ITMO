@@ -191,11 +191,11 @@ less cmp a b | tri< y y' y0 = yes y
 less cmp a b | tri= y y' y0 = no y
 less cmp a b | tri> y y' y0 = no y
 
-eq : {A : Set} {_<_ _==_ : Rel₂ A} → Cmp _<_ _==_ → (a b : A) → Dec (a == b)
-eq cmp a b with cmp {a} {b}
-eq cmp a b | tri< y y' y0 = no y'
-eq cmp a b | tri= y y' y0 = yes y'
-eq cmp a b | tri> y y' y0 = no y' 
+equal : {A : Set} {_<_ _==_ : Rel₂ A} → Cmp _<_ _==_ → (a b : A) → Dec (a == b)
+equal cmp a b with cmp {a} {b}
+equal cmp a b | tri< y y' y0 = no y'
+equal cmp a b | tri= y y' y0 = yes y'
+equal cmp a b | tri> y y' y0 = no y' 
 
 more : {A : Set} {_<_ _==_ : Rel₂ A} → Cmp _<_ _==_ → (a b : A) → Dec (b < a)
 more cmp a b with cmp {a} {b}
@@ -295,8 +295,14 @@ lemma-min≡ {cmp = cmp}{x}{y} l with cmp {x}{y}
 lemma-min≡ l | tri< x₁ x₂ x₃ = refl
 lemma-min≡ l | tri= x₁ x₂ x₃ = contradiction x₂ (λ _ → x₁ l)
 lemma-min≡ l | tri> x₁ x₂ x₃ = contradiction l x₁
+
+data _<=_ {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A} : Rel₂ A where
+  les : ∀ {x y} → x < y → x <= y
+  equ : ∀ {x y} → x == y → x <= y
+  
 module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
-  (sym== : Symmetric _==_) (resp : _<_ Respects₂ _==_) (trans : Trans _<_)
+  (sym== : Symmetric _==_) (resp : _<_ Respects₂ _==_) (trans< : Trans _<_)
+  (trans== : Trans _==_)
   where
 
   maxA minA : A → A → A
@@ -310,12 +316,10 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
     base : ∀ {x} {y} → x < y → (# x) <E (# y)
     ext  : ∀ {x} → (# x) <E top
     
---  data _≤E_ : Rel₂ 
-
   lemma-<E : ∀ {x} {y} → (# x) <E (# y) → x < y
   lemma-<E (base r) = r
   transE : Trans _<E_
-  transE {# x} {# x₁} {# x₂} a<b b<c = base (trans (lemma-<E a<b) (lemma-<E b<c))
+  transE {# x} {# x₁} {# x₂} a<b b<c = base (trans< (lemma-<E a<b) (lemma-<E b<c))
   transE {# x} {# x₁} {top} a<b b<c = ext
   transE {# x} {top} {# x₁} a<b ()
   transE {# x} {top} {top} a<b ()
@@ -329,6 +333,15 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
     ext  : top =E top
   lemma-=E : ∀ {x} {y} → (# x) =E (# y) → x == y
   lemma-=E (base r) = r
+
+  data _≤_ : Rel₂ (expanded A) where
+    le : ∀ {x} {y} → x <E y → x ≤ y
+    eq : ∀ {x} {y} → x =E y → x ≤ y
+  _<=E_ : Rel₂ (expanded A)
+  _<=E_ = _<=_ {expanded A} {_<E_} {_=E_}
+
+  postulate
+    trans2 : Trans _≤_
 
   cmpE : Cmp {expanded A} _<E_ _=E_
   cmpE {# x} {# y} with cmp {x} {y}
@@ -355,28 +368,28 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
 
   data Heap : (expanded A) → (h : ℕ) → HeapState → Set where
     eh : Heap top zero full
-    nd : ∀ {n} {x y} → (p : A) → (i : heapgood x y p)
+    nd : ∀ {n} {x y} → (p : A) → (i : (# p) ≤ x) → (j : (# p) ≤ y)
         → (a : Heap x (succ n) full)
         → (b : Heap y n full)
         → Heap (# p) (succ (succ n)) almost
-    nf : ∀ {n} {x y} → (p : A) → (i : heapgood x y p)
+    nf : ∀ {n} {x y} → (p : A) → (i : (# p) ≤ x) → (j : (# p) ≤ y)
         → (a : Heap x n full)
         → (b : Heap y n full)
         → Heap (# p) (succ n) full
-    nl : ∀ {n} {x y} → (p : A) → (i : heapgood x y p)
+    nl : ∀ {n} {x y} → (p : A) → (i : (# p) ≤ x) → (j : (# p) ≤ y)
         → (a : Heap x (succ n) almost)
         → (b : Heap y n full)
         → Heap (# p) (succ (succ n)) almost
-    nr : ∀ {n} {x y} → (p : A) → (i : heapgood x y p)
+    nr : ∀ {n} {x y} → (p : A) → (i : (# p) ≤ x) → (j : (# p) ≤ y)
         → (a : Heap x n full)
         → (b : Heap y n almost)
         → Heap (# p) (succ n) almost
   root : ∀ {m h s} → Heap m h s → (expanded A)
   root eh = top
-  root (nd p i h h₁) = # p
-  root (nf p i h h₁) = # p
-  root (nl p i h h₁) = # p
-  root (nr p i h h₁) = # p
+  root (nd p i j h h₁) = # p
+  root (nf p i j h h₁) = # p
+  root (nl p i j h h₁) = # p
+  root (nr p i j h h₁) = # p
   lemma-min-min : ∀ x y → (# (minA x y)) ≡ minE (# x) (# y)
   lemma-min-min x y with cmp {x} {y}
   lemma-min-min x y | tri< x₁ x₂ x₃ = refl
@@ -408,96 +421,52 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
     right {top} {top} {# c} () _
     right {top} {top} {top} _ ()
 
-  new-root : ∀ {p1 p2 x y} → heapgood x y p1 → p2 < p1 → heapgood x y p2
-  new-root (yes (orA x₁) , yes (orA x₂)) r = yes (orA (transE (base r) x₁)) , yes (orA (transE (base r) x₂))
-  new-root (yes (orA x₁) , yes (orB x₂)) r = yes (orA (transE (base r) x₁)) , yes (orA (fst respE x₂ (base r)))
-  new-root (yes (orB x₁) , yes (orA x₂)) r = yes (orA (fst respE x₁ (base r))) , yes (orA (transE (base r) x₂))
-  new-root (yes (orB x₁) , yes (orB x₂)) r = yes (orA (fst respE x₁ (base r))) , yes (orA (fst respE x₂ (base r)))
-  new-root {p1}{p2}{x}{y} (yes (orA x₁) , no nb) r with cmpE {# p2} {y}
-  new-root (yes (orA x₄) , no nb) r | tri< x x₁ x₂ = {! !}
-  new-root (yes (orA x₄) , no nb) r | tri= x x₁ x₂ = yes (orA (transE (base r) x₄)) , no (contradiction (snd respE x₁ (base r)) {! lemma-m1 nb!})
-  new-root (yes (orA x₄) , no nb) r | tri> x x₁ x₂ = {!!}
-  new-root (yes (orB x₁) , no nb) r = {!!}
-  new-root (no na , yes b) r = {!!}
-  new-root (no na , no nb) r = {!!}
+--   new-root : ∀ {p1 p2 x y} → heapgood x y p1 → p2 < p1 → heapgood x y p2
+--   new-root (yes (orA x₁) , yes (orA x₂)) r = yes (orA (transE (base r) x₁)) , yes (orA (transE (base r) x₂))
+--   new-root (yes (orA x₁) , yes (orB x₂)) r = yes (orA (transE (base r) x₁)) , yes (orA (fst respE x₂ (base r)))
+--   new-root (yes (orB x₁) , yes (orA x₂)) r = yes (orA (fst respE x₁ (base r))) , yes (orA (transE (base r) x₂))
+--   new-root (yes (orB x₁) , yes (orB x₂)) r = yes (orA (fst respE x₁ (base r))) , yes (orA (fst respE x₂ (base r)))
+--   new-root {p1}{p2}{x}{y} (yes (orA x₁) , no nb) r with cmpE {# p2} {y}
+--   new-root (yes (orA x₄) , no nb) r | tri< x x₁ x₂ = {! !}
+--   new-root (yes (orA x₄) , no nb) r | tri= x x₁ x₂ = yes (orA (transE (base r) x₄)) , no (contradiction (snd respE x₁ (base r)) {! lemma-m1 nb!})
+--   new-root (yes (orA x₄) , no nb) r | tri> x x₁ x₂ = {!!}
+--   new-root (yes (orB x₁) , no nb) r = {!!}
+--   new-root (no na , yes b) r = {!!}
+--   new-root (no na , no nb) r = {!!}
+
   swap-root : ∀ {p1 p2 h s} → p2 <E p1 → Heap p1 (succ h) s → Heap p2 (succ h) s
   swap-root {p1} {top} () x
-  swap-root {p1 = # p1}{p2 = # p2} r (nd .(p1) i H H₁) = nd p2 (yes (orA {! respE!}) , yes {!!}) H H₁
-  swap-root {p1 = # p1}{p2 = # p2} r (nf .(p1) i H H₁) = {!!}
-  swap-root {p1 = # p1}{p2 = # p2} r (nl .(p1) i H H₁) = {!!}
-  swap-root {p1 = # p1}{p2 = # p2} r (nr .(p1) i H H₁) = {!!}
-  finsert : ∀ {m h} → (x : A) → Heap m h full
-    → Σ HeapState (Heap (minE m (# x)) (succ h))
-  finsert {h = 0} x eh = full , nf x (yes (orA ext) , yes (orA ext)) eh eh
-  finsert {h = 1} x (nf p i eh eh) with cmp {p} {x}
-  ... | tri< x₁ x₂ x₃ = almost , nd p (yes (orA (base x₁)) , fst i) (nf x (yes (orA ext) , yes (orA ext)) eh eh) eh
-  ... | tri= x₁ x₂ x₃ = almost , nd x (yes (orB (base (sym== x₂))) , yes (orA ext)) (nf p i eh eh) eh
-  ... | tri> x₁ x₂ x₃ = almost , nd x (yes (orA (base x₃)) , yes (orA ext)) (nf p i eh eh) eh
+  swap-root {p1 = # p1}{p2 = # p2} r (nd .(p1) i j H H₁) = nd p2 {!!} {!!} H H₁
+  swap-root {p1 = # p1}{p2 = # p2} r (nf .(p1) i j H H₁) = {!!}
+  swap-root {p1 = # p1}{p2 = # p2} r (nl .(p1) i j H H₁) = {!!}
+  swap-root {p1 = # p1}{p2 = # p2} r (nr .(p1) i j H H₁) = {!!}
 
-  finsert {h = succ (succ n)} x (nf .{succ n} p i (nf .{n} p₂ i₂ a b) c) with finsert x (nf {n} p₂ i₂ a b)
-  finsert {.(# p)} {succ (succ n)} x (nf p x₁ (nf x₂ i₂ a b) c) | full , snd with cmpE {root snd} {# p}
-  finsert {.(# p)} {succ (succ n)} x (nf p x₅ (nf x₆ i₂ a b) c) | full , snd | tri< x₁ x₃ x₄ with lemma-exist-less x₁ -- = {! almost , nd (root snd)!}
-  finsert {.(# p)} {succ (succ n)} x (nf p x₂ (nf x₅ i₂ a b) c) | full , snd | tri< x₁ x₃ x₄ | fst , snd₁ = {! almost , nd fst ? snd c!}
-  finsert {.(# p)} {succ (succ n)} x (nf p x₅ (nf x₆ i₂ a b) c) | full , snd | tri= x₁ x₃ x₄ = {!!}
-  finsert {.(# p)} {succ (succ n)} x (nf p x₅ (nf x₆ i₂ a b) c) | full , snd | tri> x₁ x₃ x₄ = {!!}
-  finsert {.(# p)} {succ (succ n)} x (nf p x₁ (nf x₂ i₂ a b) c) | almost , snd = {!!}
---  finsert {h = succ (succ n)} x (nf .{succ n} p i (nf .{n} p₂ i₂ a b) c) with cmp {p} {x}
---  finsert {.(# p)} {succ (succ n)} x (nf p i (nf p₂ i₂ a b) c) | tri< x₁ x₂ x₃ with finsert x (nf {n} p₂ i₂ a b)
---  finsert {.(# p)} {succ (succ n)} x (nf p i (nf p₂ i₂ a b) c) | tri< x₁ x₂ x₃ | full , snd = {! b !}
---  finsert {.(# p)} {succ (succ n)} x (nf p i (nf p₂ i₂ a b) c) | tri< x₁ x₂ x₃ | almost , snd = almost , nl p {!!} snd c
---
---  finsert {.(# p)} {succ (succ n)} x (nf p i (nf p₂ i₂ a b) c) | tri= x₁ x₂ x₃ with finsert p (nf p₂ i₂ a b)
---  finsert {.(# p)} {succ (succ n)} x₁ (nf p x (nf x₅ i₂ a b) c) | tri= x₂ x₃ x₄ | full , snd = almost , nd x₁ {!!} snd c
---  finsert {.(# p)} {succ (succ n)} x₁ (nf p x (nf x₅ i₂ a b) c) | tri= x₂ x₃ x₄ | almost , snd = {!!}
---
---  finsert {.(# p)} {succ (succ n)} x (nf p i (nf p₂ i₂ a b) c) | tri> x₁ x₂ x₃ = {!!}
--- with finsert x (nf p₂ i₂ a b)
+  finsert : ∀ {m h} → (z : A) → Heap m h full
+    → Σ HeapState (Heap (minE m (# z)) (succ h))
+  finsert {h = 0} z eh = full , nf z (le ext) (le ext) eh eh
+  finsert {h = 1} z (nf p i j eh eh) with cmp {p} {z}
+  ... | tri< z₁ z₂ z₃ = almost , nd p (le (base z₁)) j (nf z (le ext) (le ext) eh eh) eh
+  ... | tri= z₁ z₂ z₃ = almost , nd z (eq (base (sym== z₂))) (le ext) (nf p i j eh eh) eh
+  ... | tri> z₁ z₂ z₃ = almost , nd z (le (base z₃)) (le ext) (nf p i j eh eh) eh
+  finsert z (nf p i j (nf pp ii jj a b) c) with cmp {p} {z}
+  finsert z (nf p i j (nf pp ii jj a b) c) | tri< x x₁ x₂ with finsert z (nf pp ii jj a b)
+  ... | full , snd = almost , nd p {!!} j snd c
+  ... | almost , snd = {!!}
+  finsert z (nf p i j (nf pp ii jj a b) c) | tri= x x₁ x₂ = {!!}
+  finsert z (nf p i j (nf pp ii jj a b) c) | tri> x x₁ x₂ = {!!}
+--   finsert {.(# p)} {succ (succ n)} z (nf p i j (nf .{n} pp ii jj a b) c) | tri< x x₁ x₂ with finsert z (nf pp ii jj a b)
+--   finsert {.(# p)} {succ (succ n)} z (nf p x₄ x (nf j ii jj a b) c) | tri< x₁ x₂ x₃ | full , snd = almost , nd p {!!} x snd c
+--   finsert {.(# p)} {succ (succ n)} z (nf p x₄ x (nf j ii jj a b) c) | tri< x₁ x₂ x₃ | almost , snd = {!!}
+--   finsert {.(# p)} {succ (succ n)} z (nf p i j (nf pp ii jj a b) c) | tri= x x₁ x₂ = {!!}
+--   finsert {.(# p)} {succ (succ n)} z (nf p i j (nf pp ii jj a b) c) | tri> x x₁ x₂ = {!!}
+  --finsert z (nf p i j (nf pp ii jj a b) c) with finsert z (nf pp ii jj a b)
+  --finsert z (nf p n₁ n (nf j ii jj a b) c) | full , snd = ?
+  --finsert z (nf p n₁ n (nf j ii jj a b) c) | almost , snd = ?
 
-  -- rightMost : ∀ {m h t s} → Heap m h t s → Path t
-  -- rightMost leaf = end
-  -- rightMost (nodel p x₁ h h₁) = {!!}
-  -- rightMost (noder p x₁ h h₁) = {!!}
-  -- rightMost (nodef p x₁ h h₁) = {!!}
+--  finsert {.(# p)} {succ (succ n)} z (nf p i j (nf pp ii jj a b) c) | full , snd | r = ?
+  -- finsert {.(# p)} {succ (succ n)} z (nf p i j (nf pp ii jj a b) c) | almost , snd = {!!}
 
-  -- rank : ∀ {n p} → Heap p n → ℕ
-  -- rank leaf = 0
-  -- rank (node dr p dx dy x₁ x₂) = succ (rank x₂)
 
---  makeT : ∀ {n m x y} → (p : A) → leq (# p) x → leq (# p) y
---    → Heap x n → Heap y m → Heap (# p) (succ (min n m))
---  makeT {ra}{rb}{x}{y} p xp yp a b with cmpℕ {ra} {rb}
---  ... | tri< d e f = node (yes (orA d)) p yp xp b a
---  ... | tri= d e f rewrite e = node (yes (orB refl)) p xp yp a b
---  ... | tri> d e f = node (yes (orA f)) p xp yp a b
 
-  -- ∼ ~ ⇒  ∷
---   union : ∀ {n m} → Heap n → Heap m → Heap (max n m)
---   union leaf leaf = leaf
---   union leaf (node d p a b) = node d p a b
---   union (node d p a b) leaf = node d p a b
---   union (node d1 p1 a1 b1) (node d2 p2 a2 b2) with cmp {p1} {p2}
---   ... | tri> x x₁ x₂ = {!!}
---   ... | _ = {!!}
---  union : Heap → Heap → Heap
---  union leaf leaf = leaf
---  union leaf b = b
---  union a leaf = a
---  union (node p1 l1 r1) (node p2 l2 r2) with less p1 p2
---  ... | yes a = makeT p1 l1 (union r1 (node p2 l2 r2))
---  ... | no ¬a = makeT p2 l2 (union r2 (node p1 l1 r1))
- 
---  insert0 : A → Heap → Heap
---  insert0 x h = union (singleton x) h
---  insert : A → Heap → Heap
---  insert x leaf = singleton x
---  insert x (node p l r) = {! !}
---
---  data Maybe (A : Set) : Set where
---    nothing : Maybe A
---    just    : A → Maybe A
---  getMin : Heap → Maybe A
---  getMin leaf = nothing
---  getMin (node p _ _) = just p
---  exctractMin : Heap → (Maybe A) × Heap
---  exctractMin leaf = nothing , leaf
---  exctractMin (node p l r) = just p , union l r
+
+
