@@ -1,0 +1,28 @@
+Пример:
+\newline
+
+\begin{code}\>\<%
+\\
+%
+\\
+\>\AgdaKeyword{module} \AgdaModule{Agda1} \AgdaKeyword{where}\<%
+\\
+%
+\\
+\>\AgdaKeyword{data} \AgdaDatatype{ℕ} \AgdaSymbol{:} \AgdaPrimitiveType{Set} \AgdaKeyword{where}\<%
+\\
+\>[0]\AgdaIndent{2}{}\<[2]%
+\>[2]\AgdaInductiveConstructor{zero} \AgdaSymbol{:} \AgdaDatatype{ℕ}\<%
+\\
+\>[0]\AgdaIndent{2}{}\<[2]%
+\>[2]\AgdaInductiveConstructor{succ} \AgdaSymbol{:} \AgdaDatatype{ℕ} \AgdaSymbol{→} \AgdaDatatype{ℕ}\<%
+\\
+%
+\\
+\>\AgdaFunction{\_+\_} \AgdaSymbol{:} \AgdaDatatype{ℕ} \AgdaSymbol{→} \AgdaDatatype{ℕ} \AgdaSymbol{→} \AgdaDatatype{ℕ}\<%
+\\
+\>\AgdaInductiveConstructor{zero} \AgdaFunction{+} \AgdaBound{b} \AgdaSymbol{=} \AgdaBound{b}\<%
+\\
+\>\AgdaInductiveConstructor{succ} \AgdaBound{a} \AgdaFunction{+} \AgdaBound{b} \AgdaSymbol{=} \AgdaInductiveConstructor{succ} \AgdaSymbol{(}\AgdaBound{a} \AgdaFunction{+} \AgdaBound{b}\AgdaSymbol{)}\<%
+\\
+\>\<\end{code}

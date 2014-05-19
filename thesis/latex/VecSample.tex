@@ -1,0 +1,36 @@
+\begin{code}\>\<%
+\\
+\>\AgdaKeyword{module} \AgdaModule{VecSample} \AgdaKeyword{where}\<%
+\\
+\>\AgdaKeyword{data} \AgdaDatatype{ℕ} \AgdaSymbol{:} \AgdaPrimitiveType{Set} \AgdaKeyword{where}\<%
+\\
+\>[0]\AgdaIndent{2}{}\<[2]%
+\>[2]\AgdaInductiveConstructor{zero} \AgdaSymbol{:} \AgdaDatatype{ℕ}\<%
+\\
+\>[0]\AgdaIndent{2}{}\<[2]%
+\>[2]\AgdaInductiveConstructor{succ} \AgdaSymbol{:} \AgdaDatatype{ℕ} \AgdaSymbol{→} \AgdaDatatype{ℕ}\<%
+\\
+\>\AgdaKeyword{data} \AgdaDatatype{Vec} \AgdaBound{A} \AgdaSymbol{:} \AgdaDatatype{ℕ} \AgdaSymbol{→} \AgdaPrimitiveType{Set} \AgdaKeyword{where}\<%
+\\
+\>[0]\AgdaIndent{2}{}\<[2]%
+\>[2]\AgdaInductiveConstructor{nil} \<[7]%
+\>[7]\AgdaSymbol{:} \AgdaDatatype{Vec} \AgdaBound{A} \AgdaInductiveConstructor{zero}\<%
+\\
+\>[0]\AgdaIndent{2}{}\<[2]%
+\>[2]\AgdaInductiveConstructor{cons} \AgdaSymbol{:} \AgdaSymbol{∀} \AgdaSymbol{\{}\AgdaBound{n}\AgdaSymbol{\}} \AgdaSymbol{→} \AgdaBound{A} \AgdaSymbol{→} \AgdaDatatype{Vec} \AgdaBound{A} \AgdaBound{n} \AgdaSymbol{→} \AgdaDatatype{Vec} \AgdaBound{A} \AgdaSymbol{(}\AgdaInductiveConstructor{succ} \AgdaBound{n}\AgdaSymbol{)}\<%
+\\
+\>\<\end{code}
+
+Такое определение позволяет нам описать функцию $ \F{head} $ для такого списка, которая не может бросить исключение:
+\begin{code}\>\<%
+\\
+\>\AgdaFunction{head} \AgdaSymbol{:} \AgdaSymbol{∀} \AgdaSymbol{\{}\AgdaBound{A}\AgdaSymbol{\}} \AgdaSymbol{\{}\AgdaBound{n}\AgdaSymbol{\}} \AgdaSymbol{→} \AgdaDatatype{Vec} \AgdaBound{A} \AgdaSymbol{(}\AgdaInductiveConstructor{succ} \AgdaBound{n}\AgdaSymbol{)} \AgdaSymbol{→} \AgdaBound{A}\<%
+\\
+\>\<\end{code}
+У аргумента функции $ \F{head} $ тип $ \D{Vec}\,A\,(\DC{succ}\,n) $, то есть вектор, в котором есть хотя бы один элемент.
+Это позволяет произвести сопоставление с образцом только по конструктору $ \DC{cons} $:
+\begin{code}\>\<%
+\\
+\>\AgdaFunction{head} \AgdaSymbol{(}\AgdaInductiveConstructor{cons} \AgdaBound{a} \AgdaBound{as}\AgdaSymbol{)} \AgdaSymbol{=} \AgdaBound{a}\<%
+\\
+\>\<\end{code}

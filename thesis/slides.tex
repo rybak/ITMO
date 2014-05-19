@@ -1,0 +1,64 @@
+\documentclass{beamer}
+
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{amsfonts, amsxtra}
+\usepackage[english,russian]{babel}
+
+% This handles the translation of unicode to latex:
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+
+\usepackage{csquotes}
+% \usepackage[pdftex]{graphicx}
+% \graphicspath{{pic/}}
+\usepackage{agda}
+\usepackage{catchfilebetweentags}
+
+\input{utils/unicode-characters.tex}
+%%% Agda helper shortcuts -- Rybak
+\newcommand{\D}{\AgdaDatatype}
+\newcommand{\F}{\AgdaFunction}
+\newcommand{\DC}{\AgdaInductiveConstructor}
+
+\setbeamertemplate{headline}{}
+
+\title[Представление структур данных индуктивными семействами и доказательства их свойств]{Представление структур данных индуктивными семействами и доказательства их свойств}
+\institute{НИУ ИТМО}
+\date{
+Май 2014
+}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+\begin{document}
+
+\maketitle
+
+\begin{frame}
+    \frametitle{Индуктивные семейства}
+        \emph{Индуктивное семейство} — это семейство типов данных,
+        которые могут зависеть от других типов и значений.
+\end{frame}
+
+\begin{frame}
+    \frametitle{Agda}
+    \input{latex/AgdaPresentation.tex}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Куча}
+    \begin{itemize}
+        \item двоичное дерево
+        \item заполняется слева
+        \item значение в узле $ \leq $ значений в корнях поддеревьев
+    \end{itemize}
+\end{frame}
+\begin{frame}
+    \frametitle{Пример}
+    \includegraphics[width=0.6\textwidth]{pic/min-heap.png}
+\end{frame}
+\begin{frame}
+    \input{latex/PresentationHeap.tex}
+\end{frame}
+\end{document}
+

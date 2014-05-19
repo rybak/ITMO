@@ -70,8 +70,10 @@
 %  \usebibmacro{setpageref}%
 %  \finentry}
 
-
-\newbibmacro*{publisher+location+date}{%
+% rybak
+% 2014-05-19
+% orig : \newbibmacro*{publisher+location+date}{%
+\renewbibmacro*{publisher+location+date}{%
   \printlist{location}%
   \iffieldundef{venue}%
     {\iflistundef{publisher}%
@@ -84,7 +86,10 @@
   \usebibmacro{date}%
   \newunit}
 
-\newbibmacro*{event+venue+date}{%
+% rybak
+% 2014-05-19
+% orig : \newbibmacro*{event+venue+date}{%
+\renewbibmacro*{event+venue+date}{%
   \printfield{eventtitle}%
   \ifboolexpr{
     test {\iffieldundef{venue}}

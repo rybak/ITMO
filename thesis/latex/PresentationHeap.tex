@@ -1,0 +1,52 @@
+\AgdaHide{
+
+\begin{code}\>\<%
+\\
+\>\AgdaKeyword{module} \AgdaModule{PresentationHeap} \AgdaKeyword{where}\<%
+\\
+\>\AgdaKeyword{open} \AgdaKeyword{import} \AgdaModule{AgdaDescription}\<%
+\\
+\>\<\end{code}
+}
+
+\begin{code}\>\<%
+\\
+\>\AgdaKeyword{data} \AgdaDatatype{TreeState} \AgdaSymbol{:} \AgdaPrimitiveType{Set} \AgdaKeyword{where}\<%
+\\
+\>[0]\AgdaIndent{2}{}\<[2]%
+\>[2]\AgdaInductiveConstructor{full} \AgdaInductiveConstructor{almost} \AgdaSymbol{:} \AgdaDatatype{TreeState}\<%
+\\
+%
+\\
+\>\AgdaKeyword{data} \AgdaDatatype{Tree} \AgdaSymbol{:} \AgdaSymbol{(}\AgdaBound{h} \AgdaSymbol{:} \AgdaDatatype{ℕ}\AgdaSymbol{)} \AgdaSymbol{→} \AgdaDatatype{TreeState} \AgdaSymbol{→} \AgdaPrimitiveType{Set} \AgdaKeyword{where}\<%
+\\
+\>[0]\AgdaIndent{2}{}\<[2]%
+\>[2]\AgdaInductiveConstructor{et} \AgdaSymbol{:} \AgdaDatatype{Tree} \AgdaInductiveConstructor{zero} \AgdaInductiveConstructor{full} \AgdaComment{-- Пустое дерево}\<%
+\\
+\>[0]\AgdaIndent{2}{}\<[2]%
+\>[2]\AgdaInductiveConstructor{nf} \AgdaSymbol{:} \AgdaSymbol{∀} \AgdaSymbol{\{}\AgdaBound{n}\AgdaSymbol{\}} \AgdaSymbol{→} \AgdaSymbol{(}\AgdaBound{a} \AgdaSymbol{:} \AgdaDatatype{Tree} \AgdaBound{n} \AgdaInductiveConstructor{full}\AgdaSymbol{)} \AgdaSymbol{→} \AgdaSymbol{(}\AgdaBound{b} \AgdaSymbol{:} \AgdaDatatype{Tree} \AgdaBound{n} \AgdaInductiveConstructor{full}\AgdaSymbol{)}\<%
+\\
+\>[2]\AgdaIndent{6}{}\<[6]%
+\>[6]\AgdaSymbol{→} \AgdaDatatype{Tree} \AgdaSymbol{(}\AgdaInductiveConstructor{succ} \AgdaBound{n}\AgdaSymbol{)} \AgdaInductiveConstructor{full} \AgdaComment{-- Полное дерево}\<%
+\\
+\>[0]\AgdaIndent{2}{}\<[2]%
+\>[2]\AgdaInductiveConstructor{nd} \AgdaSymbol{:} \AgdaSymbol{∀} \AgdaSymbol{\{}\AgdaBound{n}\AgdaSymbol{\}} \AgdaSymbol{→} \AgdaSymbol{(}\AgdaBound{a} \AgdaSymbol{:} \AgdaDatatype{Tree} \AgdaSymbol{(}\AgdaInductiveConstructor{succ} \AgdaBound{n}\AgdaSymbol{)} \AgdaInductiveConstructor{full}\AgdaSymbol{)} \AgdaSymbol{→} \AgdaSymbol{(}\AgdaBound{b} \AgdaSymbol{:} \AgdaDatatype{Tree} \AgdaBound{n} \AgdaInductiveConstructor{full}\AgdaSymbol{)}\<%
+\\
+\>[0]\AgdaIndent{6}{}\<[6]%
+\>[6]\AgdaSymbol{→} \AgdaDatatype{Tree} \AgdaSymbol{(}\AgdaInductiveConstructor{succ} \AgdaSymbol{(}\AgdaInductiveConstructor{succ} \AgdaBound{n}\AgdaSymbol{))} \AgdaInductiveConstructor{almost} \AgdaComment{-- Полные поддеревья разной высоты}\<%
+\\
+\>[0]\AgdaIndent{2}{}\<[2]%
+\>[2]\AgdaInductiveConstructor{nl} \AgdaSymbol{:} \AgdaSymbol{∀} \AgdaSymbol{\{}\AgdaBound{n}\AgdaSymbol{\}} \AgdaSymbol{→} \AgdaSymbol{(}\AgdaBound{a} \AgdaSymbol{:} \AgdaDatatype{Tree} \AgdaSymbol{(}\AgdaInductiveConstructor{succ} \AgdaBound{n}\AgdaSymbol{)} \AgdaInductiveConstructor{almost}\AgdaSymbol{)} \AgdaSymbol{→} \AgdaSymbol{(}\AgdaBound{b} \AgdaSymbol{:} \AgdaDatatype{Tree} \AgdaBound{n} \AgdaInductiveConstructor{full}\AgdaSymbol{)}\<%
+\\
+\>[0]\AgdaIndent{6}{}\<[6]%
+\>[6]\AgdaSymbol{→} \AgdaDatatype{Tree} \AgdaSymbol{(}\AgdaInductiveConstructor{succ} \AgdaSymbol{(}\AgdaInductiveConstructor{succ} \AgdaBound{n}\AgdaSymbol{))} \AgdaInductiveConstructor{almost} \AgdaComment{-- Правое поддерево — полное}\<%
+\\
+\>[0]\AgdaIndent{2}{}\<[2]%
+\>[2]\AgdaInductiveConstructor{nr} \AgdaSymbol{:} \AgdaSymbol{∀} \AgdaSymbol{\{}\AgdaBound{n}\AgdaSymbol{\}} \AgdaSymbol{→} \AgdaSymbol{(}\AgdaBound{a} \AgdaSymbol{:} \AgdaDatatype{Tree} \AgdaBound{n} \AgdaInductiveConstructor{full}\AgdaSymbol{)} \AgdaSymbol{→} \AgdaSymbol{(}\AgdaBound{b} \AgdaSymbol{:} \AgdaDatatype{Tree} \AgdaBound{n} \AgdaInductiveConstructor{almost}\AgdaSymbol{)}\<%
+\\
+\>[0]\AgdaIndent{6}{}\<[6]%
+\>[6]\AgdaSymbol{→} \AgdaDatatype{Tree} \AgdaSymbol{(}\AgdaInductiveConstructor{succ} \AgdaBound{n}\AgdaSymbol{)} \AgdaInductiveConstructor{almost} \AgdaComment{-- Левое поддерево — полное}\<%
+\\
+%
+\\
+\>\<\end{code}

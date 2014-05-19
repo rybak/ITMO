@@ -21,7 +21,10 @@ else
     export TEXINPUTS="$TEXINPUTS:./sty:"
     for i in `cat lagda.txt`;
     do
-        agda --latex $i.lagda
+        pushd lagda
+            agda --latex-dir "../latex" --latex "$i.lagda"
+            # mv latex/* ../latex
+        popd
     done
     # agda --latex Agda1.lagda
     cd pic
