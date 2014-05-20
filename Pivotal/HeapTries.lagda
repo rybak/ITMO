@@ -1,3 +1,4 @@
+\begin{code}
 module HeapTries where
 
 data ⊥ : Set where
@@ -297,9 +298,33 @@ lemma-min≡ l | tri= x₁ x₂ x₃ = contradiction x₂ (λ _ → x₁ l)
 lemma-min≡ l | tri> x₁ x₂ x₃ = contradiction l x₁
 
 data _<=_ {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A} : Rel₂ A where
-  les : ∀ {x y} → x < y → x <= y
-  equ : ∀ {x y} → x == y → x <= y
+  le : ∀ {x y} → x < y → x <= y
+  eq : ∀ {x y} → x == y → x <= y
   
+lemma-<=min : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A} {cmp : Cmp _<_ _==_} {a b c : A} → (_<=_ {_<_ = _<_} {_==_} a b) → (_<=_ {_<_ = _<_} {_==_} a c)
+  → (_<=_ {_<_ = _<_} {_==_} a (min cmp b c))
+lemma-<=min {cmp = cmp} {a} {b} {c} ab ac with cmp {b} {c}
+... | tri< _ _ _ = ab
+... | tri= _ _ _ = ac
+... | tri> _ _ _ = ac
+  
+resp<= : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A} → (resp : _<_ Respects₂ _==_) → (trans== : Trans _==_) → (sym== : Symmetric _==_) → (_<=_ {A}{_<_}{_==_}) Respects₂ _==_
+resp<= {A}{_<_}{_==_} resp trans sym = left , right where
+  left : {a b c : A} → b == c → a <= b → a <= c
+  left b=c (le a<b) = le (fst resp b=c a<b)
+  left b=c (eq a=b) = eq (trans a=b b=c)
+  right : {a b c : A} → b == c → b <= a → c <= a
+  right b=c (le a<b) = le (snd resp b=c a<b)
+  right b=c (eq a=b) = eq (trans (sym b=c) a=b)
+
+trans<= : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A}
+  → _<_ Respects₂ _==_ → Symmetric _==_ → Trans _==_ → Trans _<_
+  → Trans (_<=_ {A}{_<_}{_==_})
+trans<= resp sym== trans== trans< (le a<b) (le b<c) = le (trans< a<b b<c)
+trans<= resp sym== trans== trans< (le a<b) (eq b=c) = le (fst resp b=c a<b)
+trans<= resp sym== trans== trans< (eq a=b) (le b<c) = le (snd resp (sym== a=b) b<c)
+trans<= resp sym== trans== trans< (eq a=b) (eq b=c) = eq (trans== a=b b=c)
+
 module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   (sym== : Symmetric _==_) (resp : _<_ Respects₂ _==_) (trans< : Trans _<_)
   (trans== : Trans _==_)
@@ -318,30 +343,51 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
     
   lemma-<E : ∀ {x} {y} → (# x) <E (# y) → x < y
   lemma-<E (base r) = r
-  transE : Trans _<E_
-  transE {# x} {# x₁} {# x₂} a<b b<c = base (trans< (lemma-<E a<b) (lemma-<E b<c))
-  transE {# x} {# x₁} {top} a<b b<c = ext
-  transE {# x} {top} {# x₁} a<b ()
-  transE {# x} {top} {top} a<b ()
-  transE {top} {# x} {# x₁} () b<c
-  transE {top} {# x} {top} () b<c
-  transE {top} {top} {# x} () b<c
-  transE {top} {top} {top} () b<c
+  trans<E : Trans _<E_
+  trans<E {# x} {# x₁} {# x₂} a<b b<c = base (trans< (lemma-<E a<b) (lemma-<E b<c))
+  trans<E {# x} {# x₁} {top} a<b b<c = ext
+  trans<E {# x} {top} {# x₁} a<b ()
+  trans<E {# x} {top} {top} a<b ()
+  trans<E {top} {# x} {# x₁} () b<c
+  trans<E {top} {# x} {top} () b<c
+  trans<E {top} {top} {# x} () b<c
+  trans<E {top} {top} {top} () b<c
 
   data _=E_ : Rel₂ (expanded A) where
     base : ∀ {x y} → x == y → (# x) =E (# y)
     ext  : top =E top
+  sym=E   : Symmetric _=E_
+  sym=E (base a=b) = base (sym== a=b)
+  sym=E ext = ext
+  trans=E : Trans _=E_
+  trans=E (base a=b) (base b=c) = base (trans== a=b b=c)
+  trans=E ext ext = ext
   lemma-=E : ∀ {x} {y} → (# x) =E (# y) → x == y
   lemma-=E (base r) = r
 
-  data _≤_ : Rel₂ (expanded A) where
-    le : ∀ {x} {y} → x <E y → x ≤ y
-    eq : ∀ {x} {y} → x =E y → x ≤ y
-  _<=E_ : Rel₂ (expanded A)
-  _<=E_ = _<=_ {expanded A} {_<E_} {_=E_}
+  respE : _<E_ Respects₂ _=E_
+  respE = left , right where
+    left : {a b c : expanded A} → b =E c → a <E b → a <E c
+    left {# _} {# _} {# _} (base r1) (base r2) = base (fst resp r1 r2)
+    left {# _} {top} {top} ext ext = ext
+    left {_} {# _} {top} () _
+    left {_} {top} {# _} () _
+    left {top} {_} {_}   _ ()
+    right : {a b c : expanded A} → b =E c → b <E a → c <E a
+    right {# _} {# _} {# _} (base r1) (base r2) = base (snd resp r1 r2)
+    right {top} {# _} {# _} _ ext = ext
+    right {_} {# _} {top} () _
+    right {_} {top} {_} _ ()
 
-  postulate
-    trans2 : Trans _≤_
+  _≤_ : Rel₂ (expanded A)
+  _≤_ = _<=_ {expanded A} {_<E_} {_=E_}
+
+--  postulate
+--    trans2 : Trans _≤_
+  trans≤ : Trans _≤_
+  trans≤ = trans<= respE sym=E trans=E trans<E
+  resp≤ : _≤_ Respects₂ _=E_
+  resp≤ = resp<= respE trans=E sym=E
 
   cmpE : Cmp {expanded A} _<E_ _=E_
   cmpE {# x} {# y} with cmp {x} {y}
@@ -352,17 +398,11 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   cmpE {top} {# y} = tri> (λ ()) (λ ()) ext
   cmpE {top} {top} = tri= (λ ()) ext (λ ())
 
-  leq : (a b : expanded A) → Set
-  leq a b = Dec (OR (a <E b) (a =E b))
-  
   minE : (x y : expanded A) → expanded A
   minE = min cmpE
   maxE : (x y : expanded A) → expanded A
   maxE = max cmpE
 
-  heapgood : (a b : expanded A) → (p : A) → Set
-  heapgood a b p = (leq (# p) a) × (leq (# p) b)
-   
   data HeapState : Set where
     full almost : HeapState
 
@@ -390,83 +430,77 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   root (nf p i j h h₁) = # p
   root (nl p i j h h₁) = # p
   root (nr p i j h h₁) = # p
-  lemma-min-min : ∀ x y → (# (minA x y)) ≡ minE (# x) (# y)
-  lemma-min-min x y with cmp {x} {y}
-  lemma-min-min x y | tri< x₁ x₂ x₃ = refl
-  lemma-min-min x y | tri= x₁ x₂ x₃ = refl
-  lemma-min-min x y | tri> x₁ x₂ x₃ = refl
-
-  lemma-exist-less : ∀ {x y} → x <E y → Σ A (λ i → (# i) ≡ x)
-  lemma-exist-less {x = # a} (base x₁) = a , refl
-  lemma-exist-less {x = # a} ext = a , refl
-
-  respE : _<E_ Respects₂ _=E_
-  respE = left , right where
-    left : {a b c : expanded A} → b =E c → a <E b → a <E c
-    left {# a} {# b} {# c} (base r1) (base r2) = base (fst resp r1 r2)
-    left {# a} {# b} {top} () _
-    left {# a} {top} {# c} () _
-    left {# a} {top} {top} ext ext = ext
-    left {top} {# b} {# c} _ ()
-    left {top} {# b} {top} () _
-    left {top} {top} {# c} () _
-    left {top} {top} {top} _ ()
-    right : {a b c : expanded A} → b =E c → b <E a → c <E a
-    right {# a} {# b} {# c} (base r1) (base r2) = base (snd resp r1 r2)
-    right {# a} {# b} {top} () _
-    right {# a} {top} {# c} () _
-    right {# a} {top} {top} _ ()
-    right {top} {# b} {# c} _ ext = ext
-    right {top} {# b} {top} () _
-    right {top} {top} {# c} () _
-    right {top} {top} {top} _ ()
-
---   new-root : ∀ {p1 p2 x y} → heapgood x y p1 → p2 < p1 → heapgood x y p2
---   new-root (yes (orA x₁) , yes (orA x₂)) r = yes (orA (transE (base r) x₁)) , yes (orA (transE (base r) x₂))
---   new-root (yes (orA x₁) , yes (orB x₂)) r = yes (orA (transE (base r) x₁)) , yes (orA (fst respE x₂ (base r)))
---   new-root (yes (orB x₁) , yes (orA x₂)) r = yes (orA (fst respE x₁ (base r))) , yes (orA (transE (base r) x₂))
---   new-root (yes (orB x₁) , yes (orB x₂)) r = yes (orA (fst respE x₁ (base r))) , yes (orA (fst respE x₂ (base r)))
---   new-root {p1}{p2}{x}{y} (yes (orA x₁) , no nb) r with cmpE {# p2} {y}
---   new-root (yes (orA x₄) , no nb) r | tri< x x₁ x₂ = {! !}
---   new-root (yes (orA x₄) , no nb) r | tri= x x₁ x₂ = yes (orA (transE (base r) x₄)) , no (contradiction (snd respE x₁ (base r)) {! lemma-m1 nb!})
---   new-root (yes (orA x₄) , no nb) r | tri> x x₁ x₂ = {!!}
---   new-root (yes (orB x₁) , no nb) r = {!!}
---   new-root (no na , yes b) r = {!!}
---   new-root (no na , no nb) r = {!!}
 
   swap-root : ∀ {p1 p2 h s} → p2 <E p1 → Heap p1 (succ h) s → Heap p2 (succ h) s
   swap-root {p1} {top} () x
-  swap-root {p1 = # p1}{p2 = # p2} r (nd .(p1) i j H H₁) = nd p2 {!!} {!!} H H₁
-  swap-root {p1 = # p1}{p2 = # p2} r (nf .(p1) i j H H₁) = {!!}
-  swap-root {p1 = # p1}{p2 = # p2} r (nl .(p1) i j H H₁) = {!!}
-  swap-root {p1 = # p1}{p2 = # p2} r (nr .(p1) i j H H₁) = {!!}
+  swap-root {p1 = # p1}{p2 = # p2} r (nd .(p1) i j a b) = nd p2 (trans≤ (le r) i) (trans≤ (le r) j) a b
+  swap-root {p1 = # p1}{p2 = # p2} r (nf .(p1) i j a b) = nf p2 (trans≤ (le r) i) (trans≤ (le r) j) a b
+  swap-root {p1 = # p1}{p2 = # p2} r (nl .(p1) i j a b) = nl p2 (trans≤ (le r) i) (trans≤ (le r) j) a b
+  swap-root {p1 = # p1}{p2 = # p2} r (nr .(p1) i j a b) = nr p2 (trans≤ (le r) i) (trans≤ (le r) j) a b
 
-  finsert : ∀ {m h} → (z : A) → Heap m h full
+  lemma-<=minE : ∀ {a b c} → a ≤ b → a ≤ c → a ≤ (minE b c)
+  lemma-<=minE ab ac = lemma-<=min {expanded A}{_<E_}{_=E_}{cmpE} ab ac
+
+  finsert : ∀ {h m} → (z : A) → Heap m h full
     → Σ HeapState (Heap (minE m (# z)) (succ h))
-  finsert {h = 0} z eh = full , nf z (le ext) (le ext) eh eh
-  finsert {h = 1} z (nf p i j eh eh) with cmp {p} {z}
-  ... | tri< z₁ z₂ z₃ = almost , nd p (le (base z₁)) j (nf z (le ext) (le ext) eh eh) eh
-  ... | tri= z₁ z₂ z₃ = almost , nd z (eq (base (sym== z₂))) (le ext) (nf p i j eh eh) eh
-  ... | tri> z₁ z₂ z₃ = almost , nd z (le (base z₃)) (le ext) (nf p i j eh eh) eh
+  finsert {0} z eh = full , nf z (le ext) (le ext) eh eh
+  finsert {1} z (nf p i j eh eh) with cmp {p} {z}
+  ... | tri< p<z _ _ = almost , nd p (le (base p<z)) j (nf z (le ext) (le ext) eh eh) eh
+  ... | tri= _ p=z _ = almost , nd z (eq (base (sym== p=z))) (le ext) (nf p i j eh eh) eh
+  ... | tri> _ _ z<p = almost , nd z (le (base z<p)) (le ext) (nf p i j eh eh) eh
   finsert z (nf p i j (nf pp ii jj a b) c) with cmp {p} {z}
-  finsert z (nf p i j (nf pp ii jj a b) c) | tri< x x₁ x₂ with finsert z (nf pp ii jj a b)
-  ... | full , snd = almost , nd p {!!} j snd c
-  ... | almost , snd = {!!}
-  finsert z (nf p i j (nf pp ii jj a b) c) | tri= x x₁ x₂ = {!!}
-  finsert z (nf p i j (nf pp ii jj a b) c) | tri> x x₁ x₂ = {!!}
---   finsert {.(# p)} {succ (succ n)} z (nf p i j (nf .{n} pp ii jj a b) c) | tri< x x₁ x₂ with finsert z (nf pp ii jj a b)
---   finsert {.(# p)} {succ (succ n)} z (nf p x₄ x (nf j ii jj a b) c) | tri< x₁ x₂ x₃ | full , snd = almost , nd p {!!} x snd c
---   finsert {.(# p)} {succ (succ n)} z (nf p x₄ x (nf j ii jj a b) c) | tri< x₁ x₂ x₃ | almost , snd = {!!}
---   finsert {.(# p)} {succ (succ n)} z (nf p i j (nf pp ii jj a b) c) | tri= x x₁ x₂ = {!!}
---   finsert {.(# p)} {succ (succ n)} z (nf p i j (nf pp ii jj a b) c) | tri> x x₁ x₂ = {!!}
-  --finsert z (nf p i j (nf pp ii jj a b) c) with finsert z (nf pp ii jj a b)
-  --finsert z (nf p n₁ n (nf j ii jj a b) c) | full , snd = ?
-  --finsert z (nf p n₁ n (nf j ii jj a b) c) | almost , snd = ?
+  finsert z (nf p i j (nf pp ii jj a b) c) | tri< p<z _ _
+    with finsert z (nf pp ii jj a b)
+    | lemma-<=minE {# p} {# pp} {# z} i (le (base p<z))
+  ... | full ,   newleft | l1 = almost , nd p l1 j newleft c
+  ... | almost , newleft | l1 = almost , nl p l1 j newleft c
+  finsert z (nf p i j (nf pp ii jj a b) c) | tri= _ p=z _
+    with finsert p (nf pp ii jj a b)
+    | lemma-<=minE {# z} {# pp} {# p} ((snd resp≤) (base p=z) i) (eq (base (sym== p=z))) | snd resp≤ (base p=z) j
+  ... | full ,   newleft | l1 | l2 = almost , nd z l1 l2 newleft c
+  ... | almost , newleft | l1 | l2 = almost , nl z l1 l2 newleft c
+  finsert z (nf p i j (nf pp ii jj a b) c) | tri> _ _ z<p
+    with finsert p (nf pp ii jj a b)
+    | lemma-<=minE {# z} {# pp} {# p} (trans≤ (le (base z<p)) i) (le (base z<p))
+  ... | full ,   newleft | l1 = almost , nd z l1 (trans≤ (le (base z<p)) j) newleft c
+  ... | almost , newleft | l1 = almost , nl z l1 (trans≤ (le (base z<p)) j) newleft c
+  
+  ainsert : ∀ {h m} → (z : A) → Heap m h almost
+    → Σ HeapState (Heap (minE m (# z)) h)
+  ainsert z (nd p i j a b) with cmp {p} {z}
+  ainsert z (nd p i j a b) | tri< p<z _ _ with finsert z b | lemma-<=minE j (le (base p<z))
+  ... | full ,   nb | l1 = full , nf p i l1 a nb
+  ... | almost , nb | l1 = almost , nr p i l1 a nb
+  ainsert z (nd p i j a b) | tri= _ p=z _ with finsert p b | snd resp≤ (base p=z) i | lemma-<=minE (snd resp≤ (base p=z) j) (eq (base (sym== p=z)))
+  ... | full ,   nb | l1 | l2 = full , nf z l1 l2 a nb
+  ... | almost , nb | l1 | l2 = almost , nr z l1 l2 a nb
+  ainsert z (nd p i j a b) | tri> _ _ z<p with finsert p b | trans≤ (le (base z<p)) i | lemma-<=minE (trans≤ (le (base z<p)) j) (le (base z<p))
+  ... | full ,   nb | l1 | l2 = full , nf z l1 l2 a nb
+  ... | almost , nb | l1 | l2 = almost , nr z l1 l2 a nb
+  ainsert z (nl p i j a b) with cmp {p} {z}
+  ainsert z (nl p i j a b) | tri< p<z _ _ with ainsert z a | lemma-<=minE i (le (base p<z))
+  ... | full ,   na | l1 = almost , nd p l1 j na b
+  ... | almost , na | l1 = almost , nl p l1 j na b
+  ainsert z (nl p i j a b) | tri= _ p=z _ with ainsert p a | lemma-<=minE (snd resp≤ (base p=z) i) (eq (base (sym== p=z))) | snd resp≤ (base p=z) j
+  ... | full ,   na | l1 | l2 = almost , nd z l1 l2 na b
+  ... | almost , na | l1 | l2 = almost , nl z l1 l2 na b
+  ainsert z (nl p i j a b) | tri> _ _ z<p with ainsert p a | lemma-<=minE (trans≤ (le (base z<p)) i) (le (base z<p)) | trans≤ (le (base z<p)) j
+  ... | full ,   na | l1 | l2 = almost , nd z l1 l2 na b
+  ... | almost , na | l1 | l2 = almost , nl z l1 l2 na b
 
---  finsert {.(# p)} {succ (succ n)} z (nf p i j (nf pp ii jj a b) c) | full , snd | r = ?
-  -- finsert {.(# p)} {succ (succ n)} z (nf p i j (nf pp ii jj a b) c) | almost , snd = {!!}
+  ainsert z (nr p i j a b) with cmp {p} {z}
+  ainsert z (nr p i j a b) | tri< p<z _ _ with ainsert z b | lemma-<=minE j (le (base p<z))
+  ... | full ,   nb | l1 = full , nf p i l1 a nb
+  ... | almost , nb | l1 = almost , nr p i l1 a nb
+  ainsert z (nr p i j a b) | tri= _ p=z _ with ainsert p b | snd resp≤ (base p=z) i | lemma-<=minE (snd resp≤ (base p=z) j) (eq (base (sym== p=z)))
+  ... | full ,   nb | l1 | l2 = full , nf z l1 l2 a nb
+  ... | almost , nb | l1 | l2 = almost , nr z l1 l2 a nb
+  ainsert z (nr p i j a b) | tri> _ _ z<p with ainsert p b | trans≤ (le (base z<p)) i | lemma-<=minE (trans≤ (le (base z<p)) j) (le (base z<p))
+  ... | full ,   nb | l1 | l2 = full , nf z l1 l2 a nb
+  ... | almost , nb | l1 | l2 = almost , nr z l1 l2 a nb
 
-
-
-
-
+\end{code}
+\AgdaHide{
+\begin{code}
+\end{code}
+}
