@@ -321,10 +321,10 @@ resp<= {A}{_<_}{_==_} resp trans sym = left , right where
 trans<= : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A}
   → _<_ Respects₂ _==_ → Symmetric _==_ → Trans _==_ → Trans _<_
   → Trans (_<=_ {A}{_<_}{_==_})
-trans<= resp sym== trans== trans< (le a<b) (le b<c) = le (trans< a<b b<c)
-trans<= resp sym== trans== trans< (le a<b) (eq b=c) = le (fst resp b=c a<b)
-trans<= resp sym== trans== trans< (eq a=b) (le b<c) = le (snd resp (sym== a=b) b<c)
-trans<= resp sym== trans== trans< (eq a=b) (eq b=c) = eq (trans== a=b b=c)
+trans<= r s t== t< (le a<b) (le b<c) = le (t< a<b b<c)
+trans<= r s t== t< (le a<b) (eq b=c) = le (fst r b=c a<b)
+trans<= r s t== t< (eq a=b) (le b<c) = le (snd r (s a=b) b<c)
+trans<= r s t== t< (eq a=b) (eq b=c) = eq (t== a=b b=c)
 
 module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   (sym== : Symmetric _==_) (resp : _<_ Respects₂ _==_) (trans< : Trans _<_)
@@ -347,12 +347,8 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   trans<E : Trans _<E_
   trans<E {# x} {# x₁} {# x₂} a<b b<c = base (trans< (lemma-<E a<b) (lemma-<E b<c))
   trans<E {# x} {# x₁} {top} a<b b<c = ext
-  trans<E {# x} {top} {# x₁} a<b ()
-  trans<E {# x} {top} {top} a<b ()
-  trans<E {top} {# x} {# x₁} () b<c
-  trans<E {top} {# x} {top} () b<c
-  trans<E {top} {top} {# x} () b<c
-  trans<E {top} {top} {top} () b<c
+  trans<E {# _} {top} {_} _ ()
+  trans<E {top} {_} {_} () _
 
   data _=E_ : Rel₂ (expanded A) where
     base : ∀ {x y} → x == y → (# x) =E (# y)
@@ -383,8 +379,6 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   _≤_ : Rel₂ (expanded A)
   _≤_ = _<=_ {expanded A} {_<E_} {_=E_}
 
---  postulate
---    trans2 : Trans _≤_
   trans≤ : Trans _≤_
   trans≤ = trans<= respE sym=E trans=E trans<E
   resp≤ : _≤_ Respects₂ _=E_
@@ -444,7 +438,7 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
 
   finsert : ∀ {h m} → (z : A) → Heap m h full
     → Σ HeapState (Heap (minE m (# z)) (succ h))
-  finsert {0} z eh = full , nf z (le ext) (le ext) eh eh
+  finsert {0} z eh = full ,   nf z (le ext) (le ext) eh eh
   finsert {1} z (nf p i j eh eh) with cmp {p} {z}
   ... | tri< p<z _ _ = almost , nd p (le (base p<z)) j (nf z (le ext) (le ext) eh eh) eh
   ... | tri= _ p=z _ = almost , nd z (eq (base (sym== p=z))) (le ext) (nf p i j eh eh) eh
@@ -470,13 +464,13 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
     → Σ HeapState (Heap (minE m (# z)) h)
   ainsert z (nd p i j a b) with cmp {p} {z}
   ainsert z (nd p i j a b) | tri< p<z _ _ with finsert z b | lemma-<=minE j (le (base p<z))
-  ... | full ,   nb | l1 = full , nf p i l1 a nb
+  ... | full ,   nb | l1 = full ,   nf p i l1 a nb
   ... | almost , nb | l1 = almost , nr p i l1 a nb
   ainsert z (nd p i j a b) | tri= _ p=z _ with finsert p b | snd resp≤ (base p=z) i | lemma-<=minE (snd resp≤ (base p=z) j) (eq (base (sym== p=z)))
-  ... | full ,   nb | l1 | l2 = full , nf z l1 l2 a nb
+  ... | full ,   nb | l1 | l2 = full ,   nf z l1 l2 a nb
   ... | almost , nb | l1 | l2 = almost , nr z l1 l2 a nb
   ainsert z (nd p i j a b) | tri> _ _ z<p with finsert p b | trans≤ (le (base z<p)) i | lemma-<=minE (trans≤ (le (base z<p)) j) (le (base z<p))
-  ... | full ,   nb | l1 | l2 = full , nf z l1 l2 a nb
+  ... | full ,   nb | l1 | l2 = full ,   nf z l1 l2 a nb
   ... | almost , nb | l1 | l2 = almost , nr z l1 l2 a nb
   ainsert z (nl p i j a b) with cmp {p} {z}
   ainsert z (nl p i j a b) | tri< p<z _ _ with ainsert z a | lemma-<=minE i (le (base p<z))
@@ -491,15 +485,16 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
 
   ainsert z (nr p i j a b) with cmp {p} {z}
   ainsert z (nr p i j a b) | tri< p<z _ _ with ainsert z b | lemma-<=minE j (le (base p<z))
-  ... | full ,   nb | l1 = full , nf p i l1 a nb
+  ... | full ,   nb | l1 = full ,   nf p i l1 a nb
   ... | almost , nb | l1 = almost , nr p i l1 a nb
   ainsert z (nr p i j a b) | tri= _ p=z _ with ainsert p b | snd resp≤ (base p=z) i | lemma-<=minE (snd resp≤ (base p=z) j) (eq (base (sym== p=z)))
-  ... | full ,   nb | l1 | l2 = full , nf z l1 l2 a nb
+  ... | full ,   nb | l1 | l2 = full ,   nf z l1 l2 a nb
   ... | almost , nb | l1 | l2 = almost , nr z l1 l2 a nb
   ainsert z (nr p i j a b) | tri> _ _ z<p with ainsert p b | trans≤ (le (base z<p)) i | lemma-<=minE (trans≤ (le (base z<p)) j) (le (base z<p))
-  ... | full ,   nb | l1 | l2 = full , nf z l1 l2 a nb
+  ... | full ,   nb | l1 | l2 = full ,   nf z l1 l2 a nb
   ... | almost , nb | l1 | l2 = almost , nr z l1 l2 a nb
   
+  -- rightmost : ∀ {m h s} → Heap m (succ h) s → 
   -- finsert : ∀ {h m} → (z : A) → Heap m h full → Σ HeapState (Heap (minE m (# z)) (succ h))
   infix 4 _~_
   data _~_ : ℕ → ℕ → Set where
