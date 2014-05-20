@@ -154,10 +154,15 @@ data ℕ : Set where
   zero : ℕ
   succ : ℕ → ℕ
 
-infixl 6 _ℕ+_
-_ℕ+_ : ℕ → ℕ → ℕ
-zero ℕ+ b = b
-succ a ℕ+ b = succ (a ℕ+ b)
+{-# BUILTIN NATURAL ℕ #-}
+{-# BUILTIN ZERO zero #-}
+{-# BUILTIN SUC succ #-}
+
+infixl 6 _+_
+_+_ : ℕ → ℕ → ℕ
+zero + b = b
+succ a + b = succ (a + b)
+{-# BUILTIN NATPLUS _+_ #-}
 
 data _ℕ≤_ : Rel₂ ℕ where
   z≤n : ∀ {n} → zero ℕ≤ n
@@ -167,10 +172,6 @@ _ℕ<_ _ℕ≥_ _ℕ>_ : Rel₂ ℕ
 n ℕ< m = succ n ℕ≤ m
 n ℕ> m = m ℕ< n
 n ℕ≥ m = m ℕ≤ n
-
-{-# BUILTIN NATURAL ℕ #-}
-{-# BUILTIN ZERO zero #-}
-{-# BUILTIN SUC succ #-}
 
 lemma-succ-≡ : ∀ {n} {m} → succ n ≡ succ m → n ≡ m
 lemma-succ-≡ refl = refl
@@ -498,6 +499,15 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   ainsert z (nr p i j a b) | tri> _ _ z<p with ainsert p b | trans≤ (le (base z<p)) i | lemma-<=minE (trans≤ (le (base z<p)) j) (le (base z<p))
   ... | full ,   nb | l1 | l2 = full , nf z l1 l2 a nb
   ... | almost , nb | l1 | l2 = almost , nr z l1 l2 a nb
+  
+  -- finsert : ∀ {h m} → (z : A) → Heap m h full → Σ HeapState (Heap (minE m (# z)) (succ h))
+  infix 4 _~_
+  data _~_ : ℕ → ℕ → Set where
+    ~- : ∀ {n} → 1 + n ~ n
+    ~0 : ∀ {n} →     n ~ n
+  fpop : ∀ {m h} → Heap m (succ h) full
+    → Σ (expanded A) (λ x → Heap x (succ h) almost)
+  fpop (nf p i j a b) = {!!}
 
 \end{code}
 \AgdaHide{
