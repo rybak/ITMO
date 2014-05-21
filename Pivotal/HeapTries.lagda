@@ -496,13 +496,33 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   
   -- rightmost : ∀ {m h s} → Heap m (succ h) s → 
   -- finsert : ∀ {h m} → (z : A) → Heap m h full → Σ HeapState (Heap (minE m (# z)) (succ h))
+  data Tree : ℕ → Set where
+    et : Tree zero
+    nd : ∀ {n m} → A → Tree n → Tree m
+      → Tree (maxℕ n m)
   infix 4 _~_
   data _~_ : ℕ → ℕ → Set where
     ~- : ∀ {n} → 1 + n ~ n
     ~0 : ∀ {n} →     n ~ n
+
+  divide-full : ∀ {m h} → Heap m (succ h) full → A × OR (Heap top h full) (Heap m (succ h) almost)
+  divide-full (nf p i j eh eh) = p , orA eh
+  divide-full (nf p i j (nf lp li lj la lb) (nf rp ri rj ra rb)) with divide-full (nf rp ri rj ra rb)
+  ... | z , orA x₁ = z , orB (nd p i (le ext) (nf lp li lj la lb) x₁)
+  ... | z , orB (nd .rp ni nj na nb) = z , orB (nr p i j (nf lp li lj la lb) (nd rp ni nj na nb))
+  ... | z , orB (nr .rp ni nj na nb) = z , orB (nr p i j (nf lp li lj la lb) (nr rp ni nj na nb)) 
+  -- divide-full does not return nl ⇒ this won't be reached
+  ... | z , orB (nl .rp ni nj na nb) = z , orB (nr p i j (nf lp li lj la lb) (nl rp ni nj na nb))
+
+--  makeH : ∀ {m h ls rs} → A → Hea
   fpop : ∀ {m h} → Heap m (succ h) full
-    → Σ (expanded A) (λ x → Heap x (succ h) almost)
-  fpop (nf p i j a b) = {!!}
+    → OR (Σ (expanded A) (λ x → (Heap x (succ h) almost) × (m ≤ x))) (Heap top h full)
+  fpop (nf p i j eh eh) = orB eh
+  fpop (nf p i j (nf p₁ i₁ j₁ a₁ b₁) (nf p₂ i₂ j₂ a₂ b₂)) with divide-full (nf p₂ i₂ j₂ a₂ b₂)
+  fpop (nf p i j (nf p₁ i₁ j₁ a₁ b₁) (nf p₂ i₂ j₂ a₂ b₂)) | z , orA eh with finsert z (nf p₁ i₁ j₁ a₁ b₁)
+  fpop (nf p i j (nf p₁ i₁ j₁ a₁ b₁) (nf p₂ i₂ j₂ a₂ b₂)) | z , orA eh | full , snd = {! snd!}
+  fpop (nf p i j (nf p₁ i₁ j₁ a₁ b₁) (nf p₂ i₂ j₂ a₂ b₂)) | z , orA eh | almost , snd = {!!}
+  fpop (nf p i j (nf p₁ i₁ j₁ a₁ b₁) (nf p₂ i₂ j₂ a₂ b₂)) | z , orB x₁ = {!!}
 
 \end{code}
 \AgdaHide{
