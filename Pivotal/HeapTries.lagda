@@ -505,24 +505,26 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
     ~- : ∀ {n} → 1 + n ~ n
     ~0 : ∀ {n} →     n ~ n
 
-  divide-full : ∀ {m h} → Heap m (succ h) full → A × OR (Heap top h full) (Heap m (succ h) almost)
-  divide-full (nf p i j eh eh) = p , orA eh
-  divide-full (nf p i j (nf lp li lj la lb) (nf rp ri rj ra rb)) with divide-full (nf rp ri rj ra rb)
-  ... | z , orA x₁ = z , orB (nd p i (le ext) (nf lp li lj la lb) x₁)
-  ... | z , orB (nd .rp ni nj na nb) = z , orB (nr p i j (nf lp li lj la lb) (nd rp ni nj na nb))
-  ... | z , orB (nr .rp ni nj na nb) = z , orB (nr p i j (nf lp li lj la lb) (nr rp ni nj na nb)) 
-  -- divide-full does not return nl ⇒ this won't be reached
-  ... | z , orB (nl .rp ni nj na nb) = z , orB (nr p i j (nf lp li lj la lb) (nl rp ni nj na nb))
+ 
+  fmerge : ∀ {x y h} → Heap x h full → Heap y h full → OR (Heap x zero full × (x ≡ y) × (h ≡ zero)) (Heap (minE x y) (succ h) almost)
+  fmerge eh eh = orA (eh , refl , refl)
+  fmerge .{# x}.{# y} (nf x i₁ j₁ a₁ b₁) (nf y i₂ j₂ a₂ b₂) with cmp {x}{y}
+  fmerge (nf x i₁ j₁ a₁ b₁) (nf y i₂ j₂ a₂ b₂) | tri< x<y _ _ with fmerge a₁ b₁
+  fmerge (nf .{zero} x i₁ j₁ a₁ b₁) (nf .{zero} y i₂ j₂ a₂ b₂) | tri< x<y x₃ x₄ | orA (eh , refl , refl) = orB (nd x (le (base x<y)) j₁ (nf y i₂ j₂ a₂ b₂) eh)
+  fmerge (nf x i₁ j₁ a₁ b₁) (nf y i₂ j₂ a₂ b₂) | tri< x<y x₃ x₄ | orB x₁ = orB (nr x (le (base x<y)) (lemma-<=minE i₁ j₁) (nf y i₂ j₂ a₂ b₂) x₁)
+  fmerge (nf x i₁ j₁ a₁ b₁) (nf y i₂ j₂ a₂ b₂) | tri= _ x=y _ with fmerge a₂ b₂
+  fmerge (nf x i₁ j₁ a₁ b₁) (nf y i₂ j₂ a₂ b₂) | tri= x₃ x=y x₄ | orA (eh , refl , refl) = orB (nd y (eq (base (sym== x=y))) j₂ (nf x i₁ j₁ a₁ b₁) eh)
+  fmerge (nf x i₁ j₁ a₁ b₁) (nf y i₂ j₂ a₂ b₂) | tri= x₃ x=y x₄ | orB x₁ = orB (nr y (eq (base (sym== x=y))) (lemma-<=minE i₂ j₂) (nf x i₁ j₁ a₁ b₁) x₁) 
+  fmerge (nf x i₁ j₁ a₁ b₁) (nf y i₂ j₂ a₂ b₂) | tri> _ _ y<x with fmerge a₂ b₂
+  fmerge (nf x i₁ j₁ a₁ b₁) (nf y i₂ j₂ a₂ b₂) | tri> x₃ x₄ y<x | orA (eh , refl , refl) = orB (nd y (le (base y<x)) j₂ (nf x i₁ j₁ a₁ b₁) eh)
+  fmerge (nf x i₁ j₁ a₁ b₁) (nf y i₂ j₂ a₂ b₂) | tri> x₃ x₄ y<x | orB x₁ = orB (nr y (le (base y<x)) (lemma-<=minE i₂ j₂) (nf x i₁ j₁ a₁ b₁) x₁)
 
---  makeH : ∀ {m h ls rs} → A → Hea
-  fpop : ∀ {m h} → Heap m (succ h) full
+  fpop2 : ∀ {m h} → Heap m (succ h) full
     → OR (Σ (expanded A) (λ x → (Heap x (succ h) almost) × (m ≤ x))) (Heap top h full)
-  fpop (nf p i j eh eh) = orB eh
-  fpop (nf p i j (nf p₁ i₁ j₁ a₁ b₁) (nf p₂ i₂ j₂ a₂ b₂)) with divide-full (nf p₂ i₂ j₂ a₂ b₂)
-  fpop (nf p i j (nf p₁ i₁ j₁ a₁ b₁) (nf p₂ i₂ j₂ a₂ b₂)) | z , orA eh with finsert z (nf p₁ i₁ j₁ a₁ b₁)
-  fpop (nf p i j (nf p₁ i₁ j₁ a₁ b₁) (nf p₂ i₂ j₂ a₂ b₂)) | z , orA eh | full , snd = {! snd!}
-  fpop (nf p i j (nf p₁ i₁ j₁ a₁ b₁) (nf p₂ i₂ j₂ a₂ b₂)) | z , orA eh | almost , snd = {!!}
-  fpop (nf p i j (nf p₁ i₁ j₁ a₁ b₁) (nf p₂ i₂ j₂ a₂ b₂)) | z , orB x₁ = {!!}
+  fpop2 (nf _ _ _ eh eh) = orB eh
+  fpop2 (nf _ _ _ (nf x i₁ j₁ a b) (nf y i₂ j₂ c d)) with fmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d)
+  fpop2 (nf _ _ _ (nf x i₁ j₁ a b) (nf y i₂ j₂ c d)) | orA (() , f , u)
+  fpop2 (nf _ i j (nf x i₁ j₁ a b) (nf y i₂ j₂ c d)) | orB x₂ = orA ((minE (# x) (# y)) , x₂ , lemma-<=minE i j)
 
 \end{code}
 \AgdaHide{
