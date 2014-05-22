@@ -240,6 +240,7 @@ min cmp x y with cmp {x} {y}
 max cmp x y with cmp {x} {y}
 ... | tri> _ _ _ = x
 ... | _ = y
+
 minℕ maxℕ : ℕ → ℕ → ℕ
 minℕ = min cmpℕ
 maxℕ = max cmpℕ
@@ -308,6 +309,21 @@ lemma-<=min {cmp = cmp} {a} {b} {c} ab ac with cmp {b} {c}
 ... | tri< _ _ _ = ab
 ... | tri= _ _ _ = ac
 ... | tri> _ _ _ = ac
+
+min3 : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A} → (cmp : Cmp _<_ _==_) → A → A → A → A
+min3 cmp x y z with cmp {x} {y}
+... | tri< x₁ x₂ x₃ = min cmp x z
+... | _ = min cmp y z
+
+lemma-<=min3 : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A} {cmp : Cmp _<_ _==_} {x a b c : A}
+  → (_<=_ {_<_ = _<_} {_==_} x a)
+  → (_<=_ {_<_ = _<_} {_==_} x b)
+  → (_<=_ {_<_ = _<_} {_==_} x c)
+  → (_<=_ {_<_ = _<_} {_==_} x (min3 cmp a b c))
+lemma-<=min3 {cmp = cmp} {x} {a} {b} {c} xa xb xc with cmp {a} {b}
+... | tri< _ _ _ = lemma-<=min {cmp = cmp} xa xc
+... | tri= _ _ _ = lemma-<=min {cmp = cmp} xb xc
+... | tri> _ _ _ = lemma-<=min {cmp = cmp} xb xc
   
 resp<= : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A} → (resp : _<_ Respects₂ _==_) → (trans== : Trans _==_) → (sym== : Symmetric _==_) → (_<=_ {A}{_<_}{_==_}) Respects₂ _==_
 resp<= {A}{_<_}{_==_} resp trans sym = left , right where
@@ -328,7 +344,7 @@ trans<= r s t== t< (eq a=b) (eq b=c) = eq (t== a=b b=c)
 
 module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   (sym== : Symmetric _==_) (resp : _<_ Respects₂ _==_) (trans< : Trans _<_)
-  (trans== : Trans _==_)
+  (trans== : Trans _==_) (refl== : Reflexive _==_)
   where
 
   maxA minA : A → A → A
@@ -416,25 +432,30 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
         → (b : Heap y n full)
         → Heap (# p) (succ (succ n)) almost
     nr : ∀ {n} {x y} → (p : A) → (i : (# p) ≤ x) → (j : (# p) ≤ y)
-        → (a : Heap x n full)
-        → (b : Heap y n almost)
-        → Heap (# p) (succ n) almost
-  root : ∀ {m h s} → Heap m h s → (expanded A)
-  root eh = top
-  root (nd p i j h h₁) = # p
-  root (nf p i j h h₁) = # p
-  root (nl p i j h h₁) = # p
-  root (nr p i j h h₁) = # p
-
-  swap-root : ∀ {p1 p2 h s} → p2 <E p1 → Heap p1 (succ h) s → Heap p2 (succ h) s
-  swap-root {p1} {top} () x
-  swap-root {p1 = # p1}{p2 = # p2} r (nd .(p1) i j a b) = nd p2 (trans≤ (le r) i) (trans≤ (le r) j) a b
-  swap-root {p1 = # p1}{p2 = # p2} r (nf .(p1) i j a b) = nf p2 (trans≤ (le r) i) (trans≤ (le r) j) a b
-  swap-root {p1 = # p1}{p2 = # p2} r (nl .(p1) i j a b) = nl p2 (trans≤ (le r) i) (trans≤ (le r) j) a b
-  swap-root {p1 = # p1}{p2 = # p2} r (nr .(p1) i j a b) = nr p2 (trans≤ (le r) i) (trans≤ (le r) j) a b
+        → (a : Heap x (succ n) full)
+        → (b : Heap y (succ n) almost)
+        → Heap (# p) (succ (succ n)) almost
+--  root : ∀ {m h s} → Heap m h s → (expanded A)
+--  root eh = top
+--  root (nd p i j h h₁) = # p
+--  root (nf p i j h h₁) = # p
+--  root (nl p i j h h₁) = # p
+--  root (nr p i j h h₁) = # p
+--
+--  swap-root : ∀ {p1 p2 h s} → p2 <E p1 → Heap p1 (succ h) s → Heap p2 (succ h) s
+--  swap-root {p1} {top} () x
+--  swap-root {p1 = # p1}{p2 = # p2} r (nd .(p1) i j a b) = nd p2 (trans≤ (le r) i) (trans≤ (le r) j) a b
+--  swap-root {p1 = # p1}{p2 = # p2} r (nf .(p1) i j a b) = nf p2 (trans≤ (le r) i) (trans≤ (le r) j) a b
+--  swap-root {p1 = # p1}{p2 = # p2} r (nl .(p1) i j a b) = nl p2 (trans≤ (le r) i) (trans≤ (le r) j) a b
+--  swap-root {p1 = # p1}{p2 = # p2} r (nr .(p1) i j a b) = nr p2 (trans≤ (le r) i) (trans≤ (le r) j) a b
 
   lemma-<=minE : ∀ {a b c} → a ≤ b → a ≤ c → a ≤ (minE b c)
   lemma-<=minE ab ac = lemma-<=min {expanded A}{_<E_}{_=E_}{cmpE} ab ac
+
+  min3E : (expanded A) → (expanded A) → (expanded A) → (expanded A)
+  min3E x y z = min3 cmpE x y z
+  lemma-<=minE3 : ∀ {x a b c} → x ≤ a → x ≤ b → x ≤ c → x ≤ (min3E a b c)
+  lemma-<=minE3 = lemma-<=min3 {expanded A}{_<E_}{_=E_}{cmpE}
 
   finsert : ∀ {h m} → (z : A) → Heap m h full
     → Σ HeapState (Heap (minE m (# z)) (succ h))
@@ -472,6 +493,7 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   ainsert z (nd p i j a b) | tri> _ _ z<p with finsert p b | trans≤ (le (base z<p)) i | lemma-<=minE (trans≤ (le (base z<p)) j) (le (base z<p))
   ... | full ,   nb | l1 | l2 = full ,   nf z l1 l2 a nb
   ... | almost , nb | l1 | l2 = almost , nr z l1 l2 a nb
+
   ainsert z (nl p i j a b) with cmp {p} {z}
   ainsert z (nl p i j a b) | tri< p<z _ _ with ainsert z a | lemma-<=minE i (le (base p<z))
   ... | full ,   na | l1 = almost , nd p l1 j na b
@@ -496,36 +518,127 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   
   -- rightmost : ∀ {m h s} → Heap m (succ h) s → 
   -- finsert : ∀ {h m} → (z : A) → Heap m h full → Σ HeapState (Heap (minE m (# z)) (succ h))
-  data Tree : ℕ → Set where
-    et : Tree zero
-    nd : ∀ {n m} → A → Tree n → Tree m
-      → Tree (maxℕ n m)
-  infix 4 _~_
-  data _~_ : ℕ → ℕ → Set where
-    ~- : ∀ {n} → 1 + n ~ n
-    ~0 : ∀ {n} →     n ~ n
+--  data Tree : ℕ → Set where
+--    et : Tree zero
+--    nd : ∀ {n m} → A → Tree n → Tree m
+--      → Tree (maxℕ n m)
+--  infix 4 _~_
+--  data _~_ : ℕ → ℕ → Set where
+--    ~- : ∀ {n} → 1 + n ~ n
+--    ~0 : ∀ {n} →     n ~ n
 
- 
   fmerge : ∀ {x y h} → Heap x h full → Heap y h full → OR (Heap x zero full × (x ≡ y) × (h ≡ zero)) (Heap (minE x y) (succ h) almost)
   fmerge eh eh = orA (eh , refl , refl)
-  fmerge .{# x}.{# y} (nf x i₁ j₁ a₁ b₁) (nf y i₂ j₂ a₂ b₂) with cmp {x}{y}
-  fmerge (nf x i₁ j₁ a₁ b₁) (nf y i₂ j₂ a₂ b₂) | tri< x<y _ _ with fmerge a₁ b₁
-  fmerge (nf .{zero} x i₁ j₁ a₁ b₁) (nf .{zero} y i₂ j₂ a₂ b₂) | tri< x<y x₃ x₄ | orA (eh , refl , refl) = orB (nd x (le (base x<y)) j₁ (nf y i₂ j₂ a₂ b₂) eh)
-  fmerge (nf x i₁ j₁ a₁ b₁) (nf y i₂ j₂ a₂ b₂) | tri< x<y x₃ x₄ | orB x₁ = orB (nr x (le (base x<y)) (lemma-<=minE i₁ j₁) (nf y i₂ j₂ a₂ b₂) x₁)
-  fmerge (nf x i₁ j₁ a₁ b₁) (nf y i₂ j₂ a₂ b₂) | tri= _ x=y _ with fmerge a₂ b₂
-  fmerge (nf x i₁ j₁ a₁ b₁) (nf y i₂ j₂ a₂ b₂) | tri= x₃ x=y x₄ | orA (eh , refl , refl) = orB (nd y (eq (base (sym== x=y))) j₂ (nf x i₁ j₁ a₁ b₁) eh)
-  fmerge (nf x i₁ j₁ a₁ b₁) (nf y i₂ j₂ a₂ b₂) | tri= x₃ x=y x₄ | orB x₁ = orB (nr y (eq (base (sym== x=y))) (lemma-<=minE i₂ j₂) (nf x i₁ j₁ a₁ b₁) x₁) 
-  fmerge (nf x i₁ j₁ a₁ b₁) (nf y i₂ j₂ a₂ b₂) | tri> _ _ y<x with fmerge a₂ b₂
-  fmerge (nf x i₁ j₁ a₁ b₁) (nf y i₂ j₂ a₂ b₂) | tri> x₃ x₄ y<x | orA (eh , refl , refl) = orB (nd y (le (base y<x)) j₂ (nf x i₁ j₁ a₁ b₁) eh)
-  fmerge (nf x i₁ j₁ a₁ b₁) (nf y i₂ j₂ a₂ b₂) | tri> x₃ x₄ y<x | orB x₁ = orB (nr y (le (base y<x)) (lemma-<=minE i₂ j₂) (nf x i₁ j₁ a₁ b₁) x₁)
+  fmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d) with cmp {x}{y}
+  fmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d) | tri< x<y _ _ with fmerge a b
+  ... | orA (eh , refl , refl) = orB (nd x (le (base x<y)) j₁ (nf y i₂ j₂ c d) eh)
+  ... | orB ab = orB (nr x (le (base x<y)) (lemma-<=minE i₁ j₁) (nf y i₂ j₂ c d) ab)
+  fmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d) | tri= _ x=y _ with fmerge c d
+  ... | orA (eh , refl , refl) = orB (nd y (eq (base (sym== x=y))) j₂ (nf x i₁ j₁ a b) eh)
+  ... | orB cd = orB (nr y (eq (base (sym== x=y))) (lemma-<=minE i₂ j₂) (nf x i₁ j₁ a b) cd) 
+  fmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d) | tri> _ _ y<x with fmerge c d
+  ... | orA (eh , refl , refl) = orB (nd y (le (base y<x)) j₂ (nf x i₁ j₁ a b) eh)
+  ... | orB cd = orB (nr y (le (base y<x)) (lemma-<=minE i₂ j₂) (nf x i₁ j₁ a b) cd)
 
-  fpop2 : ∀ {m h} → Heap m (succ h) full
+  fpop : ∀ {m h} → Heap m (succ h) full
     → OR (Σ (expanded A) (λ x → (Heap x (succ h) almost) × (m ≤ x))) (Heap top h full)
-  fpop2 (nf _ _ _ eh eh) = orB eh
-  fpop2 (nf _ _ _ (nf x i₁ j₁ a b) (nf y i₂ j₂ c d)) with fmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d)
-  fpop2 (nf _ _ _ (nf x i₁ j₁ a b) (nf y i₂ j₂ c d)) | orA (() , f , u)
-  fpop2 (nf _ i j (nf x i₁ j₁ a b) (nf y i₂ j₂ c d)) | orB x₂ = orA ((minE (# x) (# y)) , x₂ , lemma-<=minE i j)
+  fpop (nf _ _ _ eh eh) = orB eh
+  fpop (nf _ i j (nf x i₁ j₁ a b) (nf y i₂ j₂ c d)) with fmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d)
+  ... | orA (() , f , u)
+  ... | orB x₂ = orA ((minE (# x) (# y)) , x₂ , lemma-<=minE i j)
 
+  makeH : ∀ {x y h} → (p : A) → Heap x h full → Heap y h full → Heap (min3E x y (# p)) (succ h) full
+  makeH p eh eh = nf p (le ext) (le ext) eh eh
+  makeH p (nf x i j a b) (nf y i₁ j₁ c d) with cmp {x} {y}
+  makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri< x<y _ _ with cmp {x} {p}
+  makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri< x<y _ _ | tri< x<p _ _ with makeH p a b
+  ... | res = nf x (lemma-<=minE3 i j (le (base x<p))) (le (base x<y)) res (nf y i₁ j₁ c d)
+  makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri< x<y _ _ | tri= _ x=p _ = nf p (eq (base (sym== x=p))) (le (base (snd resp x=p x<y))) (nf x i j a b) (nf y i₁ j₁ c d)
+  makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri< x<y _ _ | tri> _ _ p<x = nf p (le (base p<x)) (le (base (trans< p<x x<y))) (nf x i j a b) (nf y i₁ j₁ c d)
+  makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri= _ x=y _ with cmp {y} {p}
+  makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri= _ x=y _ | tri< y<p _ _ = nf y (eq (base (sym== x=y))) (lemma-<=minE3 i₁ j₁ (le (base y<p))) (nf x i j a b) (makeH p c d)
+  makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri= _ x=y _ | tri= _ y=p _ = nf p (eq (base (trans== (sym== y=p) (sym== x=y)))) (eq (base (sym== y=p))) (nf x i j a b) (nf y i₁ j₁ c d)
+  makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri= _ x=y _ | tri> _ _ p<y = nf p (le (base (fst resp (sym== x=y) p<y))) (le (base p<y)) (nf x i j a b) (nf y i₁ j₁ c d)
+  makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri> _ _ y<x with cmp {y} {p}
+  makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri> _ _ y<x | tri< y<p _ _ = nf y (le (base y<x)) (lemma-<=minE3 i₁ j₁ (le (base y<p))) (nf x i j a b) (makeH p c d)
+  makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri> _ _ y<x | tri= _ y=p _ = nf p (le (base (snd resp y=p y<x))) (eq (base (sym== y=p))) (nf x i j a b) (nf y i₁ j₁ c d)
+  makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri> _ _ y<x | tri> _ _ p<y = nf p (le (base (trans< p<y y<x))) (le (base p<y)) (nf x i j a b) (nf y i₁ j₁ c d)
+
+  ndmerge : ∀ {x y h} → Heap x (succ (succ h)) full → Heap y (succ h) full
+    → Heap (minE x y) (succ (succ (succ h))) almost
+  ndmerge (nf x i j a b) (nf y i₁ j₁ c d) with cmp {x} {y}
+  ndmerge (nf x i j a b) (nf y i₁ j₁ c d) | tri< x<y _ _ with fmerge a b
+  ndmerge (nf x i j a b) (nf y i₁ j₁ c d) | tri< x<y _ _ | orA (_ , _ , ())
+  ndmerge (nf x i j a b) (nf y i₁ j₁ c d) | tri< x<y _ _ | orB x₁ = nl x (lemma-<=minE i j) (le (base x<y)) x₁ (nf y i₁ j₁ c d)
+
+  ndmerge (nf x i j a b) (nf y i₁ j₁ c d) | tri= _ x=y _ with fmerge c d
+  ndmerge (nf x i j a b) (nf y i₁ j₁ c d) | tri= _ x=y _ | orA (eh , refl , refl) with fmerge a b
+  ndmerge (nf x i j a b) (nf y i₁ j₁ c d) | tri= _ x=y _ | orA (eh , refl , refl) | orA (eh , refl , ())
+  ndmerge (nf x i j a b) (nf y i₁ j₁ c d) | tri= _ x=y _ | orA (eh , refl , refl) | orB ab = nl y (lemma-<=minE (trans≤ (eq (base (sym== x=y))) i) (trans≤ (eq (base (sym== x=y))) j)) (eq (base (sym== x=y))) ab (nf x (le ext) (le ext) eh eh)
+
+  ndmerge (nf x i j a b) (nf y i₁ j₁ c d) | tri= _ x=y _ | orB cd with fmerge a b
+  ndmerge (nf x₃ i j a b) (nf y₂ i₁ j₁ c d) | tri= x₄ x=y x₅ | orB cd | orA (eh , refl , ())
+  ndmerge (nf x i j a b) (nf y i₁ j₁ c d) | tri= _ x=y _ | orB cd | orB ab = nl y (lemma-<=minE (trans≤ (eq (base (sym== x=y))) i) (trans≤ (eq (base (sym== x=y))) j)) (lemma-<=minE3 i₁ j₁ (eq (base (sym== x=y)))) ab (makeH x c d)
+  ndmerge (nf x i j a b) (nf y i₁ j₁ c d) | tri> _ _ y<x with fmerge a b
+  ndmerge (nf x i j a b) (nf y i₁ j₁ c d) | tri> _ _ y<x | orA (fst , fst₁ , ())
+  ndmerge (nf x i j a b) (nf y i₁ j₁ c d) | tri> _ _ y<x | orB ab = nl y (lemma-<=minE (trans≤ (le (base y<x)) i) (trans≤ (le (base y<x)) j)) (lemma-<=minE3 i₁ j₁ (le (base y<x))) ab (makeH x c d)
+
+  afmerge : ∀ {h x y} → Heap x (succ (succ h)) almost → Heap y (succ h) full
+    → OR (Heap (minE x y) (succ (succ h)) full) (Heap (minE x y) (succ (succ (succ h))) almost)
+  afmerge (nd .{zero} x i j (nf p i₁ j₁ eh eh) eh) (nf y i₂ j₂ eh eh) with cmp {x} {y}
+  ... | tri< x<y _ _ = orA (nf x i (le (base x<y)) (nf p (le ext) (le ext) eh eh) (nf y i₂ j₂ eh eh))
+  ... | tri= _ x=y _ = orA (nf y (eq (base (sym== x=y))) (snd resp≤ (base x=y) i) (nf x (le ext) (le ext) eh eh) (nf p i₁ j₁ eh eh))
+  ... | tri> _ _ y<x = orA (nf y (le (base y<x)) (trans≤ (le (base y<x)) i) (nf x j j eh eh) (nf p j₁ j₁ eh eh))
+
+  afmerge (nd x i j (nf p₁ i₁ j₁ a₁ b₁) (nf p₂ i₂ j₂ a₂ b₂)) (nf y i₃ j₃ c d) with cmp {x} {y} | ndmerge (nf p₁ i₁ j₁ a₁ b₁) (nf p₂ i₂ j₂ a₂ b₂)
+  ... | tri< x<y _ _ | ab = orB (nl x (lemma-<=minE i j) (le (base x<y)) ab (nf y i₃ j₃ c d))
+  ... | tri= _ x=y _ | ab = orB (nl y (lemma-<=minE (trans≤ (eq (base (sym== x=y))) i) (trans≤ (eq (base (sym== x=y))) j)) (lemma-<=minE3 i₃ j₃ (eq (base (sym== x=y)))) ab (makeH x c d))
+  ... | tri> _ _ y<x | ab = orB (nl y (lemma-<=minE (trans≤ (le (base y<x)) i) (trans≤ (le (base y<x)) j)) (lemma-<=minE3 i₃ j₃ (le (base y<x))) ab (makeH x c d))
+  afmerge (nl x i j (nd p₁ i₁ j₁ a₁ b₁) (nf p₂ i₂ j₂ a₂ b₂)) (nf y i₃ j₃ c d) with cmp {x}{y} | afmerge (nd p₁ i₁ j₁ a₁ b₁) (nf p₂ i₂ j₂ a₂ b₂)
+  ... | tri< x<y _ _ | orA ab = orA (nf x (lemma-<=minE i j) (le (base x<y)) ab (nf y i₃ j₃ c d))
+  ... | tri< x<y _ _ | orB ab = orB (nl x (lemma-<=minE i j) (le (base x<y)) ab (nf y i₃ j₃ c d))
+  ... | tri= _ x=y _ | orA ab = orA (nf y (lemma-<=minE (snd resp≤ (base x=y) i) (snd resp≤ (base x=y) j)) (lemma-<=minE3 i₃ j₃ (eq (base (sym== x=y)))) ab (makeH x c d))
+  ... | tri= _ x=y _ | orB ab = orB (nl y (lemma-<=minE (snd resp≤ (base x=y) i) (snd resp≤ (base x=y) j)) (lemma-<=minE3 i₃ j₃ (eq (base (sym== x=y)))) ab (makeH x c d))
+  ... | tri> _ _ y<x | orA ab = orA (nf y (lemma-<=minE (trans≤ (le (base y<x)) i) (trans≤ (le (base y<x)) j)) (lemma-<=minE3 i₃ j₃ (le (base y<x))) ab (makeH x c d))
+  ... | tri> _ _ y<x | orB ab = orB (nl y (lemma-<=minE (trans≤ (le (base y<x)) i) (trans≤ (le (base y<x)) j)) (lemma-<=minE3 i₃ j₃ (le (base y<x))) ab (makeH x c d))
+  afmerge (nl x i j (nl p₁ i₁ j₁ a₁ b₁) (nf p₂ i₂ j₂ a₂ b₂)) (nf y i₃ j₃ c d) with cmp {x} {y} | afmerge (nl p₁ i₁ j₁ a₁ b₁) (nf p₂ i₂ j₂ a₂ b₂)
+  ... | tri< x<y _ _ | orA ab = orA (nf x (lemma-<=minE i j) (le (base x<y)) ab (nf y i₃ j₃ c d))
+  ... | tri< x<y _ _ | orB ab = orB (nl x (lemma-<=minE i j) (le (base x<y)) ab (nf y i₃ j₃ c d))
+  ... | tri= _ x=y _ | orA ab = orA (nf y (lemma-<=minE (snd resp≤ (base x=y) i) (snd resp≤ (base x=y) j)) (lemma-<=minE3 i₃ j₃ (eq (base (sym== x=y)))) ab (makeH x c d))
+  ... | tri= _ x=y _ | orB ab = orB (nl y (lemma-<=minE (snd resp≤ (base x=y) i) (snd resp≤ (base x=y) j)) (lemma-<=minE3 i₃ j₃ (eq (base (sym== x=y)))) ab (makeH x c d))
+  ... | tri> _ _ y<x | orA ab = orA (nf y (lemma-<=minE (trans≤ (le (base y<x)) i) (trans≤ (le (base y<x)) j)) (lemma-<=minE3 i₃ j₃ (le (base y<x))) ab (makeH x c d))
+  ... | tri> _ _ y<x | orB ab = orB (nl y (lemma-<=minE (trans≤ (le (base y<x)) i) (trans≤ (le (base y<x)) j)) (lemma-<=minE3 i₃ j₃ (le (base y<x))) ab (makeH x c d))
+  afmerge (nl x i j (nr p₁ i₁ j₁ a₁ b₁) (nf p₂ i₂ j₂ a₂ b₂)) (nf y i₃ j₃ c d) with cmp {x} {y} | afmerge (nr p₁ i₁ j₁ a₁ b₁) (nf p₂ i₂ j₂ a₂ b₂)
+  ... | tri< x<y _ _ | orA ab = orA (nf x (lemma-<=minE i j) (le (base x<y)) ab (nf y i₃ j₃ c d))
+  ... | tri< x<y _ _ | orB ab = orB (nl x (lemma-<=minE i j) (le (base x<y)) ab (nf y i₃ j₃ c d))
+  ... | tri= _ x=y _ | orA ab = orA (nf y (lemma-<=minE (snd resp≤ (base x=y) i) (snd resp≤ (base x=y) j)) (lemma-<=minE3 i₃ j₃ (eq (base (sym== x=y)))) ab (makeH x c d))
+  ... | tri= _ x=y _ | orB ab = orB (nl y (lemma-<=minE (snd resp≤ (base x=y) i) (snd resp≤ (base x=y) j)) (lemma-<=minE3 i₃ j₃ (eq (base (sym== x=y)))) ab (makeH x c d))
+  ... | tri> _ _ y<x | orA ab = orA (nf y (lemma-<=minE (trans≤ (le (base y<x)) i) (trans≤ (le (base y<x)) j)) (lemma-<=minE3 i₃ j₃ (le (base y<x))) ab (makeH x c d))
+  ... | tri> _ _ y<x | orB ab = orB (nl y (lemma-<=minE (trans≤ (le (base y<x)) i) (trans≤ (le (base y<x)) j)) (lemma-<=minE3 i₃ j₃ (le (base y<x))) ab (makeH x c d))
+  afmerge (nr x i j a b) (nf y i₁ j₁ c d) = {!!}
+
+  apop : ∀ {m h} → Heap m (succ h) almost
+    → OR (Σ (expanded A) (λ x → (Heap x (succ h) almost) × (m ≤ x)))
+         (Σ (expanded A) (λ x → (Heap x h full) × (m ≤ x)))
+  apop (nd {x = x} p i j a eh) = orB (x , a , i)
+  apop (nd p i j (nf p₁ i₁ j₁ a b) (nf p₂ i₂ j₂ c d)) with cmp {p₁} {p₂} | ndmerge (nf p₁ i₁ j₁ a b) (nf p₂ i₂ j₂ c d)
+  ... | tri< _ _ _ | res = orA (# p₁ , res , i)
+  ... | tri= _ _ _ | res = orA (# p₂ , res , j)
+  ... | tri> _ _ _ | res = orA (# p₂ , res , j)
+  apop (nl _ i j (nd x i₁ j₁ (nf y _ _ eh eh) eh) (nf z _ _ eh eh)) with cmp {x} {z}
+  ... | tri< x<z _ _ = orB (# x , nf x i₁ (le (base x<z)) (nf y (le ext) (le ext) eh eh) (nf z (le ext) (le ext) eh eh) , i)
+  ... | tri= _ x=z _ = orB (# z , nf z (eq (base (sym== x=z))) (snd resp≤ (base x=z) i₁) (nf x (le ext) (le ext) eh eh) (nf y (le ext) (le ext) eh eh) , j)
+  ... | tri> _ _ z<x = orB (# z , nf z (le (base z<x)) (trans≤ (le (base z<x)) i₁) (nf x (le ext) (le ext) eh eh) (nf y (le ext) (le ext) eh eh) , j)
+  apop (nl _ i j (nd x i₁ j₁ (nf y i₂ j₂ a a₁) (nf z i₃ j₃ b b₁)) (nf t i₄ j₄ c d)) with cmp {x} {t} | ndmerge (nf y i₂ j₂ a a₁) (nf z i₃ j₃ b b₁)
+  ... | tri< x<t _ _ | res = orA (# x , nl x (lemma-<=minE i₁ j₁) (le (base x<t)) res (nf t i₄ j₄ c d) , i)
+  ... | tri= _ x=t _ | res = orA (# t , nl t (snd resp≤ (base x=t) (lemma-<=minE i₁ j₁)) (lemma-<=minE3 i₄ j₄ (eq (base (sym== x=t)))) res (makeH x c d) , j)
+  ... | tri> x₂ x₃ x₄ | res = orA (# t , nl t (lemma-<=minE (trans≤ (le (base x₄)) i₁) (trans≤ (le (base x₄)) j₁)) (lemma-<=minE3 i₄ j₄ (le (base x₄))) res (makeH x c d) , j)
+  apop (nl _ i j (nl p₁ i₁ j₁ a b) (nf p₂ i₂ j₂ c d)) with cmp {p₁} {p₂}
+  ... | r = {!!}
+  apop (nl _ i j (nr p₁ i₁ j₁ a b) (nf p₂ i₂ j₂ c d)) = {!!}
+  apop (nr _ i j (nf p₁ i₁ j₁ a b) (nd p₂ i₂ j₂ c d)) = {!!}
+  apop (nr _ i j (nf p₁ i₁ j₁ a b) (nl p₂ i₂ j₂ c d)) = {!!}
+  apop (nr _ i j (nf p₁ i₁ j₁ a b) (nr p₂ i₂ j₂ c d)) = {!!}
 \end{code}
 \AgdaHide{
 \begin{code}
