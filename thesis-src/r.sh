@@ -1,6 +1,20 @@
 #!/bin/bash
 
-echo "first arg == x $1 x"
+function run_latex()
+{
+    pdflatex -output-directory ../ $1
+}
+function run_one()
+{
+    run_latex thesis.tex
+}
+function make_thesis()
+{
+    run_one
+    biber thesis
+    run_one
+    run_one
+}
 
 if [ "x$1" = "xclean" ];
 then
@@ -26,20 +40,15 @@ else
             # mv latex/* ../latex
         popd
     done
-    # agda --latex Agda1.lagda
-    cd pic
-    for i in *.mp
-    do
-        if [[ -f "$i" ]]
-        then
-            mpost $i
-        fi
-    done
-    cd ..
-
-    pdflatex thesis.tex
-    biber thesis
-    pdflatex thesis.tex
-    pdflatex thesis.tex
+##    cd pic
+##    for i in *.mp
+##    do
+##        if [[ -f "$i" ]]
+##        then
+##            mpost $i
+##        fi
+##    done
+##    cd ..
+    make_thesis
 fi
 
