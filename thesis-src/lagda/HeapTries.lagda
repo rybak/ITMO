@@ -1,3 +1,4 @@
+\AgdaHide{
 \begin{code}
 module HeapTries where
 
@@ -64,6 +65,9 @@ module Logic where
 
 open Logic public
 
+\end{code}
+}
+\begin{code}
 module MLTT where
   infix 4 _≡_
   data _≡_ {a} {A : Set a} (x : A) : A → Set a where
