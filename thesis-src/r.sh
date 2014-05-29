@@ -11,7 +11,7 @@ function run_one()
 function make_thesis()
 {
     run_one
-    biber thesis
+    biber --bblsafechars ../thesis
     run_one
     run_one
 }
