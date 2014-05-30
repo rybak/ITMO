@@ -33,13 +33,17 @@ then
     done
 else
     export TEXINPUTS="$TEXINPUTS:./sty:"
-    for i in `cat lagda.txt`;
-    do
-        pushd lagda
-            agda --latex-dir "../latex" --latex "$i.lagda"
+    if [ "x$1" = "xagda" ];
+    then
+        for i in `cat lagda.txt`;
+        do
+            pushd lagda
+            agda --latex-dir "../latex" --latex "$i.lagda" --no-termination-check
+
             # mv latex/* ../latex
-        popd
-    done
+            popd
+        done
+    fi
 ##    cd pic
 ##    for i in *.mp
 ##    do

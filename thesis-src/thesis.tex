@@ -2,13 +2,23 @@
 %uncomment to see the references
 %\usepackage{showkeys}
 
-\usepackage{amsmath, amssymb, amsthm}
-\usepackage{amsfonts, amsxtra}
 % \usepackage{bbm}
-\usepackage[utf8]{inputenc}
 \usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
 
 \usepackage[english,russian]{babel}
+%\usepackage{expdlist}
+\usepackage[pdftex]{graphicx}
+\graphicspath{{pic/}}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{amsfonts, amsxtra}
+
+\usepackage{sty/dbl12}
+\usepackage{epsfig}
+\usepackage{verbatim}
+
+\usepackage{sty/rac}
+\usepackage{placeins}
 
 % This handles the translation of unicode to latex:
 
@@ -31,15 +41,8 @@
   {\item}
 
 \usepackage{csquotes}
-%\usepackage{expdlist}
 %\usepackage[nottoc,notbib]{tocbibind}
-\usepackage[pdftex]{graphicx}
-\graphicspath{{pic/}}
-\usepackage{sty/dbl12}
-\usepackage{epsfig}
-\usepackage{sty/rac}
 % \usepackage{listings}
-\usepackage{verbatim}
 
 \input{utils/braces.tex}
 \usepackage{agda}

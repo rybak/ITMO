@@ -20,22 +20,22 @@ module Level where
 open Level
 
 module Function where
-  _∘_ : ∀ {α β γ}
-      → {A : Set α} {B : A → Set β} {C : {x : A} → B x → Set γ}
+  _∘_ : ∀ {a b c}
+      → {A : Set a} {B : A → Set b} {C : {x : A} → B x → Set c}
       → (f : {x : A} → (y : B x) → C y)
       → (g : (x : A) → B x)
       → ((x : A) → C (g x))
   f ∘ g = λ x → f (g x)
   
   -- Simple composition
-  _∘′_ : ∀ {α β γ}
-      → {A : Set α} {B : Set β} {C : Set γ}
+  _∘′_ : ∀ {a b c}
+      → {A : Set a} {B : Set b} {C : Set c}
       → (B → C) → (A → B) → (A → C)
   f ∘′ g = f ∘ g
   
   -- Flip
-  flip : ∀ {α β γ}
-       → {A : Set α} {B : Set β} {C : A → B → Set γ} 
+  flip : ∀ {a b c}
+       → {A : Set a} {B : Set b} {C : A → B → Set c} 
        → ((x : A) → (y : B) → C x y)
        → ((y : B) → (x : A) → C x y)
   flip f x y = f y x
@@ -51,7 +51,7 @@ module Logic where
   ¬ P = P → ⊥
 
   private
-   module DummyAB {α β} {A : Set α} {B : Set β} where
+   module DummyAB {a b} {A : Set a} {B : Set b} where
     contradiction : A → ¬ A → B
     contradiction a ¬a = ⊥-elim (¬a a)
 
@@ -74,38 +74,24 @@ module MLTT where
     refl : x ≡ x
   {-# BUILTIN EQUALITY _≡_ #-}
   {-# BUILTIN REFL    refl #-}
-
+\end{code}
+Тип-сумма
+\begin{code}
   record Σ {a b} (A : Set a) (B : A → Set b) : Set (a ⊔ b) where
     constructor _,_
     field fst : A ; snd : B fst
-
   open Σ public
   _×_ : ∀ {a b} (A : Set a) → (B : Set b) → Set (a ⊔ b)
   A × B = Σ A (λ _ → B)
   infixr 5 _×_ _,_
   module ≡-Prop where
    private
-    module DummyA {α} {A : Set α} where
-      -- _≡_ is symmetric
-      sym : {x y : A} → x ≡ y → y ≡ x
-      sym refl = refl
-  
-      -- _≡_ is transitive
-      trans : {x y z : A} → x ≡ y → y ≡ z → x ≡ z
-      trans refl refl = refl
-  
-      -- _≡_ is substitutive
-      subst : ∀ {γ} {P : A → Set γ} {x y} → x ≡ y → P x → P y
-      subst refl p = p
-  
-    private
-     module DummyAB {α β} {A : Set α} {B : Set β} where
+    module DummyA {a b} {A : Set a} {B : Set b} where
       -- _≡_ is congruent
       cong : ∀ (f : A → B) {x y} → x ≡ y → f x ≡ f y
       cong f refl = refl
 
     open DummyA public
-    open DummyAB public
   open ≡-Prop public
 
 open MLTT public
@@ -123,14 +109,17 @@ flip₁ f a b = f b a
 
 Cmp : {A : Set} → Rel₂ A → Rel₂ A → Set
 Cmp {A} _<_ _==_ = ∀ (x y : A) → Tri (_<_) (_==_) (flip₁ _<_) x y
-
+\end{code}\AgdaHide{
+\begin{code}
 data ℕ : Set where
   zero : ℕ
   succ : ℕ → ℕ
 {-# BUILTIN NATURAL ℕ #-}
 {-# BUILTIN ZERO zero #-}
 {-# BUILTIN SUC succ #-}
-
+\end{code}
+}
+\begin{code}
 data _ℕ≤_ : Rel₂ ℕ where
   z≤n : ∀ {n} → zero ℕ≤ n
   s≤s : ∀ {n m} → n ℕ≤ m → succ n ℕ≤ succ m
@@ -153,6 +142,9 @@ cmpℕ (succ x) (succ y) with cmpℕ x y
 ... | tri<  a ¬b ¬c = tri< (s≤s a) (contraposition lemma-succ-≡ ¬b) (contraposition lemma-succ-≤ ¬c)
 ... | tri> ¬a ¬b  c = tri> (contraposition lemma-succ-≤ ¬a) (contraposition lemma-succ-≡ ¬b) (s≤s c)
 ... | tri= ¬a  b ¬c = tri= (contraposition lemma-succ-≤ ¬a) (cong succ b) (contraposition lemma-succ-≤ ¬c)
+\end{code}
+% Предикат (?) транзитивности отношения
+\begin{code}
 
 Trans : {A : Set} → Rel₂ A → Set
 Trans {A} _rel_ = {a b c : A} → (a rel b) → (b rel c) → (a rel c)
@@ -168,12 +160,18 @@ min cmp x y with cmp x y
 max cmp x y with cmp x y
 ... | tri> _ _ _ = x
 ... | _ = y
+\end{code}
+% Предикат (?) симметричности отношения
+\begin{code}
 
+\end{code}\AgdaHide{
+\begin{code}
 infixr 4 _⇒_
--- Implication/containment. Could also be written ⊆.
+\end{code}
+}
+\begin{code}
 _⇒_ : ∀ {A : Set} → Rel₂ A → Rel₂ A → Set
 P ⇒ Q = ∀ {i j} → P i j → Q i j
-
 -- Generalised symmetry.
 Sym : ∀ {A : Set} → Rel₂ A → Rel₂ A → Set
 Sym P Q = P ⇒ flip Q
@@ -195,10 +193,16 @@ data _<=_ {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A} : Rel₂ A where
   
 lemma-<=min : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A} {cmp : Cmp _<_ _==_} {a b c : A} → (_<=_ {_<_ = _<_} {_==_} a b) → (_<=_ {_<_ = _<_} {_==_} a c)
   → (_<=_ {_<_ = _<_} {_==_} a (min cmp b c))
+\end{code}\AgdaHide{
+\begin{code}
 lemma-<=min {cmp = cmp} {_} {b} {c} ab ac with cmp b c
 ... | tri< _ _ _ = ab
 ... | tri= _ _ _ = ac
 ... | tri> _ _ _ = ac
+
+\end{code}
+}
+\begin{code}
 
 min3 : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A} → (cmp : Cmp _<_ _==_) → A → A → A → A
 min3 cmp x y z with cmp x y
@@ -335,6 +339,9 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
 
   finsert : ∀ {h m} → (z : A) → Heap m h full
     → Σ HeapState (Heap (minE m (# z)) (succ h))
+\end{code}
+\AgdaHide{
+\begin{code}
   finsert {0} z eh = full , nf z (le ext) (le ext) eh eh
   finsert {1} z (nf p i j eh eh) with cmp p z
   ... | tri< p<z _ _ = almost , nd p (le (base p<z)) j (nf z (le ext) (le ext) eh eh) eh
@@ -356,9 +363,14 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
     | lemma-<=minE {# z} {# x} {# p} (trans≤ (le (base z<p)) i) (le (base z<p))
   ... | full   , newleft | l1 = almost , nd z l1 (trans≤ (le (base z<p)) j) newleft c
   ... | almost , newleft | l1 = almost , nl z l1 (trans≤ (le (base z<p)) j) newleft c
-  
+\end{code}
+}
+\begin{code}
   ainsert : ∀ {h m} → (z : A) → Heap m h almost
     → Σ HeapState (Heap (minE m (# z)) h)
+\end{code}
+\AgdaHide{
+\begin{code}
   ainsert z (nd p i j a b) with cmp p z
   ainsert z (nd p i j a b) | tri< p<z _ _ with finsert z b | lemma-<=minE j (le (base p<z))
   ... | full   , nb | l1 = full   , nf p i l1 a nb
@@ -391,8 +403,15 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   ainsert z (nr p i j a b) | tri> _ _ z<p with ainsert p b | trans≤ (le (base z<p)) i | lemma-<=minE (trans≤ (le (base z<p)) j) (le (base z<p))
   ... | full   , nb | l1 | l2 = full   , nf z l1 l2 a nb
   ... | almost , nb | l1 | l2 = almost , nr z l1 l2 a nb
-  
+\end{code}
+}
+\begin{code}
+
   fmerge : ∀ {x y h} → Heap x h full → Heap y h full → OR (Heap x zero full × (x ≡ y) × (h ≡ zero)) (Heap (minE x y) (succ h) almost)
+\end{code}
+\AgdaHide{
+\begin{code}
+
   fmerge eh eh = orA (eh , refl , refl)
   fmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d) with cmp x y
   fmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d) | tri< x<y _ _ with fmerge a b
@@ -404,6 +423,9 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   fmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d) | tri> _ _ y<x with fmerge c d
   ... | orA (eh , refl , refl) = orB (nd y (le (base y<x)) j₂ (nf x i₁ j₁ a b) eh)
   ... | orB cd = orB (nr y (le (base y<x)) (lemma-<=minE i₂ j₂) (nf x i₁ j₁ a b) cd)
+\end{code}
+}
+\begin{code}
 
   fpop : ∀ {m h} → Heap m (succ h) full
     → OR (Σ (expanded A) (λ x → (Heap x (succ h) almost) × (m ≤ x))) (Heap top h full)
@@ -413,6 +435,10 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   ... | orB res = orA ((minE (# x) (# y)) , res , lemma-<=minE i j)
 
   makeH : ∀ {x y h} → (p : A) → Heap x h full → Heap y h full → Heap (min3E x y (# p)) (succ h) full
+\end{code}
+\AgdaHide{
+\begin{code}
+
   makeH p eh eh = nf p (le ext) (le ext) eh eh
   makeH p (nf x i j a b) (nf y i₁ j₁ c d) with cmp x y
   makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri< x<y _ _ with cmp x p
@@ -430,6 +456,9 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri> _ _ y<x | tri< y<p _ _ = nf y (le (base y<x)) (lemma-<=min3E i₁ j₁ (le (base y<p))) (nf x i j a b) (makeH p c d)
   makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri> _ _ y<x | tri= _ y=p _ = nf p (le (base (snd resp y=p y<x))) (eq (base (sym== y=p))) (nf x i j a b) (nf y i₁ j₁ c d)
   makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri> _ _ y<x | tri> _ _ p<y = nf p (le (base (trans< p<y y<x))) (le (base p<y)) (nf x i j a b) (nf y i₁ j₁ c d)
+\end{code}
+}
+\begin{code}
 
   lemma-resp : ∀ {x y a b} → x == y → (# x) ≤ a → (# x) ≤ b → (# y) ≤ minE a b
   lemma-resp x=y i j = lemma-<=minE (snd resp≤ (base x=y) i) (snd resp≤ (base x=y) j)
@@ -438,6 +467,10 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
 
   ndmerge : ∀ {x y h} → Heap x (succ (succ h)) full → Heap y (succ h) full
     → Heap (minE x y) (succ (succ (succ h))) almost
+\end{code}
+\AgdaHide{
+\begin{code}
+
   ndmerge (nf x i j a b) (nf y i₁ j₁ c d) with cmp x y
   ndmerge (nf x i j a b) (nf y i₁ j₁ c d) | tri< x<y _ _ with fmerge a b
   ndmerge (nf x i j a b) (nf y i₁ j₁ c d) | tri< x<y _ _ | orA (_ , _ , ())
@@ -454,10 +487,15 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   ndmerge (nf x i j a b) (nf y i₁ j₁ c d) | tri> _ _ y<x with fmerge a b
   ndmerge (nf x i j a b) (nf y i₁ j₁ c d) | tri> _ _ y<x | orA (_ , _ , ())
   ndmerge (nf x i j a b) (nf y i₁ j₁ c d) | tri> _ _ y<x | orB ab = nl y (lemma-trans y<x i j) (lemma-<=min3E i₁ j₁ (le (base y<x))) ab (makeH x c d)
-
+\end{code}
+}
+\begin{code}
   afmerge : ∀ {h x y} → Heap x (succ (succ h)) almost
     → OR (Heap y (succ h) full) (Heap y (succ (succ h)) full)
     → OR (Heap (minE x y) (succ (succ h)) full) (Heap (minE x y) (succ (succ (succ h))) almost)
+\end{code}
+\AgdaHide{
+\begin{code}
   afmerge (nd x i j (nf p i₁ j₁ eh eh) eh) (orA (nf y i₂ j₂ eh eh)) with cmp x y
   ... | tri< x<y _ _ = orA (nf x i (le (base x<y)) (nf p i₁ j₁ eh eh) (nf y i₂ j₂ eh eh))
   ... | tri= _ x=y _ = orA (nf y (eq (base (sym== x=y))) (snd resp≤ (base x=y) i) (nf x (le ext) (le ext) eh eh) (nf p i₁ j₁ eh eh))
@@ -568,10 +606,15 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   ... | tri= _ x=y _ | (orB ab) = orB (nr y (lemma-<=min3E i₃ j₃ (eq (base (sym== x=y)))) (lemma-resp x=y j i) (makeH x c d) ab)
   ... | tri> _ _ y<x | (orA ab) = orB (nd y (lemma-<=min3E i₃ j₃ (le (base y<x))) (lemma-trans y<x j i) (makeH x c d) ab)
   ... | tri> _ _ y<x | (orB ab) = orB (nr y (lemma-<=min3E i₃ j₃ (le (base y<x))) (lemma-trans y<x j i) (makeH x c d) ab)
- 
+\end{code}
+}
+\begin{code}
   apop : ∀ {m h} → Heap m (succ h) almost
     → OR (Σ (expanded A) (λ x → (Heap x (succ h) almost) × (m ≤ x)))
          (Σ (expanded A) (λ x → (Heap x h full) × (m ≤ x)))
+\end{code}
+\AgdaHide{
+\begin{code}
   apop (nd {x = x} p i j a eh) = orB (x , a , i)
   apop (nd _ i j (nf x i₁ j₁ a b) (nf y i₂ j₂ c d)) with cmp x y | ndmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d)
   ... | tri< _ _ _ | res = orA (# x , res , i)
@@ -624,6 +667,7 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   ... | tri> _ _ _ | orB res = orA (# x , res , i)
 
 \end{code}
+}
 \AgdaHide{
 \begin{code}
 \end{code}
