@@ -31,7 +31,7 @@ module Function where
   _∘′_ : ∀ {α β γ}
       → {A : Set α} {B : Set β} {C : Set γ}
       → (B → C) → (A → B) → (A → C)
-  f ∘′ g = f ∘ g
+  f ∘′ g = {! .B!} ∘ g
   
   -- Flip
   flip : ∀ {α β γ}
