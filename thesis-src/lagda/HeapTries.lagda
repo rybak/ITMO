@@ -1,10 +1,13 @@
+% TODO сделать введение
+Часть общеизвестных определений заимствована из стандартной библиотеки
+Agda \cite{AgdaSLib}.
+
+\AgdaHide{
 \begin{code}
-
 module HeapTries where
-
+\end{code}} Тип данных для пустого типа из интуционистской теории типов.
+\begin{code}
 data ⊥ : Set where
-record ⊤ : Set where
-  constructor ⟨⟩
 \end{code} \AgdaHide{
 \begin{code}
 module Level where
@@ -48,9 +51,7 @@ module Logic where
 \begin{code}
   private
    module DummyAB {a b} {A : Set a} {B : Set b} where
-\end{code}
-}
-Контрадикция, противоречие: из $A$ и $\neg A$ можно получить любое $B$.
+\end{code}} Контрадикция, противоречие: из $A$ и $\neg A$ можно получить любое $B$.
 \begin{code}
     contradiction : A → ¬ A → B
     contradiction a ¬a = ⊥-elim (¬a a)
@@ -269,12 +270,8 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
 Тип данных для расширения исходного типа. 
 \begin{code}
   data expanded (A : Set) : Set where
-\end{code} \DC{\#} $x$ — элемент исходного типа
-\begin{code}
-    # : A → expanded A
-\end{code} \DC{top} — элемент расширение
-\begin{code}
-    top : expanded A
+    # : A → expanded A -- (# x) — элемент исходного типа
+    top : expanded A -- элемент расширение
 \end{code} Теперь нам нужно аналогичным образом расширить отношения
 заданные на множестве исходного типа.
 Тип данных для расширения отношения меньше.
@@ -327,9 +324,11 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
     right : ∀ {a b c : expanded A} → b =E c → b <E a → c <E a
     right {# _} {# _} {# _} (base r1) (base r2) = base (snd resp r1 r2)
     right {top} {# _} {# _} _ ext = ext
+\end{code}\AgdaHide{
+\begin{code}
     right {_} {# _} {top} () _
     right {_} {top} {_} _ ()
-\end{code} Отношение меньше-равно для расширенного типа.
+\end{code}} Отношение меньше-равно для расширенного типа.
 \begin{code}
   _≤_ : Rel₂ (expanded A)
   _≤_ = _<=_ {expanded A} {_<E_} {_=E_}
@@ -350,9 +349,12 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
 \begin{code}
   cmpE : Cmp {expanded A} _<E_ _=E_
   cmpE (# x) (# y) with cmp x y
-  cmpE (# x) (# y) | tri< a b c = tri< (base a) (contraposition lemma-=E b) (contraposition lemma-<E c)
-  cmpE (# x) (# y) | tri= a b c = tri= (contraposition lemma-<E a) (base b) (contraposition lemma-<E c)
-  cmpE (# x) (# y) | tri> a b c = tri> (contraposition lemma-<E a) (contraposition lemma-=E b) (base c)
+  cmpE (# x) (# y) | tri< a b c = 
+      tri< (base a) (contraposition lemma-=E b) (contraposition lemma-<E c)
+  cmpE (# x) (# y) | tri= a b c =
+      tri= (contraposition lemma-<E a) (base b) (contraposition lemma-<E c)
+  cmpE (# x) (# y) | tri> a b c =
+      tri> (contraposition lemma-<E a) (contraposition lemma-=E b) (base c)
   cmpE (# x) top = tri< ext (λ ()) (λ ())
   cmpE top (# y) = tri> (λ ()) (λ ()) ext
   cmpE top top   = tri= (λ ()) ext (λ ())
@@ -417,8 +419,7 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   lemma-almost-height (nd _ _ _ _ _) = s≤s z≤n
   lemma-almost-height (nl _ _ _ _ _) = s≤s z≤n
   lemma-almost-height (nr _ _ _ _ _) = s≤s z≤n
-\end{code}
-} Функция — просмотр минимума в куче.
+\end{code}} Функция — просмотр минимума в куче.
 \begin{code}
   peekMin : ∀ {m h s} → Heap m h s → (expanded A)
   peekMin eh = top
@@ -426,18 +427,22 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   peekMin (nf p _ _ _ _) = # p
   peekMin (nl p _ _ _ _) = # p
   peekMin (nr p _ _ _ _) = # p
-  lemma-<=minE : ∀ {a b c} → a ≤ b → a ≤ c → a ≤ (minE b c)
-  lemma-<=minE ab ac = lemma-<=min {expanded A}{_<E_}{_=E_}{cmpE} ab ac
-
+\end{code} Функция — минимум из трех элементов расширенного типа —
+частный случай ранее определенной общей функции.
+\begin{code}
   min3E : (expanded A) → (expanded A) → (expanded A) → (expanded A)
   min3E x y z = min3 cmpE x y z
+\end{code} Леммы для сравнения с минимумами для элементов расширенного типа.
+\begin{code}
+  lemma-<=minE : ∀ {a b c} → a ≤ b → a ≤ c → a ≤ (minE b c)
+  lemma-<=minE ab ac = lemma-<=min {expanded A}{_<E_}{_=E_}{cmpE} ab ac
   lemma-<=min3E : ∀ {x a b c} → x ≤ a → x ≤ b → x ≤ c → x ≤ (min3E a b c)
   lemma-<=min3E = lemma-<=min3 {expanded A}{_<E_}{_=E_}{cmpE}
-
+\end{code} Функция вставки элемента в полную кучу.
+\begin{code}
   finsert : ∀ {h m} → (z : A) → Heap m h full
     → Σ HeapState (Heap (minE m (# z)) (succ h))
-\end{code}
-\AgdaHide{
+\end{code} \AgdaHide{
 \begin{code}
   finsert {0} z eh = full , nf z (le ext) (le ext) eh eh
   finsert {1} z (nf p i j eh eh) with cmp p z
@@ -460,13 +465,11 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
     | lemma-<=minE {# z} {# x} {# p} (trans≤ (le (base z<p)) i) (le (base z<p))
   ... | full   , newleft | l1 = almost , nd z l1 (trans≤ (le (base z<p)) j) newleft c
   ... | almost , newleft | l1 = almost , nl z l1 (trans≤ (le (base z<p)) j) newleft c
-\end{code}
-}
+\end{code}} Вставка элемента в неполную кучу.
 \begin{code}
   ainsert : ∀ {h m} → (z : A) → Heap m h almost
     → Σ HeapState (Heap (minE m (# z)) h)
-\end{code}
-\AgdaHide{
+\end{code} \AgdaHide{
 \begin{code}
   ainsert z (nd p i j a b) with cmp p z
   ainsert z (nd p i j a b) | tri< p<z _ _ with finsert z b | lemma-<=minE j (le (base p<z))
@@ -500,9 +503,11 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   ainsert z (nr p i j a b) | tri> _ _ z<p with ainsert p b | trans≤ (le (base z<p)) i | lemma-<=minE (trans≤ (le (base z<p)) j) (le (base z<p))
   ... | full   , nb | l1 | l2 = full   , nf z l1 l2 a nb
   ... | almost , nb | l1 | l2 = almost , nr z l1 l2 a nb
-\end{code}}
+\end{code}} Слияние двух полных куч одной высоты.
 \begin{code}
-  fmerge : ∀ {x y h} → Heap x h full → Heap y h full → OR (Heap x zero full × (x ≡ y) × (h ≡ zero)) (Heap (minE x y) (succ h) almost)
+  fmerge : ∀ {x y h} → Heap x h full → Heap y h full
+    → OR (Heap x zero full × (x ≡ y) × (h ≡ zero))
+         (Heap (minE x y) (succ h) almost)
 \end{code} \AgdaHide{
 \begin{code}
   fmerge eh eh = orA (eh , refl , refl)
@@ -516,22 +521,19 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   fmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d) | tri> _ _ y<x with fmerge c d
   ... | orA (eh , refl , refl) = orB (nd y (le (base y<x)) j₂ (nf x i₁ j₁ a b) eh)
   ... | orB cd = orB (nr y (le (base y<x)) (lemma-<=minE i₂ j₂) (nf x i₁ j₁ a b) cd)
-\end{code}
-}
+\end{code}} Извлечение минимума из полной кучи.
 \begin{code}
-
   fpop : ∀ {m h} → Heap m (succ h) full
     → OR (Σ (expanded A) (λ x → (Heap x (succ h) almost) × (m ≤ x))) (Heap top h full)
   fpop (nf _ _ _ eh eh) = orB eh
   fpop (nf _ i j (nf x i₁ j₁ a b) (nf y i₂ j₂ c d)) with fmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d)
   ... | orA (() , _ , _)
   ... | orB res = orA ((minE (# x) (# y)) , res , lemma-<=minE i j)
-
-  makeH : ∀ {x y h} → (p : A) → Heap x h full → Heap y h full → Heap (min3E x y (# p)) (succ h) full
-\end{code}
-\AgdaHide{
+\end{code} Составление полной кучи высотой $h+1$ из двух куч высотой $h$ и одного элемента.
 \begin{code}
-
+  makeH : ∀ {x y h} → (p : A) → Heap x h full → Heap y h full → Heap (min3E x y (# p)) (succ h) full
+\end{code} \AgdaHide{
+\begin{code}
   makeH p eh eh = nf p (le ext) (le ext) eh eh
   makeH p (nf x i j a b) (nf y i₁ j₁ c d) with cmp x y
   makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri< x<y _ _ with cmp x p
@@ -549,21 +551,19 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri> _ _ y<x | tri< y<p _ _ = nf y (le (base y<x)) (lemma-<=min3E i₁ j₁ (le (base y<p))) (nf x i j a b) (makeH p c d)
   makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri> _ _ y<x | tri= _ y=p _ = nf p (le (base (snd resp y=p y<x))) (eq (base (sym== y=p))) (nf x i j a b) (nf y i₁ j₁ c d)
   makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri> _ _ y<x | tri> _ _ p<y = nf p (le (base (trans< p<y y<x))) (le (base p<y)) (nf x i j a b) (nf y i₁ j₁ c d)
-\end{code}
-}
+\end{code}} Вспомогательные леммы, использующие \F{lemma-<=minE}.
 \begin{code}
-
   lemma-resp : ∀ {x y a b} → x == y → (# x) ≤ a → (# x) ≤ b → (# y) ≤ minE a b
   lemma-resp x=y i j = lemma-<=minE (snd resp≤ (base x=y) i) (snd resp≤ (base x=y) j)
   lemma-trans : ∀ {x y a b} → y < x → (# x) ≤ a → (# x) ≤ b → (# y) ≤ minE a b
   lemma-trans y<x i j = lemma-<=minE (trans≤ (le (base y<x)) i) (trans≤ (le (base y<x)) j)
-
+\end{code} Слияние поддеревьев из кучи, у которой последний ряд заполнен до середины,
+определенной конструктором \DC{nd}.
+\begin{code}
   ndmerge : ∀ {x y h} → Heap x (succ (succ h)) full → Heap y (succ h) full
     → Heap (minE x y) (succ (succ (succ h))) almost
-\end{code}
-\AgdaHide{
+\end{code} \AgdaHide{
 \begin{code}
-
   ndmerge (nf x i j a b) (nf y i₁ j₁ c d) with cmp x y
   ndmerge (nf x i j a b) (nf y i₁ j₁ c d) | tri< x<y _ _ with fmerge a b
   ndmerge (nf x i j a b) (nf y i₁ j₁ c d) | tri< x<y _ _ | orA (_ , _ , ())
@@ -580,8 +580,7 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   ndmerge (nf x i j a b) (nf y i₁ j₁ c d) | tri> _ _ y<x with fmerge a b
   ndmerge (nf x i j a b) (nf y i₁ j₁ c d) | tri> _ _ y<x | orA (_ , _ , ())
   ndmerge (nf x i j a b) (nf y i₁ j₁ c d) | tri> _ _ y<x | orB ab = nl y (lemma-trans y<x i j) (lemma-<=min3E i₁ j₁ (le (base y<x))) ab (makeH x c d)
-\end{code}
-}
+\end{code}} Слияние неполной кучи высотой $h+2$ и полной кучи высотой $h+1$ или $h+2$.
 \begin{code}
   afmerge : ∀ {h x y} → Heap x (succ (succ h)) almost
     → OR (Heap y (succ h) full) (Heap y (succ (succ h)) full)
@@ -699,14 +698,12 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   ... | tri= _ x=y _ | (orB ab) = orB (nr y (lemma-<=min3E i₃ j₃ (eq (base (sym== x=y)))) (lemma-resp x=y j i) (makeH x c d) ab)
   ... | tri> _ _ y<x | (orA ab) = orB (nd y (lemma-<=min3E i₃ j₃ (le (base y<x))) (lemma-trans y<x j i) (makeH x c d) ab)
   ... | tri> _ _ y<x | (orB ab) = orB (nr y (lemma-<=min3E i₃ j₃ (le (base y<x))) (lemma-trans y<x j i) (makeH x c d) ab)
-\end{code}
-}
+\end{code}} Извлечение минимума из неполной кучи.
 \begin{code}
   apop : ∀ {m h} → Heap m (succ h) almost
     → OR (Σ (expanded A) (λ x → (Heap x (succ h) almost) × (m ≤ x)))
          (Σ (expanded A) (λ x → (Heap x h full) × (m ≤ x)))
-\end{code}
-\AgdaHide{
+\end{code} \AgdaHide{
 \begin{code}
   apop (nd {x = x} p i j a eh) = orB (x , a , i)
   apop (nd _ i j (nf x i₁ j₁ a b) (nf y i₂ j₂ c d)) with cmp x y | ndmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d)
@@ -758,10 +755,7 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   ... | tri< _ _ _ | orB res = orA (# y , res , j)
   ... | tri= _ _ _ | orB res = orA (# x , res , i)
   ... | tri> _ _ _ | orB res = orA (# x , res , i)
-
-\end{code}
-}
-\AgdaHide{
+\end{code}} \AgdaHide{
 \begin{code}
 \end{code}
 }
