@@ -1,17 +1,13 @@
 \documentclass[a4paper,oneside]{report}
-%uncomment to see the references
-%\usepackage{showkeys}
 
-% \usepackage{bbm}
 \usepackage[T2A]{fontenc}
 \usepackage[utf8]{inputenc}
 
-%\usepackage{expdlist}
 \usepackage[pdftex]{graphicx}
 \graphicspath{{pic/}}
+
 \usepackage{amsmath, amssymb, amsthm}
 \usepackage{amsfonts, amsxtra}
-
 \usepackage{sty/dbl12}
 \usepackage{epsfig}
 \usepackage{verbatim}
@@ -19,8 +15,6 @@
 \usepackage{sty/rac}
 \usepackage{placeins}
 \usepackage[english,russian]{babel}
-
-% This handles the translation of unicode to latex:
 
 \usepackage[section]{algorithm}
 \usepackage{algorithmic}
@@ -54,17 +48,16 @@
 \newcommand{\D}{\AgdaDatatype}
 \newcommand{\F}{\AgdaFunction}
 \newcommand{\DC}{\AgdaInductiveConstructor}
-%%% haskell hide
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{pdfpages}
+\usepackage{tikz}
+\usetikzlibrary{fit}
 
-% \captionsetup[figure]{justification=centering,   position=bottom, skip=0pt}
-% \captionsetup[table] {justification=raggedright, position=top,    skip=0pt}
+%%%
 
 %%% Russian captions:
 \input{utils/theorems.tex}
-% Various theorem environments. All of the following have the same numbering
-% system as theorem.
 
 \binoppenalty=10000
 \relpenalty=10000
@@ -72,8 +65,7 @@
 \addbibresource{thesis.bib}
 
 \begin{document}
-%  \renewcommand{\thelstlisting}{\thesection.\arabic{lstlisting}}
-% Begin the front matter as required by Rackham dissertation guidelines
+
 \initializefrontsections
 
 \pagestyle{title}
@@ -119,11 +111,5 @@
 
 \printbibliography
 
-% \startappendices
-% \input{parts/chapter1.tex}
-% \begin{appendices}
-%     \chapter{Some Appendix}
-%     The contents...
-% \end{appendices}
-
 \end{document}
+

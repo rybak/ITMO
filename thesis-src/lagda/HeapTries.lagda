@@ -384,6 +384,8 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
 элементов отношения \AgdaOperator{\_≤\_}: $i$ и $j$, которые говорят от том, что
 значение в корне меньше-равно
 значений в корнях левого и правого поддеревьев соответственно.
+На рисунке~\ref{pic:heap-nodes} схематичное изображены конструкторы
+типа данных \D{Heap}.
 \begin{code}
     nf : ∀ {n} {x y} → (p : A) → (i : (# p) ≤ x) → (j : (# p) ≤ y)
         → (a : Heap x n full)
@@ -411,7 +413,16 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
         → (a : Heap x (succ n) full)
         → (b : Heap y (succ n) almost)
         → Heap (# p) (succ (succ n)) almost
-\end{code} \emph{Замечание}: высота любой неполной кучи больше нуля.
+\end{code}
+\begin{figure}
+  \begin{center}
+    \includegraphics[width=0.6\textwidth]{pic/nodes-1.pdf}
+    \caption{Конструкторы типа данных \D{Heap}}
+    \label{pic:heap-nodes}
+  \end{center}
+\end{figure}
+\par
+\emph{Замечание}: высота любой неполной кучи больше нуля.
 \begin{code}
   lemma-almost-height : ∀ {m h} → Heap m h almost → h ℕ> 0
 \end{code}\AgdaHide{

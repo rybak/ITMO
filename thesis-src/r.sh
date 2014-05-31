@@ -2,7 +2,7 @@
 
 function run_latex()
 {
-    pdflatex -output-directory ../ $1
+    pdflatex -shell-escape -output-directory ../ $1
 }
 function run_one()
 {
@@ -44,15 +44,7 @@ else
             popd
         done
     fi
-##    cd pic
-##    for i in *.mp
-##    do
-##        if [[ -f "$i" ]]
-##        then
-##            mpost $i
-##        fi
-##    done
-##    cd ..
+    . m.sh
     make_thesis
 fi
 
