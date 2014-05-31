@@ -5,8 +5,9 @@
 .*\.hi$
 .*\~$
 .*\.sh$
+.*\.1$
 
-# thesis/backup
+thesis-src/backup/*
 .*.tar$
 .*.agdai$
 # " regexp:.*\/[^\.]+$

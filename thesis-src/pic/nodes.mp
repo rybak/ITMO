@@ -48,7 +48,7 @@ beginfig(1)
     y = 3u;
     pair NF, ND, NL, NR;
     pair xshift , yshift;
-    xshift = (5u, 0);
+    xshift = (6u, 0);
     yshift = (0 , -5u);
     NF = (2.5u, y);
     ND = NF + xshift;

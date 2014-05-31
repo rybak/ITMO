@@ -1,11 +1,15 @@
+\section{Реализация}
 % TODO сделать введение
+\subsection{Вспомогательные определения}
 Часть общеизвестных определений заимствована из стандартной библиотеки
 Agda \cite{AgdaSLib}.
 
 \AgdaHide{
 \begin{code}
 module HeapTries where
-\end{code}} Тип данных для пустого типа из интуционистской теории типов.
+\end{code}} Тип данных для пустого типа.
+У этого типа нет конструкторов, и, как следствие, нет термов,
+населяющих этот тип.
 \begin{code}
 data ⊥ : Set where
 \end{code} \AgdaHide{
@@ -90,6 +94,9 @@ module MLTT where
 \end{code}\AgdaHide{
 \begin{code}
   infixr 5 _×_ _,_
+\end{code}
+
+\begin{code}
   module ≡-Prop where
    private
     module DummyA {a b} {A : Set a} {B : Set b} where
@@ -104,6 +111,7 @@ module MLTT where
   open ≡-Prop public
 open MLTT public
 \end{code}}
+\subsection{Определение отношений и их свойств}
 Для сравнения элементов нужно задать отношения на этих элементах.
 \begin{code}
 Rel₂ : Set → Set₁
@@ -162,17 +170,33 @@ cmpℕ (succ x) (succ y) with cmpℕ x y
 ... | tri<  a ¬b ¬c = tri< (s≤s a) (contraposition lemma-succ-≡ ¬b) (contraposition lemma-succ-≤ ¬c)
 ... | tri> ¬a ¬b  c = tri> (contraposition lemma-succ-≤ ¬a) (contraposition lemma-succ-≡ ¬b) (s≤s c)
 ... | tri= ¬a  b ¬c = tri= (contraposition lemma-succ-≤ ¬a) (cong succ b) (contraposition lemma-succ-≤ ¬c)
-\end{code}
-% Предикат (?) транзитивности отношения
+\end{code} Транзитивность отношения
 \begin{code}
 
 Trans : {A : Set} → Rel₂ A → Set
 Trans {A} _rel_ = {a b c : A} → (a rel b) → (b rel c) → (a rel c)
 
-data OR (A B : Set) : Set where
-  orA : A → OR A B
-  orB : B → OR A B
-
+\end{code} Симметричность отношения.
+\begin{code}
+Symmetric : ∀ {A : Set} → Rel₂ A → Set
+Symmetric _rel_ = ∀ {a b} → a rel b → b rel a
+\end{code} Предикат $P$ учитывает (соблюдает) отношение \AgdaOperator{ \_rel\_ }.
+\begin{code}
+_Respects_ : ∀ {ℓ} {A : Set} → (A → Set ℓ) → Rel₂ A → Set _
+P Respects _rel_ = ∀ {x y} → x rel y → P x → P y
+\end{code} Отношение $P$ соблюдает отношение \AgdaOperator{ \_rel\_ }.
+\begin{code}
+_Respects₂_ : ∀ {A : Set} → Rel₂ A → Rel₂ A → Set
+P Respects₂ _rel_ =
+  (∀ {x} → P x      Respects _rel_) ×
+  (∀ {y} → flip P y Respects _rel_)
+\end{code} Тип данных для обобщенного отношения меньше или равно.
+\begin{code}
+data _<=_ {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A} : Rel₂ A where
+  le : ∀ {x y} → x < y → x <= y
+  eq : ∀ {x y} → x == y → x <= y
+\end{code} Обобщенные функции минимум и максимум.
+\begin{code}
 min max : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A} → (cmp : Cmp _<_ _==_) → A → A → A
 min cmp x y with cmp x y
 ... | tri< _ _ _ = x
@@ -180,27 +204,8 @@ min cmp x y with cmp x y
 max cmp x y with cmp x y
 ... | tri> _ _ _ = x
 ... | _ = y
-\end{code}
-% Предикат (?) симметричности отношения
-\begin{code}
-Symmetric : ∀ {A : Set} → Rel₂ A → Set
-Symmetric _∼_ = ∀ {a b} → a ∼ b → b ∼ a
-\end{code} Предикат $P$ учитывает (соблюдает) отношение \AgdaOperator{ \_∼\_ }.
-\begin{code}
-_Respects_ : ∀ {ℓ} {A : Set} → (A → Set ℓ) → Rel₂ A → Set _
-P Respects _∼_ = ∀ {x y} → x ∼ y → P x → P y
-\end{code} Частный случай: отношение $P$ соблюдает отношение \AgdaOperator{ \_∼\_ }.
-\begin{code}
-_Respects₂_ : ∀ {A : Set} → Rel₂ A → Rel₂ A → Set
-P Respects₂ _∼_ =
-  (∀ {x} → P x      Respects _∼_) ×
-  (∀ {y} → flip P y Respects _∼_)
-\end{code} Тип данных для обобщенного отношения меньше или равно.
-\begin{code}
-data _<=_ {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A} : Rel₂ A where
-  le : ∀ {x y} → x < y → x <= y
-  eq : ∀ {x y} → x == y → x <= y
-\end{code} Лемма: число меньше или равное двух чисел меньше или равно минимума из них.
+\end{code} Лемма: элемент меньше или равный двух других элементов
+меньше или равен минимума из них.
 \begin{code}
 lemma-<=min : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A}
   {cmp : Cmp _<_ _==_} {a b c : A}
@@ -229,8 +234,12 @@ lemma-<=min3 {cmp = cmp} {x} {a} {b} {c} xa xb xc with cmp a b
 ... | tri< _ _ _ = lemma-<=min {cmp = cmp} xa xc
 ... | tri= _ _ _ = lemma-<=min {cmp = cmp} xb xc
 ... | tri> _ _ _ = lemma-<=min {cmp = cmp} xb xc
-\end{code} Отношение \AgdaOperator{\_<=\_} соблюдает отношение равенства \AgdaOperator{\_==\_}, с помощью
-которого оно определено.
+\end{code} Леммы \F{lemma-<=min} и \F{lemma-<=min3} понадобятся
+при доказательстве соотношений между элементами,
+из которорых составляются новые кучи при их обработке.
+
+Отношение \AgdaOperator{\_<=\_} соблюдает отношение равенства \AgdaOperator{\_==\_},
+с помощью которого оно определено.
 \begin{code}
 resp<= : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A} → (resp : _<_ Respects₂ _==_) → (trans== : Trans _==_) → (sym== : Symmetric _==_) → (_<=_ {A}{_<_}{_==_}) Respects₂ _==_
 resp<= {A}{_<_}{_==_} resp trans sym = left , right where
@@ -250,6 +259,7 @@ trans<= r s t== t< (le a<b) (eq b=c) = le (fst r b=c a<b)
 trans<= r s t== t< (eq a=b) (le b<c) = le (snd r (s a=b) b<c)
 trans<= r s t== t< (eq a=b) (eq b=c) = eq (t== a=b b=c)
 \end{code}
+\subsection{Куча}
 Модуль, в котором мы определим структуру данных куча, параметризован
 исходным типом, двумя отношениями, определенными для этого типа, \AgdaOperator{\_<\_} и \AgdaOperator{\_==\_}.
 Также требуется симметричность и транзитивность \AgdaOperator{\_==\_},
@@ -514,7 +524,12 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   ainsert z (nr p i j a b) | tri> _ _ z<p with ainsert p b | trans≤ (le (base z<p)) i | lemma-<=minE (trans≤ (le (base z<p)) j) (le (base z<p))
   ... | full   , nb | l1 | l2 = full   , nf z l1 l2 a nb
   ... | almost , nb | l1 | l2 = almost , nr z l1 l2 a nb
-\end{code}} Слияние двух полных куч одной высоты.
+\end{code}} Вспомогательный тип данных.
+\begin{code}
+  data OR (A B : Set) : Set where
+    orA : A → OR A B
+    orB : B → OR A B
+\end{code} Слияние двух полных куч одной высоты.
 \begin{code}
   fmerge : ∀ {x y h} → Heap x h full → Heap y h full
     → OR (Heap x zero full × (x ≡ y) × (h ≡ zero))
@@ -535,12 +550,17 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
 \end{code}} Извлечение минимума из полной кучи.
 \begin{code}
   fpop : ∀ {m h} → Heap m (succ h) full
-    → OR (Σ (expanded A) (λ x → (Heap x (succ h) almost) × (m ≤ x))) (Heap top h full)
+    → OR (Σ (expanded A) 
+            (λ x → (Heap x (succ h) almost) × (m ≤ x)))
+         (Heap top h full)
+\end{code}\AgdaHide{
+\begin{code}
   fpop (nf _ _ _ eh eh) = orB eh
-  fpop (nf _ i j (nf x i₁ j₁ a b) (nf y i₂ j₂ c d)) with fmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d)
+  fpop (nf _ i j (nf x i₁ j₁ a b) (nf y i₂ j₂ c d))
+    with fmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d)
   ... | orA (() , _ , _)
   ... | orB res = orA ((minE (# x) (# y)) , res , lemma-<=minE i j)
-\end{code} Составление полной кучи высотой $h+1$ из двух куч высотой $h$ и одного элемента.
+\end{code}} Составление полной кучи высотой $h+1$ из двух куч высотой $h$ и одного элемента.
 \begin{code}
   makeH : ∀ {x y h} → (p : A) → Heap x h full → Heap y h full → Heap (min3E x y (# p)) (succ h) full
 \end{code} \AgdaHide{
@@ -564,10 +584,14 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri> _ _ y<x | tri> _ _ p<y = nf p (le (base (trans< p<y y<x))) (le (base p<y)) (nf x i j a b) (nf y i₁ j₁ c d)
 \end{code}} Вспомогательные леммы, использующие \F{lemma-<=minE}.
 \begin{code}
-  lemma-resp : ∀ {x y a b} → x == y → (# x) ≤ a → (# x) ≤ b → (# y) ≤ minE a b
-  lemma-resp x=y i j = lemma-<=minE (snd resp≤ (base x=y) i) (snd resp≤ (base x=y) j)
-  lemma-trans : ∀ {x y a b} → y < x → (# x) ≤ a → (# x) ≤ b → (# y) ≤ minE a b
-  lemma-trans y<x i j = lemma-<=minE (trans≤ (le (base y<x)) i) (trans≤ (le (base y<x)) j)
+  lemma-resp : ∀ {x y a b} → x == y → (# x) ≤ a → (# x) ≤ b
+    → (# y) ≤ minE a b
+  lemma-resp x=y i j = lemma-<=minE (snd resp≤ (base x=y) i)
+    (snd resp≤ (base x=y) j)
+  lemma-trans : ∀ {x y a b} → y < x → (# x) ≤ a → (# x) ≤ b
+    → (# y) ≤ minE a b
+  lemma-trans y<x i j = lemma-<=minE (trans≤ (le (base y<x)) i)
+    (trans≤ (le (base y<x)) j)
 \end{code} Слияние поддеревьев из кучи, у которой последний ряд заполнен до середины,
 определенной конструктором \DC{nd}.
 \begin{code}
