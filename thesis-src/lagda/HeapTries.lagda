@@ -71,6 +71,8 @@ module MLTT where
   infix 4 _≡_
 \end{code}}
 Пропозициональное равенство из ИТТ.
+% Так как Agda приводит все термы к нормальной форме,
+% то \F{\_≡\_} — отношение конвертабельности.
 \begin{code}
   data _≡_ {a} {A : Set a} (x : A) : A → Set a where
     refl : x ≡ x
@@ -167,9 +169,12 @@ cmpℕ zero (zero) = tri= (λ ()) refl (λ ())
 cmpℕ zero (succ y) = tri< (s≤s z≤n) (λ ()) (λ ())
 cmpℕ (succ x) zero = tri> (λ ()) (λ ()) (s≤s z≤n)
 cmpℕ (succ x) (succ y) with cmpℕ x y
-... | tri<  a ¬b ¬c = tri< (s≤s a) (contraposition lemma-succ-≡ ¬b) (contraposition lemma-succ-≤ ¬c)
-... | tri> ¬a ¬b  c = tri> (contraposition lemma-succ-≤ ¬a) (contraposition lemma-succ-≡ ¬b) (s≤s c)
-... | tri= ¬a  b ¬c = tri= (contraposition lemma-succ-≤ ¬a) (cong succ b) (contraposition lemma-succ-≤ ¬c)
+... | tri<  a ¬b ¬c = tri< (s≤s a) (contraposition lemma-succ-≡ ¬b)
+  (contraposition lemma-succ-≤ ¬c)
+... | tri> ¬a ¬b  c = tri> (contraposition lemma-succ-≤ ¬a)
+  (contraposition lemma-succ-≡ ¬b) (s≤s c)
+... | tri= ¬a  b ¬c = tri= (contraposition lemma-succ-≤ ¬a)
+  (cong succ b) (contraposition lemma-succ-≤ ¬c)
 \end{code} Транзитивность отношения
 \begin{code}
 
@@ -197,7 +202,8 @@ data _<=_ {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A} : Rel₂ A where
   eq : ∀ {x y} → x == y → x <= y
 \end{code} Обобщенные функции минимум и максимум.
 \begin{code}
-min max : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A} → (cmp : Cmp _<_ _==_) → A → A → A
+min max : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A}
+  → (cmp : Cmp _<_ _==_) → A → A → A
 min cmp x y with cmp x y
 ... | tri< _ _ _ = x
 ... | _ = y
@@ -209,7 +215,8 @@ max cmp x y with cmp x y
 \begin{code}
 lemma-<=min : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A}
   {cmp : Cmp _<_ _==_} {a b c : A}
-  → (_<=_ {_<_ = _<_} {_==_} a b) → (_<=_ {_<_ = _<_} {_==_} a c)
+  → (_<=_ {_<_ = _<_} {_==_} a b)
+  → (_<=_ {_<_ = _<_} {_==_} a c)
   → (_<=_ {_<_ = _<_} {_==_} a (min cmp b c))
 \end{code}\AgdaHide{
 \begin{code}
@@ -219,13 +226,15 @@ lemma-<=min {cmp = cmp} {_} {b} {c} ab ac with cmp b c
 ... | tri> _ _ _ = ac
 \end{code}} Функция — минимум из трех элементов.
 \begin{code}
-min3 : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A} → (cmp : Cmp _<_ _==_) → A → A → A → A
+min3 : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A}
+  → (cmp : Cmp _<_ _==_) → A → A → A → A
 min3 cmp x y z with cmp x y
 ... | tri< _ _ _ = min cmp x z
 ... | _ = min cmp y z
 \end{code} Аналогичная предыдущей лемма для минимума из трех элементов.
 \begin{code}
-lemma-<=min3 : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A} {cmp : Cmp _<_ _==_} {x a b c : A}
+lemma-<=min3 : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A}
+  {cmp : Cmp _<_ _==_} {x a b c : A}
   → (_<=_ {_<_ = _<_} {_==_} x a)
   → (_<=_ {_<_ = _<_} {_==_} x b)
   → (_<=_ {_<_ = _<_} {_==_} x c)
@@ -241,7 +250,9 @@ lemma-<=min3 {cmp = cmp} {x} {a} {b} {c} xa xb xc with cmp a b
 Отношение \AgdaOperator{\_<=\_} соблюдает отношение равенства \AgdaOperator{\_==\_},
 с помощью которого оно определено.
 \begin{code}
-resp<= : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A} → (resp : _<_ Respects₂ _==_) → (trans== : Trans _==_) → (sym== : Symmetric _==_) → (_<=_ {A}{_<_}{_==_}) Respects₂ _==_
+resp<= : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A}
+  → (resp : _<_ Respects₂ _==_) → (trans== : Trans _==_)
+  → (sym== : Symmetric _==_) → (_<=_ {A}{_<_}{_==_}) Respects₂ _==_
 resp<= {A}{_<_}{_==_} resp trans sym = left , right where
   left : ∀ {a b c : A} → b == c → a <= b → a <= c
   left b=c (le a<b) = le (fst resp b=c a<b)
@@ -259,7 +270,7 @@ trans<= r s t== t< (le a<b) (eq b=c) = le (fst r b=c a<b)
 trans<= r s t== t< (eq a=b) (le b<c) = le (snd r (s a=b) b<c)
 trans<= r s t== t< (eq a=b) (eq b=c) = eq (t== a=b b=c)
 \end{code}
-\subsection{Куча}
+\subsection{КучКучаа}
 Модуль, в котором мы определим структуру данных куча, параметризован
 исходным типом, двумя отношениями, определенными для этого типа, \AgdaOperator{\_<\_} и \AgdaOperator{\_==\_}.
 Также требуется симметричность и транзитивность \AgdaOperator{\_==\_},
@@ -267,8 +278,8 @@ trans<= r s t== t< (eq a=b) (eq b=c) = eq (t== a=b b=c)
 
 \begin{code}
 module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
-  (sym== : Symmetric _==_) (resp : _<_ Respects₂ _==_) (trans< : Trans _<_)
-  (trans== : Trans _==_)
+  (sym== : Symmetric _==_) (trans== : Trans _==_)
+  (trans< : Trans _<_) (resp : _<_ Respects₂ _==_)
   where
 \end{code}
 Будем индексировать кучу минимальным элементом в ней,
@@ -298,7 +309,8 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
 \end{code} Расширенное отношение меньше — транзитивно.
 \begin{code}
   trans<E : Trans _<E_
-  trans<E {# _} {# _} {# _} a<b b<c = base (trans< (lemma-<E a<b) (lemma-<E b<c))
+  trans<E {# _} {# _} {# _} a<b b<c =
+    base (trans< (lemma-<E a<b) (lemma-<E b<c))
   trans<E {# _} {# _} {top} _  _  = ext
 \end{code}\AgdaHide{
 \begin{code}
@@ -456,7 +468,7 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
 \end{code} Леммы для сравнения с минимумами для элементов расширенного типа.
 \begin{code}
   lemma-<=minE : ∀ {a b c} → a ≤ b → a ≤ c → a ≤ (minE b c)
-  lemma-<=minE ab ac = lemma-<=min {expanded A}{_<E_}{_=E_}{cmpE} ab ac
+  lemma-<=minE = lemma-<=min {expanded A}{_<E_}{_=E_}{cmpE}
   lemma-<=min3E : ∀ {x a b c} → x ≤ a → x ≤ b → x ≤ c → x ≤ (min3E a b c)
   lemma-<=min3E = lemma-<=min3 {expanded A}{_<E_}{_=E_}{cmpE}
 \end{code} Функция вставки элемента в полную кучу.
@@ -562,7 +574,8 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   ... | orB res = orA ((minE (# x) (# y)) , res , lemma-<=minE i j)
 \end{code}} Составление полной кучи высотой $h+1$ из двух куч высотой $h$ и одного элемента.
 \begin{code}
-  makeH : ∀ {x y h} → (p : A) → Heap x h full → Heap y h full → Heap (min3E x y (# p)) (succ h) full
+  makeH : ∀ {x y h} → (p : A) → Heap x h full → Heap y h full
+    → Heap (min3E x y (# p)) (succ h) full
 \end{code} \AgdaHide{
 \begin{code}
   makeH p eh eh = nf p (le ext) (le ext) eh eh
@@ -619,7 +632,8 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
 \begin{code}
   afmerge : ∀ {h x y} → Heap x (succ (succ h)) almost
     → OR (Heap y (succ h) full) (Heap y (succ (succ h)) full)
-    → OR (Heap (minE x y) (succ (succ h)) full) (Heap (minE x y) (succ (succ (succ h))) almost)
+    → OR (Heap (minE x y) (succ (succ h)) full)
+         (Heap (minE x y) (succ (succ (succ h))) almost)
 \end{code}
 \AgdaHide{
 \begin{code}
