@@ -1,12 +1,12 @@
-\AgdaHide{
 \begin{code}
+
 module HeapTries where
 
 data ⊥ : Set where
-
 record ⊤ : Set where
   constructor ⟨⟩
-
+\end{code} \AgdaHide{
+\begin{code}
 module Level where
   postulate Level : Set
   postulate lzero : Level
@@ -20,20 +20,12 @@ module Level where
 open Level
 
 module Function where
+ 
   _∘_ : ∀ {a b c}
-      → {A : Set a} {B : A → Set b} {C : {x : A} → B x → Set c}
-      → (f : {x : A} → (y : B x) → C y)
-      → (g : (x : A) → B x)
-      → ((x : A) → C (g x))
-  f ∘ g = λ x → f (g x)
-  
-  -- Simple composition
-  _∘′_ : ∀ {a b c}
       → {A : Set a} {B : Set b} {C : Set c}
       → (B → C) → (A → B) → (A → C)
-  f ∘′ g = f ∘ g
+  f ∘ g = λ x → f (g x)
   
-  -- Flip
   flip : ∀ {a b c}
        → {A : Set a} {B : Set b} {C : A → B → Set c} 
        → ((x : A) → (y : B) → C x y)
@@ -43,23 +35,29 @@ module Function where
 open Function public
 
 module Logic where
-
-  ⊥-elim : ∀ {a} {A : Set a} → ⊥ → A
+\end{code}} Из элемента пустого типа следует что-угодно.
+\begin{code}
+  ⊥-elim : ∀ {a} {Whatever : Set a} → ⊥ → Whatever
   ⊥-elim ()
-
+\end{code} Логическое отрицание.
+\begin{code}
   ¬ : ∀ {a} → Set a → Set a
   ¬ P = P → ⊥
-
+\end{code}
+\AgdaHide{
+\begin{code}
   private
    module DummyAB {a b} {A : Set a} {B : Set b} where
-\end{code}} Контрадикция, противоречие: из $A$ и $\neg A$ можно получить любое $B$.
+\end{code}
+}
+Контрадикция, противоречие: из $A$ и $\neg A$ можно получить любое $B$.
 \begin{code}
     contradiction : A → ¬ A → B
     contradiction a ¬a = ⊥-elim (¬a a)
 \end{code} Контрапозиция
 \begin{code}
     contraposition : (A → B) → (¬ B → ¬ A)
-    contraposition = flip _∘′_
+    contraposition = flip _∘_
 \end{code}\AgdaHide{
 \begin{code}
   open DummyAB public
@@ -83,7 +81,7 @@ module MLTT where
 \end{code}\AgdaHide{
 \begin{code}
   open Σ public
-\end{code}} Декартово произведения — частный случай зависимой пары,
+\end{code}} Декартово произведение — частный случай зависимой пары,
 Второй индекс игнорирует передаваемое ему значение.
 \begin{code}
   _×_ : ∀ {a b} (A : Set a) → (B : Set b) → Set (a ⊔ b)
@@ -110,8 +108,8 @@ open MLTT public
 Rel₂ : Set → Set₁
 Rel₂ A = A → A → Set
 \end{code}
-Трихотомичность отношений меньне, равно и больше:
-одновременно два элемента могут пренадлежать только одному отношению из трех.
+Трихотомичность отношений меньше, равно и больше:
+одновременно два элемента могут принадлежать только одному отношению из трех.
 \begin{code}
 data Tri {A : Set} (_<_ _==_ _>_ : Rel₂ A) (a b : A) : Set where
   tri< :   (a < b) → ¬ (a == b) → ¬ (a > b) → Tri _<_ _==_ _>_ a b
@@ -201,7 +199,7 @@ P Respects₂ _∼_ =
 data _<=_ {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A} : Rel₂ A where
   le : ∀ {x y} → x < y → x <= y
   eq : ∀ {x y} → x == y → x <= y
-\end{code} Лемма: число меньше-равное двух чисел меньше или равно минимума из них.
+\end{code} Лемма: число меньше или равное двух чисел меньше или равно минимума из них.
 \begin{code}
 lemma-<=min : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A}
   {cmp : Cmp _<_ _==_} {a b c : A}
@@ -213,7 +211,7 @@ lemma-<=min {cmp = cmp} {_} {b} {c} ab ac with cmp b c
 ... | tri< _ _ _ = ab
 ... | tri= _ _ _ = ac
 ... | tri> _ _ _ = ac
-\end{code}} Функция минимума из трех элементов.
+\end{code}} Функция — минимум из трех элементов.
 \begin{code}
 min3 : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A} → (cmp : Cmp _<_ _==_) → A → A → A → A
 min3 cmp x y z with cmp x y
@@ -251,7 +249,7 @@ trans<= r s t== t< (le a<b) (eq b=c) = le (fst r b=c a<b)
 trans<= r s t== t< (eq a=b) (le b<c) = le (snd r (s a=b) b<c)
 trans<= r s t== t< (eq a=b) (eq b=c) = eq (t== a=b b=c)
 \end{code}
-Модуль, в котором мы определим структуру данных куча, параметризирован
+Модуль, в котором мы определим структуру данных куча, параметризован
 исходным типом, двумя отношениями, определенными для этого типа, \AgdaOperator{\_<\_} и \AgdaOperator{\_==\_}.
 Также требуется симметричность и транзитивность \AgdaOperator{\_==\_},
 транзитивность \AgdaOperator{\_<\_}, соблюдение отношением \AgdaOperator{\_<\_} отношения \AgdaOperator{\_==\_} и
@@ -277,13 +275,17 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
 \end{code} \DC{top} — элемент расширение
 \begin{code}
     top : expanded A
-\end{code} Теперь нам нужно аналагичным образом расширить отношения
+\end{code} Теперь нам нужно аналогичным образом расширить отношения
 заданные на множестве исходного типа.
 Тип данных для расширения отношения меньше.
 \begin{code}
   data _<E_ : Rel₂ (expanded A) where
     base : ∀ {x y : A} → x < y → (# x) <E (# y)
     ext  : ∀ {x : A} → (# x) <E top
+\end{code} Вспомогательная лемма, извлекающая доказательство
+для отношения элементов исходного типа из отношения для элементов
+расширенного типа.
+\begin{code}
   lemma-<E : ∀ {x} {y} → (# x) <E (# y) → x < y
   lemma-<E (base r) = r
 \end{code} Расширенное отношение меньше — транзитивно.
@@ -354,7 +356,7 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   cmpE (# x) top = tri< ext (λ ()) (λ ())
   cmpE top (# y) = tri> (λ ()) (λ ()) ext
   cmpE top top   = tri= (λ ()) ext (λ ())
-\end{code} Функция минимум для расширенного типа.
+\end{code} Функция — минимум для расширенного типа.
 \begin{code}
   minE : (x y : expanded A) → expanded A
   minE = min cmpE
@@ -407,7 +409,7 @@ module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
         → (a : Heap x (succ n) full)
         → (b : Heap y (succ n) almost)
         → Heap (# p) (succ (succ n)) almost
-\end{code} \emph{Замечание}: высота любой неполная куча больше нуля.
+\end{code} \emph{Замечание}: высота любой неполной кучи больше нуля.
 \begin{code}
   lemma-almost-height : ∀ {m h} → Heap m h almost → h ℕ> 0
 \end{code}\AgdaHide{
