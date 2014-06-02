@@ -1,14 +1,14 @@
 #!/bin/sh
 
-function run_latex()
+run_latex()
 {
     pdflatex -shell-escape -output-directory ../ $1
 }
-function run_one()
+run_one()
 {
     run_latex thesis.tex
 }
-function make_thesis()
+make_thesis()
 {
     run_one
     biber --bblsafechars ../thesis
@@ -37,11 +37,11 @@ else
     then
         for i in `cat lagda.txt`;
         do
-            pushd lagda
+            cd lagda
             agda --latex-dir "../latex" --latex "$i.lagda" --no-termination-check
 
             # mv latex/* ../latex
-            popd
+            cd ../
         done
     fi
     . ./m.sh

@@ -1,9 +1,9 @@
 #!/bin/sh
 
-pushd pic
+cd pic
 for i in *.mp
 do
-    if [[ -f "$i" ]]
+    if [ -f "$i" ];
     then
         fn=${i%.*}
         mpost $fn.mp
@@ -11,5 +11,5 @@ do
         mptopdf --latex $fn.mp
     fi
 done
-popd
+cd ../
 
