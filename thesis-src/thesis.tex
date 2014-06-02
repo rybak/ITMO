@@ -19,6 +19,7 @@
 \usepackage[section]{algorithm}
 \usepackage{algorithmic}
 
+% надо сделать нумерацию нумерами, а у меня почему-то рендерится буквами
 \usepackage[backend=biber,bibencoding=utf8,sorting=none,sortcites=true,bibstyle=sty/gost71,maxnames=99,citestyle=numeric-comp,babel=other]{biblatex}
 
 \defbibenvironment{bibliography}
@@ -88,8 +89,14 @@
 \vbox{\LARGE\bfseries
 Представление структур данных индуктивными семействами и доказательства их свойств
 }
+
 \vspace{4cm}
-{\Large Научный руководитель: ассистент кафедры ТП Я.~М.~Малаховски}
+
+% Общее правило: в таких местах пишут научные звания, а не должности у
+% меня научных званий нет.
+% По этому же правилу ты не "студент", а просто "ты" чуть выше.
+{\Large Научный руководитель: Я.~М.~Малаховски}
+
 \vspace{6cm}
 Санкт-Петербург\\ 2014
 \end{center}

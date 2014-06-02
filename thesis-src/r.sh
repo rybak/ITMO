@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 function run_latex()
 {
@@ -44,7 +44,7 @@ else
             popd
         done
     fi
-    . m.sh
+    . ./m.sh
     make_thesis
 fi
 

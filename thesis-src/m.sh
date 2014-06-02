@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/bin/sh
+
 pushd pic
 for i in *.mp
 do
