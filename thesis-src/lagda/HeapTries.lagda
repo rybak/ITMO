@@ -111,7 +111,7 @@ module MLTT where
   open ≡-Prop public
 open MLTT public
 \end{code}}
-\subsection{Определение отношений и их свойств}
+\subsection{Определение отношений и доказательство их свойств}
 Для сравнения элементов нужно задать отношения на этих элементах.
 \begin{code}
 Rel₂ : Set → Set₁
@@ -268,14 +268,14 @@ trans<= r s t== t< (le a<b) (eq b=c) = le (fst r b=c a<b)
 trans<= r s t== t< (eq a=b) (le b<c) = le (snd r (s a=b) b<c)
 trans<= r s t== t< (eq a=b) (eq b=c) = eq (t== a=b b=c)
 \end{code}
-\subsection{КучКучаа}
+\subsection{Куча}
 Модуль, в котором мы определим структуру данных куча, параметризован
 исходным типом, двумя отношениями, определенными для этого типа, \AgdaOperator{\_<\_} и \AgdaOperator{\_==\_}.
 Также требуется симметричность и транзитивность \AgdaOperator{\_==\_},
 транзитивность \AgdaOperator{\_<\_}, соблюдение отношением \AgdaOperator{\_<\_} отношения \AgdaOperator{\_==\_} и
 
 \begin{code}
-module TryHeap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
+module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   (sym== : Symmetric _==_) (trans== : Trans _==_)
   (trans< : Trans _<_) (resp : _<_ Respects₂ _==_)
   where
