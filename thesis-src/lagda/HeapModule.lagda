@@ -804,42 +804,91 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
     (lemma-<=min3E i₃ j₃ (le (base y<x))) (lemma-trans y<x i j) (makeH x c d) ab)
   ... | tri> _ _ y<x | (orB ab) = orB (nr y
     (lemma-<=min3E i₃ j₃ (le (base y<x))) (lemma-trans y<x i j) (makeH x c d) ab)
-  afmerge (nl x i j (nl p₁ i₁ j₁ a₁ b₁) (nf p₂ i₂ j₂ a₂ b₂)) (orB (nf y i₃ j₃ c d)) with cmp x y | afmerge (nl p₁ i₁ j₁ a₁ b₁) (orA (nf p₂ i₂ j₂ a₂ b₂))
-  ... | tri< x<y _ _ | (orA ab) = orB (nd x (le (base x<y)) (lemma-<=minE i j) (nf y i₃ j₃ c d) ab)
-  ... | tri< x<y _ _ | (orB ab) = orB (nr x (le (base x<y)) (lemma-<=minE i j) (nf y i₃ j₃ c d) ab)
-  ... | tri= _ x=y _ | (orA ab) = orB (nd y (lemma-<=min3E i₃ j₃ (eq (base (sym== x=y)))) (lemma-resp x=y i j) (makeH x c d) ab)
-  ... | tri= _ x=y _ | (orB ab) = orB (nr y (lemma-<=min3E i₃ j₃ (eq (base (sym== x=y)))) (lemma-resp x=y i j) (makeH x c d) ab)
-  ... | tri> _ _ y<x | (orA ab) = orB (nd y (lemma-<=min3E i₃ j₃ (le (base y<x))) (lemma-trans y<x i j) (makeH x c d) ab)
-  ... | tri> _ _ y<x | (orB ab) = orB (nr y (lemma-<=min3E i₃ j₃ (le (base y<x))) (lemma-trans y<x i j) (makeH x c d) ab)
+  afmerge (nl x i j (nl p₁ i₁ j₁ a₁ b₁) (nf p₂ i₂ j₂ a₂ b₂)) (orB (nf y i₃ j₃ c d))
+    with cmp x y | afmerge (nl p₁ i₁ j₁ a₁ b₁) (orA (nf p₂ i₂ j₂ a₂ b₂))
+  ... | tri< x<y _ _ | (orA ab) = orB (nd x (le (base x<y))
+    (lemma-<=minE i j) (nf y i₃ j₃ c d) ab)
+  ... | tri< x<y _ _ | (orB ab) = orB (nr x (le (base x<y))
+    (lemma-<=minE i j) (nf y i₃ j₃ c d) ab)
+  ... | tri= _ x=y _ | (orA ab) = orB
+    (nd y (lemma-<=min3E i₃ j₃ (eq (base (sym== x=y))))
+    (lemma-resp x=y i j) (makeH x c d) ab)
+  ... | tri= _ x=y _ | (orB ab) = orB
+    (nr y (lemma-<=min3E i₃ j₃ (eq (base (sym== x=y))))
+    (lemma-resp x=y i j) (makeH x c d) ab)
+  ... | tri> _ _ y<x | (orA ab) = orB
+    (nd y (lemma-<=min3E i₃ j₃ (le (base y<x)))
+    (lemma-trans y<x i j) (makeH x c d) ab)
+  ... | tri> _ _ y<x | (orB ab) = orB
+    (nr y (lemma-<=min3E i₃ j₃ (le (base y<x)))
+    (lemma-trans y<x i j) (makeH x c d) ab)
 
-  afmerge (nl x i j (nr p₁ i₁ j₁ a₁ b₁) (nf p₂ i₂ j₂ a₂ b₂)) (orB (nf y i₃ j₃ c d)) with cmp x y | afmerge (nr p₁ i₁ j₁ a₁ b₁) (orA (nf p₂ i₂ j₂ a₂ b₂))
-  ... | tri< x<y _ _ | (orA ab) = orB (nd x (le (base x<y)) (lemma-<=minE i j) (nf y i₃ j₃ c d) ab)
-  ... | tri< x<y _ _ | (orB ab) = orB (nr x (le (base x<y)) (lemma-<=minE i j) (nf y i₃ j₃ c d) ab)
-  ... | tri= _ x=y _ | (orA ab) = orB (nd y (lemma-<=min3E i₃ j₃ (eq (base (sym== x=y)))) (lemma-resp x=y i j) (makeH x c d) ab)
-  ... | tri= _ x=y _ | (orB ab) = orB (nr y (lemma-<=min3E i₃ j₃ (eq (base (sym== x=y)))) (lemma-resp x=y i j) (makeH x c d) ab)
-  ... | tri> _ _ y<x | (orA ab) = orB (nd y (lemma-<=min3E i₃ j₃ (le (base y<x))) (lemma-trans y<x i j) (makeH x c d) ab)
-  ... | tri> _ _ y<x | (orB ab) = orB (nr y (lemma-<=min3E i₃ j₃ (le (base y<x))) (lemma-trans y<x i j) (makeH x c d) ab)
-  afmerge (nr x i j (nf p₁ i₁ j₁ a₁ b₁) (nd p₂ i₂ j₂ a₂ b₂)) (orB (nf y i₃ j₃ c d)) with cmp x y | afmerge (nd p₂ i₂ j₂ a₂ b₂) (orB (nf p₁ i₁ j₁ a₁ b₁)) 
-  ... | tri< x<y _ _ | (orA ab) = orB (nd x (le (base x<y)) (lemma-<=minE j i) (nf y i₃ j₃ c d) ab) 
-  ... | tri< x<y _ _ | (orB ab) = orB (nr x (le (base x<y)) (lemma-<=minE j i) (nf y i₃ j₃ c d) ab)
-  ... | tri= _ x=y _ | (orA ab) = orB (nd y (lemma-<=min3E i₃ j₃ (eq (base (sym== x=y)))) (lemma-resp x=y j i) (makeH x c d) ab)
-  ... | tri= _ x=y _ | (orB ab) = orB (nr y (lemma-<=min3E i₃ j₃ (eq (base (sym== x=y)))) (lemma-resp x=y j i) (makeH x c d) ab)
-  ... | tri> _ _ y<x | (orA ab) = orB (nd y (lemma-<=min3E i₃ j₃ (le (base y<x))) (lemma-trans y<x j i) (makeH x c d) ab)
-  ... | tri> _ _ y<x | (orB ab) = orB (nr y (lemma-<=min3E i₃ j₃ (le (base y<x))) (lemma-trans y<x j i) (makeH x c d) ab)
-  afmerge (nr x i j (nf p₁ i₁ j₁ a₁ b₁) (nl p₂ i₂ j₂ a₂ b₂)) (orB (nf y i₃ j₃ c d)) with cmp x y | afmerge (nl p₂ i₂ j₂ a₂ b₂) (orB (nf p₁ i₁ j₁ a₁ b₁)) 
-  ... | tri< x<y _ _ | (orA ab) = orB (nd x (le (base x<y)) (lemma-<=minE j i) (nf y i₃ j₃ c d) ab) 
-  ... | tri< x<y _ _ | (orB ab) = orB (nr x (le (base x<y)) (lemma-<=minE j i) (nf y i₃ j₃ c d) ab)
-  ... | tri= _ x=y _ | (orA ab) = orB (nd y (lemma-<=min3E i₃ j₃ (eq (base (sym== x=y)))) (lemma-resp x=y j i) (makeH x c d) ab)
-  ... | tri= _ x=y _ | (orB ab) = orB (nr y (lemma-<=min3E i₃ j₃ (eq (base (sym== x=y)))) (lemma-resp x=y j i) (makeH x c d) ab)
-  ... | tri> _ _ y<x | (orA ab) = orB (nd y (lemma-<=min3E i₃ j₃ (le (base y<x))) (lemma-trans y<x j i) (makeH x c d) ab)
-  ... | tri> _ _ y<x | (orB ab) = orB (nr y (lemma-<=min3E i₃ j₃ (le (base y<x))) (lemma-trans y<x j i) (makeH x c d) ab)
+  afmerge (nl x i j (nr p₁ i₁ j₁ a₁ b₁) (nf p₂ i₂ j₂ a₂ b₂)) (orB (nf y i₃ j₃ c d))
+    with cmp x y | afmerge (nr p₁ i₁ j₁ a₁ b₁) (orA (nf p₂ i₂ j₂ a₂ b₂))
+  ... | tri< x<y _ _ | (orA ab) = orB
+    (nd x (le (base x<y)) (lemma-<=minE i j) (nf y i₃ j₃ c d) ab)
+  ... | tri< x<y _ _ | (orB ab) = orB
+    (nr x (le (base x<y)) (lemma-<=minE i j) (nf y i₃ j₃ c d) ab)
+  ... | tri= _ x=y _ | (orA ab) = orB
+    (nd y (lemma-<=min3E i₃ j₃ (eq (base (sym== x=y))))
+    (lemma-resp x=y i j) (makeH x c d) ab)
+  ... | tri= _ x=y _ | (orB ab) = orB
+    (nr y (lemma-<=min3E i₃ j₃ (eq (base (sym== x=y))))
+    (lemma-resp x=y i j) (makeH x c d) ab)
+  ... | tri> _ _ y<x | (orA ab) = orB
+    (nd y (lemma-<=min3E i₃ j₃ (le (base y<x)))
+    (lemma-trans y<x i j) (makeH x c d) ab)
+  ... | tri> _ _ y<x | (orB ab) = orB
+    (nr y (lemma-<=min3E i₃ j₃ (le (base y<x)))
+    (lemma-trans y<x i j) (makeH x c d) ab)
+
+  afmerge (nr x i j (nf p₁ i₁ j₁ a₁ b₁) (nd p₂ i₂ j₂ a₂ b₂)) (orB (nf y i₃ j₃ c d))
+    with cmp x y | afmerge (nd p₂ i₂ j₂ a₂ b₂) (orB (nf p₁ i₁ j₁ a₁ b₁)) 
+  ... | tri< x<y _ _ | (orA ab) = orB
+    (nd x (le (base x<y)) (lemma-<=minE j i) (nf y i₃ j₃ c d) ab) 
+  ... | tri< x<y _ _ | (orB ab) = orB
+    (nr x (le (base x<y)) (lemma-<=minE j i) (nf y i₃ j₃ c d) ab)
+  ... | tri= _ x=y _ | (orA ab) = orB
+    (nd y (lemma-<=min3E i₃ j₃ (eq (base (sym== x=y))))
+    (lemma-resp x=y j i) (makeH x c d) ab)
+  ... | tri= _ x=y _ | (orB ab) = orB
+    (nr y (lemma-<=min3E i₃ j₃ (eq (base (sym== x=y))))
+    (lemma-resp x=y j i) (makeH x c d) ab)
+  ... | tri> _ _ y<x | (orA ab) = orB
+    (nd y (lemma-<=min3E i₃ j₃ (le (base y<x))) (lemma-trans y<x j i) (makeH x c d) ab)
+  ... | tri> _ _ y<x | (orB ab) = orB
+    (nr y (lemma-<=min3E i₃ j₃ (le (base y<x))) (lemma-trans y<x j i) (makeH x c d) ab)
+  afmerge (nr x i j (nf p₁ i₁ j₁ a₁ b₁) (nl p₂ i₂ j₂ a₂ b₂)) (orB (nf y i₃ j₃ c d))
+    with cmp x y | afmerge (nl p₂ i₂ j₂ a₂ b₂) (orB (nf p₁ i₁ j₁ a₁ b₁)) 
+  ... | tri< x<y _ _ | (orA ab) = orB
+    (nd x (le (base x<y)) (lemma-<=minE j i) (nf y i₃ j₃ c d) ab) 
+  ... | tri< x<y _ _ | (orB ab) = orB
+    (nr x (le (base x<y)) (lemma-<=minE j i) (nf y i₃ j₃ c d) ab)
+  ... | tri= _ x=y _ | (orA ab) = orB
+    (nd y (lemma-<=min3E i₃ j₃ (eq (base (sym== x=y)))) (lemma-resp x=y j i) (makeH x c d) ab)
+  ... | tri= _ x=y _ | (orB ab) = orB
+    (nr y (lemma-<=min3E i₃ j₃ (eq (base (sym== x=y)))) (lemma-resp x=y j i) (makeH x c d) ab)
+  ... | tri> _ _ y<x | (orA ab) = orB
+    (nd y (lemma-<=min3E i₃ j₃ (le (base y<x))) (lemma-trans y<x j i) (makeH x c d) ab)
+  ... | tri> _ _ y<x | (orB ab) = orB
+    (nr y (lemma-<=min3E i₃ j₃ (le (base y<x))) (lemma-trans y<x j i) (makeH x c d) ab)
   afmerge (nr x i j (nf p₁ i₁ j₁ a₁ b₁) (nr p₂ i₂ j₂ a₂ b₂)) (orB (nf y i₃ j₃ c d)) with cmp x y | afmerge (nr p₂ i₂ j₂ a₂ b₂) (orB (nf p₁ i₁ j₁ a₁ b₁)) 
-  ... | tri< x<y _ _ | (orA ab) = orB (nd x (le (base x<y)) (lemma-<=minE j i) (nf y i₃ j₃ c d) ab) 
-  ... | tri< x<y _ _ | (orB ab) = orB (nr x (le (base x<y)) (lemma-<=minE j i) (nf y i₃ j₃ c d) ab)
-  ... | tri= _ x=y _ | (orA ab) = orB (nd y (lemma-<=min3E i₃ j₃ (eq (base (sym== x=y)))) (lemma-resp x=y j i) (makeH x c d) ab)
-  ... | tri= _ x=y _ | (orB ab) = orB (nr y (lemma-<=min3E i₃ j₃ (eq (base (sym== x=y)))) (lemma-resp x=y j i) (makeH x c d) ab)
-  ... | tri> _ _ y<x | (orA ab) = orB (nd y (lemma-<=min3E i₃ j₃ (le (base y<x))) (lemma-trans y<x j i) (makeH x c d) ab)
-  ... | tri> _ _ y<x | (orB ab) = orB (nr y (lemma-<=min3E i₃ j₃ (le (base y<x))) (lemma-trans y<x j i) (makeH x c d) ab)
+  ... | tri< x<y _ _ | (orA ab) = orB
+    (nd x (le (base x<y)) (lemma-<=minE j i) (nf y i₃ j₃ c d) ab) 
+  ... | tri< x<y _ _ | (orB ab) = orB
+    (nr x (le (base x<y)) (lemma-<=minE j i) (nf y i₃ j₃ c d) ab)
+  ... | tri= _ x=y _ | (orA ab) = orB
+    (nd y (lemma-<=min3E i₃ j₃ (eq (base (sym== x=y))))
+    (lemma-resp x=y j i) (makeH x c d) ab)
+  ... | tri= _ x=y _ | (orB ab) = orB
+    (nr y (lemma-<=min3E i₃ j₃ (eq (base (sym== x=y))))
+    (lemma-resp x=y j i) (makeH x c d) ab)
+  ... | tri> _ _ y<x | (orA ab) = orB
+    (nd y (lemma-<=min3E i₃ j₃ (le (base y<x)))
+    (lemma-trans y<x j i) (makeH x c d) ab)
+  ... | tri> _ _ y<x | (orB ab) = orB
+    (nr y (lemma-<=min3E i₃ j₃ (le (base y<x)))
+    (lemma-trans y<x j i) (makeH x c d) ab)
 \end{code} Извлечение минимума из неполной кучи.
 \begin{code}
   apop : ∀ {m h} → Heap m (succ h) almost
@@ -847,49 +896,68 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
          (Σ (expanded A) (λ x → (Heap x h full) × (m ≤ x)))
 
   apop (nd {x = x} p i j a eh) = orB (x , a , i)
-  apop (nd _ i j (nf x i₁ j₁ a b) (nf y i₂ j₂ c d)) with cmp x y | ndmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d)
+  apop (nd _ i j (nf x i₁ j₁ a b) (nf y i₂ j₂ c d))
+    with cmp x y | ndmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d)
   ... | tri< _ _ _ | res = orA (# x , res , i)
   ... | tri= _ _ _ | res = orA (# y , res , j)
   ... | tri> _ _ _ | res = orA (# y , res , j)
-  apop (nl _ i j (nd x i₁ j₁ (nf y _ _ eh eh) eh) (nf z _ _ eh eh)) with cmp x z
-  ... | tri< x<z _ _ = orB (# x , nf x i₁ (le (base x<z)) (nf y (le ext) (le ext) eh eh) (nf z (le ext) (le ext) eh eh) , i)
-  ... | tri= _ x=z _ = orB (# z , nf z (eq (base (sym== x=z))) (snd resp≤ (base x=z) i₁) (nf x (le ext) (le ext) eh eh) (nf y (le ext) (le ext) eh eh) , j)
-  ... | tri> _ _ z<x = orB (# z , nf z (le (base z<x)) (trans≤ (le (base z<x)) i₁) (nf x (le ext) (le ext) eh eh) (nf y (le ext) (le ext) eh eh) , j)
+  apop (nl _ i j (nd x i₁ j₁ (nf y _ _ eh eh) eh) (nf z _ _ eh eh))
+    with cmp x z
+  ... | tri< x<z _ _ = orB (# x , nf x i₁ (le (base x<z))
+    (nf y (le ext) (le ext) eh eh) (nf z (le ext) (le ext) eh eh) , i)
+  ... | tri= _ x=z _ = orB (# z ,
+    nf z (eq (base (sym== x=z))) (snd resp≤ (base x=z) i₁)
+      (nf x (le ext) (le ext) eh eh) (nf y (le ext) (le ext) eh eh) , j)
+  ... | tri> _ _ z<x = orB (# z , nf z
+    (le (base z<x)) (trans≤ (le (base z<x)) i₁)
+    (nf x (le ext) (le ext) eh eh) (nf y (le ext) (le ext) eh eh) , j)
 
-  apop (nl _ i j (nd x i₁ j₁ (nf y i₂ j₂ a₂ b₂) (nf z i₃ j₃ a₃ b₃)) (nf t i₄ j₄ c d)) with cmp x t | ndmerge (nf y i₂ j₂ a₂ b₂) (nf z i₃ j₃ a₃ b₃)
-  ... | tri< x<t _ _ | res = orA (# x , nl x (lemma-<=minE i₁ j₁) (le (base x<t)) res (nf t i₄ j₄ c d) , i)
-  ... | tri= _ x=t _ | res = orA (# t , nl t (snd resp≤ (base x=t) (lemma-<=minE i₁ j₁)) (lemma-<=min3E i₄ j₄ (eq (base (sym== x=t)))) res (makeH x c d) , j)
-  ... | tri> _ _ t<x | res = orA (# t , nl t (lemma-trans t<x i₁ j₁) (lemma-<=min3E i₄ j₄ (le (base t<x))) res (makeH x c d) , j)
+  apop (nl _ i j (nd x i₁ j₁ (nf y i₂ j₂ a₂ b₂) (nf z i₃ j₃ a₃ b₃)) (nf t i₄ j₄ c d))
+    with cmp x t | ndmerge (nf y i₂ j₂ a₂ b₂) (nf z i₃ j₃ a₃ b₃)
+  ... | tri< x<t _ _ | res = orA (# x , nl x
+    (lemma-<=minE i₁ j₁) (le (base x<t))
+    res (nf t i₄ j₄ c d) , i)
+  ... | tri= _ x=t _ | res = orA (# t , nl t
+    (snd resp≤ (base x=t) (lemma-<=minE i₁ j₁))
+    (lemma-<=min3E i₄ j₄ (eq (base (sym== x=t)))) res (makeH x c d) , j)
+  ... | tri> _ _ t<x | res = orA (# t , nl t
+    (lemma-trans t<x i₁ j₁)
+    (lemma-<=min3E i₄ j₄ (le (base t<x))) res (makeH x c d) , j)
 
-  apop (nl _ i j (nl x i₁ j₁ a b) (nf y i₂ j₂ c d)) with cmp x y | afmerge (nl x i₁ j₁ a b) (orA (nf y i₂ j₂ c d))
+  apop (nl _ i j (nl x i₁ j₁ a b) (nf y i₂ j₂ c d))
+    with cmp x y | afmerge (nl x i₁ j₁ a b) (orA (nf y i₂ j₂ c d))
   ... | tri< _ _ _ | orA res = orB (# x , res , i)
   ... | tri= _ _ _ | orA res = orB (# y , res , j)
   ... | tri> _ _ _ | orA res = orB (# y , res , j)
   ... | tri< _ _ _ | orB res = orA (# x , res , i)
   ... | tri= _ _ _ | orB res = orA (# y , res , j)
   ... | tri> _ _ _ | orB res = orA (# y , res , j)
-  apop (nl _ i j (nr x i₁ j₁ a b) (nf y i₂ j₂ c d)) with cmp x y | afmerge (nr x i₁ j₁ a b) (orA (nf y i₂ j₂ c d))
+  apop (nl _ i j (nr x i₁ j₁ a b) (nf y i₂ j₂ c d))
+    with cmp x y | afmerge (nr x i₁ j₁ a b) (orA (nf y i₂ j₂ c d))
   ... | tri< _ _ _ | orA res = orB (# x , res , i)
   ... | tri= _ _ _ | orA res = orB (# y , res , j)
   ... | tri> _ _ _ | orA res = orB (# y , res , j)
   ... | tri< _ _ _ | orB res = orA (# x , res , i)
   ... | tri= _ _ _ | orB res = orA (# y , res , j)
   ... | tri> _ _ _ | orB res = orA (# y , res , j)
-  apop (nr _ i j (nf x i₁ j₁ a b) (nd y i₂ j₂ c d)) with cmp y x | afmerge (nd y i₂ j₂ c d) (orB (nf x i₁ j₁ a b))
+  apop (nr _ i j (nf x i₁ j₁ a b) (nd y i₂ j₂ c d))
+    with cmp y x | afmerge (nd y i₂ j₂ c d) (orB (nf x i₁ j₁ a b))
   ... | tri< _ _ _ | orA res = orB (# y , res , j)
   ... | tri= _ _ _ | orA res = orB (# x , res , i)
   ... | tri> _ _ _ | orA res = orB (# x , res , i)
   ... | tri< _ _ _ | orB res = orA (# y , res , j)
   ... | tri= _ _ _ | orB res = orA (# x , res , i)
   ... | tri> _ _ _ | orB res = orA (# x , res , i)
-  apop (nr _ i j (nf x i₁ j₁ a b) (nl y i₂ j₂ c d)) with cmp y x | afmerge (nl y i₂ j₂ c d) (orB (nf x i₁ j₁ a b))
+  apop (nr _ i j (nf x i₁ j₁ a b) (nl y i₂ j₂ c d))
+    with cmp y x | afmerge (nl y i₂ j₂ c d) (orB (nf x i₁ j₁ a b))
   ... | tri< _ _ _ | orA res = orB (# y , res , j)
   ... | tri= _ _ _ | orA res = orB (# x , res , i)
   ... | tri> _ _ _ | orA res = orB (# x , res , i)
   ... | tri< _ _ _ | orB res = orA (# y , res , j)
   ... | tri= _ _ _ | orB res = orA (# x , res , i)
   ... | tri> _ _ _ | orB res = orA (# x , res , i)
-  apop (nr _ i j (nf x i₁ j₁ a b) (nr y i₂ j₂ c d)) with cmp y x | afmerge (nr y i₂ j₂ c d) (orB (nf x i₁ j₁ a b))
+  apop (nr _ i j (nf x i₁ j₁ a b) (nr y i₂ j₂ c d))
+    with cmp y x | afmerge (nr y i₂ j₂ c d) (orB (nf x i₁ j₁ a b))
   ... | tri< _ _ _ | orA res = orB (# y , res , j)
   ... | tri= _ _ _ | orA res = orB (# x , res , i)
   ... | tri> _ _ _ | orA res = orB (# x , res , i)
