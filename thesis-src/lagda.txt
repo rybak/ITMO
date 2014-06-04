@@ -2,3 +2,4 @@ AgdaDescription
 AVLBalance
 HeapDef
 HeapTries
+HeapModule
