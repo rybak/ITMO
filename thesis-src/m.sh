@@ -7,7 +7,7 @@ do
     then
         fn=${i%.*}
         mpost $fn.mp
-        #- mv $fn.1 $fn.eps
+        mv $fn.1 $fn.eps
         mptopdf --latex $fn.mp
     fi
 done

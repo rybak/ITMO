@@ -2,7 +2,9 @@
 
 run_latex()
 {
-    pdflatex -shell-escape -output-directory ../ $1
+    export TEXMFCNF=~/texmf/:
+    # pdflatex -output-directory ../ $1
+    xelatex -output-directory ../ $1
 }
 run_one()
 {
@@ -11,9 +13,11 @@ run_one()
 make_thesis()
 {
     run_one
-    biber --bblsafechars ../thesis
+    ./biber --version
+    ./biber --bblsafechars ../thesis
     run_one
     run_one
+    dvipdf ../thesis.dvi ../thesis.pdf
 }
 
 if [ "x$1" = "xclean" ];

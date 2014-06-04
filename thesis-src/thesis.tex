@@ -1,9 +1,9 @@
 \documentclass[a4paper,oneside]{report}
 
-\usepackage[T2A]{fontenc}
-\usepackage[utf8]{inputenc}
+% \usepackage[T2A]{fontenc}
+% \usepackage[utf8]{inputenc}
 
-\usepackage[pdftex]{graphicx}
+\usepackage[dvips]{graphicx}
 \graphicspath{{pic/}}
 
 \usepackage{amsmath, amssymb, amsthm}
@@ -15,13 +15,25 @@
 
 \usepackage{sty/rac}
 \usepackage{placeins}
-\usepackage[english,russian]{babel}
+
+% \usepackage[english,russian]{babel}
+\usepackage{polyglossia}
+\setdefaultlanguage[spelling=modern]{russian}
+\setotherlanguage{english}
+\newcommand{\myfont}[0]{FreeSerif}
+\setmainfont[Ligatures=TeX]{\myfont}
+\newfontfamily\cyrillicfontsf{\myfont}
+\newfontfamily\cyrillicfontit{\myfont}
+\newfontfamily\cyrillicfonttt{\myfont}
+
+\usepackage{csquotes}
 
 \usepackage[section]{algorithm}
 \usepackage{algorithmic}
 
 % надо сделать нумерацию нумерами, а у меня почему-то рендерится буквами
-\usepackage[backend=biber,bibencoding=utf8,sorting=none,sortcites=true,bibstyle=sty/gost71,maxnames=99,citestyle=numeric-comp,babel=other]{biblatex}
+\usepackage[backend=biber,bibencoding=utf8,sorting=none,sortcites=true,bibstyle=sty/gost71,maxnames=99,citestyle=numeric-comp,babel=other
+]{biblatex}
 
 \defbibenvironment{bibliography}
   {\list
@@ -44,7 +56,7 @@
 \usepackage{agda}
 %\usepackage[singlelinecheck=false]{caption}
 %%% Unicode characters
-\input{utils/unicode-characters.tex}
+% \input{utils/unicode-characters.tex}
 %%% Agda helper shortcuts -- Rybak
 
 \newcommand{\D}{\AgdaDatatype}
@@ -65,6 +77,11 @@
 \relpenalty=10000
 
 \addbibresource{thesis.bib}
+
+% \hfuzz=\maxdimen
+% \tolerance=10000
+% \hbadness=10000
+% \hbadness=10000 % overfull + underfull
 
 \begin{document}
 
