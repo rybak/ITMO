@@ -1,8 +1,9 @@
-\section{Реализация}
+\section{Вспомогательные определения}
 % TODO сделать введение
-\subsection{Вспомогательные определения}
+
+\subsection{Общие определения}
 Часть общеизвестных определений заимствована из стандартной библиотеки
-Agda \cite{AgdaSLib}.
+Agda~\cite{AgdaSLib}.
 
 \begin{code}
 module HeapModule where
@@ -25,22 +26,23 @@ module Level where
 open Level
 
 module Function where
- 
+\end{code}
+Композиция функций.
+\begin{code}
   _∘_ : ∀ {a b c}
       → {A : Set a} {B : Set b} {C : Set c}
       → (B → C) → (A → B) → (A → C)
   f ∘ g = λ x → f (g x)
-  
   flip : ∀ {a b c}
        → {A : Set a} {B : Set b} {C : A → B → Set c} 
        → ((x : A) → (y : B) → C x y)
        → ((y : B) → (x : A) → C x y)
   flip f x y = f y x
-  
 open Function public
-
 module Logic where
-\end{code} Из элемента пустого типа следует что-угодно.
+\end{code}
+\begin{minipage}{\textwidth}
+Из элемента пустого типа следует что-угодно.
 \begin{code}
   ⊥-elim : ∀ {a} {Whatever : Set a} → ⊥ → Whatever
   ⊥-elim ()
@@ -48,7 +50,8 @@ module Logic where
 \begin{code}
   ¬ : ∀ {a} → Set a → Set a
   ¬ P = P → ⊥
-
+\end{code} \end{minipage}
+\begin{code}
   private
    module DummyAB {a b} {A : Set a} {B : Set b} where
 \end{code} Контрадикция, противоречие: из $A$ и $\neg A$ можно получить любое $B$.
@@ -59,17 +62,18 @@ module Logic where
 \begin{code}
     contraposition : (A → B) → (¬ B → ¬ A)
     contraposition = flip _∘_
-
   open DummyAB public
 open Logic public
-module MLTT where
-  infix 4 _≡_
 \end{code}
-Пропозициональное равенство из интуционистской теории типов.
+Определения интуционистской теории типов.
 \begin{code}
+module MLTT where
+\end{code}
+Пропозициональное равенство из интуционистской теории типов~\cite{MLTT}.
+\begin{code}
+  infix 4 _≡_
   data _≡_ {a} {A : Set a} (x : A) : A → Set a where
     refl : x ≡ x
-
   {-# BUILTIN EQUALITY _≡_ #-}
   {-# BUILTIN REFL    refl #-}
 \end{code} Тип-сумма — зависимая пара.
@@ -77,16 +81,16 @@ module MLTT where
   record Σ {a b} (A : Set a) (B : A → Set b) : Set (a ⊔ b) where
     constructor _,_
     field fst : A ; snd : B fst
-
   open Σ public
 \end{code} Декартово произведение — частный случай зависимой пары,
 Второй индекс игнорирует передаваемое ему значение.
 \begin{code}
   _×_ : ∀ {a b} (A : Set a) → (B : Set b) → Set (a ⊔ b)
   A × B = Σ A (λ _ → B)
-
   infixr 5 _×_ _,_
-
+\end{code}
+\begin{minipage}{\textwidth}
+\begin{code}
   module ≡-Prop where
    private
     module DummyA {a b} {A : Set a} {B : Set b} where
@@ -95,17 +99,20 @@ module MLTT where
 \begin{code}
       cong : ∀ (f : A → B) {x y} → x ≡ y → f x ≡ f y
       cong f refl = refl
-
     open DummyA public
   open ≡-Prop public
 open MLTT public
 \end{code}
-\subsection{Определение отношений и доказательство их свойств}
-Для сравнения элементов нужно задать отношения на этих элементах.
+\end{minipage}
+
+\subsection{Определение отношений и доказательства их свойств}
+Чтобы задать порядок элементов в куче, нужно уметь сравнивать элементы.
+Зададим отношения на этих элементах.
 \begin{code}
 Rel₂ : Set → Set₁
 Rel₂ A = A → A → Set
 \end{code}
+\begin{minipage}{\textwidth}
 Трихотомичность отношений меньше, равно и больше:
 одновременно два элемента могут принадлежать только одному отношению из трех.
 \begin{code}
@@ -113,7 +120,10 @@ data Tri {A : Set} (_<_ _==_ _>_ : Rel₂ A) (a b : A) : Set where
   tri< :   (a < b) → ¬ (a == b) → ¬ (a > b) → Tri _<_ _==_ _>_ a b
   tri= : ¬ (a < b) →   (a == b) → ¬ (a > b) → Tri _<_ _==_ _>_ a b
   tri> : ¬ (a < b) → ¬ (a == b) →   (a > b) → Tri _<_ _==_ _>_ a b
-\end{code} Введем упрощенный предикат, использующий только два отношения
+\end{code}
+\end{minipage}
+\begin{minipage}{\textwidth}
+Введем упрощенный предикат, использующий только два отношения
 — меньше и равенство. 
 Отношение больше заменяется отношением меньше с переставленными аргументами.
 \begin{code}
@@ -122,7 +132,11 @@ flip₁ f a b = f b a
 
 Cmp : {A : Set} → Rel₂ A → Rel₂ A → Set
 Cmp {A} _<_ _==_ = ∀ (x y : A) → Tri (_<_) (_==_) (flip₁ _<_) x y
-
+\end{code}
+\end{minipage}
+\begin{minipage}{\textwidth}
+Задавать высоту кучи будем натуральными числами.
+\begin{code}
 data ℕ : Set where
   zero : ℕ
   succ : ℕ → ℕ
@@ -130,7 +144,7 @@ data ℕ : Set where
 {-# BUILTIN ZERO zero #-}
 {-# BUILTIN SUC succ #-}
 \end{code}
-
+\end{minipage}
 Тип данных для отношения меньше или равно на натуральных числах.
 \begin{code}
 data _ℕ≤_ : Rel₂ ℕ where
@@ -161,13 +175,15 @@ cmpℕ (succ x) (succ y) with cmpℕ x y
   (contraposition lemma-succ-≡ ¬b) (s≤s c)
 ... | tri= ¬a  b ¬c = tri= (contraposition lemma-succ-≤ ¬a)
   (cong succ b) (contraposition lemma-succ-≤ ¬c)
-\end{code} Транзитивность отношения
+\end{code}
+\begin{minipage}{\textwidth}
+Транзитивность отношения.
 \begin{code}
-
 Trans : {A : Set} → Rel₂ A → Set
 Trans {A} _rel_ = {a b c : A} → (a rel b) → (b rel c) → (a rel c)
-
-\end{code} Симметричность отношения.
+\end{code}
+\end{minipage}
+Симметричность отношения.
 \begin{code}
 Symmetric : ∀ {A : Set} → Rel₂ A → Set
 Symmetric _rel_ = ∀ {a b} → a rel b → b rel a
@@ -257,7 +273,8 @@ trans<= r s t== t< (le a<b) (eq b=c) = le (fst r b=c a<b)
 trans<= r s t== t< (eq a=b) (le b<c) = le (snd r (s a=b) b<c)
 trans<= r s t== t< (eq a=b) (eq b=c) = eq (t== a=b b=c)
 \end{code}
-\subsection{Куча}
+
+\section{Модуль Heap}
 Модуль, в котором мы определим структуру данных куча, параметризован
 исходным типом, двумя отношениями, определенными для этого типа, \AgdaOperator{\_<\_} и \AgdaOperator{\_==\_}.
 Также требуется симметричность и транзитивность \AgdaOperator{\_==\_},
@@ -269,6 +286,8 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   (trans< : Trans _<_) (resp : _<_ Respects₂ _==_)
   where
 \end{code}
+
+\subsection{Расширение исходного типа}
 Будем индексировать кучу минимальным элементом в ней,
 для того, чтобы можно было строить инварианты порядка на куче исходя из
 этих индексов.
@@ -299,7 +318,6 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   trans<E {# _} {# _} {# _} a<b b<c =
     base (trans< (lemma-<E a<b) (lemma-<E b<c))
   trans<E {# _} {# _} {top} _  _  = ext
-
   trans<E {# _} {top} {_}   _  ()
   trans<E {top} {_}   {_}   () _
 \end{code} Тип данных расширенного отношения равенства.
@@ -367,12 +385,27 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
 \begin{code}
   minE : (x y : expanded A) → expanded A
   minE = min cmpE
-\end{code} Вспомогательный тип данных для индексации кучи — куча полная или почти заполненная.
+\end{code} Функция — минимум из трех элементов расширенного типа —
+частный случай ранее определенной общей функции.
+\begin{code}
+  min3E : (expanded A) → (expanded A) → (expanded A) → (expanded A)
+  min3E x y z = min3 cmpE x y z
+\end{code} Леммы для сравнения с минимумами для элементов расширенного типа.
+\begin{code}
+  lemma-<=minE : ∀ {a b c} → a ≤ b → a ≤ c → a ≤ (minE b c)
+  lemma-<=minE = lemma-<=min {expanded A}{_<E_}{_=E_}{cmpE}
+  lemma-<=min3E : ∀ {x a b c} → x ≤ a → x ≤ b → x ≤ c
+    → x ≤ (min3E a b c)
+  lemma-<=min3E = lemma-<=min3 {expanded A}{_<E_}{_=E_}{cmpE}
+\end{code} 
+
+\subsection{Тип данных Heap}
+Вспомогательный тип данных для индексации кучи — куча полная или почти заполненная.
 \begin{code}
   data HeapState : Set where
     full almost : HeapState
-\end{code} Тип данных для кучи, проиндексированный минимальным элементом кучи,
-натуральным числом — высотой — и заполненностью.
+\end{code} Тип данных для кучи, проиндексированный
+минимальным элементом кучи, высотой и заполненностью.
 \begin{code}
   data Heap : (expanded A) → (h : ℕ) → HeapState → Set where
 \end{code} У пустой кучи минимальный элемент — \DC{top}, высота — ноль.
@@ -426,7 +459,7 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
     \label{pic:heap-nodes}
   \end{center}
 \end{figure}
-\par
+\begin{minipage}{\textwidth}
 \emph{Замечание}: высота любой неполной кучи больше нуля.
 \begin{code}
   lemma-almost-height : ∀ {m h} → Heap m h almost → h ℕ> 0
@@ -434,7 +467,10 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   lemma-almost-height (nd _ _ _ _ _) = s≤s z≤n
   lemma-almost-height (nl _ _ _ _ _) = s≤s z≤n
   lemma-almost-height (nr _ _ _ _ _) = s≤s z≤n
-\end{code} Функция — просмотр минимума в куче.
+\end{code}
+\end{minipage}
+\begin{minipage}{\textwidth}
+Функция — просмотр минимума в куче.
 \begin{code}
   peekMin : ∀ {m h s} → Heap m h s → (expanded A)
   peekMin eh = top
@@ -442,26 +478,16 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   peekMin (nf p _ _ _ _) = # p
   peekMin (nl p _ _ _ _) = # p
   peekMin (nr p _ _ _ _) = # p
-\end{code} Функция — минимум из трех элементов расширенного типа —
-частный случай ранее определенной общей функции.
-\begin{code}
-  min3E : (expanded A) → (expanded A) → (expanded A) → (expanded A)
-  min3E x y z = min3 cmpE x y z
-\end{code} Леммы для сравнения с минимумами для элементов расширенного типа.
-\begin{code}
-  lemma-<=minE : ∀ {a b c} → a ≤ b → a ≤ c → a ≤ (minE b c)
-  lemma-<=minE = lemma-<=min {expanded A}{_<E_}{_=E_}{cmpE}
-  lemma-<=min3E : ∀ {x a b c} → x ≤ a → x ≤ b → x ≤ c
-    → x ≤ (min3E a b c)
-  lemma-<=min3E = lemma-<=min3 {expanded A}{_<E_}{_=E_}{cmpE}
-\end{code} Функция вставки элемента в полную кучу.
+\end{code}\end{minipage}
+
+\subsection{Функции вставки в кучу}
+Функция вставки элемента в полную кучу.
 \begin{code}
   finsert : ∀ {h m} → (z : A) → Heap m h full
     → Σ HeapState (Heap (minE m (# z)) (succ h))
 \end{code}
 \AgdaHide{
 \begin{code}
-
   finsert {0} z eh = full , nf z (le ext) (le ext) eh eh
   finsert {1} z (nf p i j eh eh) with cmp p z
   ... | tri< p<z _ _ = almost ,
@@ -553,6 +579,8 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   ... | almost , nb | l1 | l2 = almost , nr z l1 l2 a nb
 
 \end{code}}
+
+\subsection{Удаление минимума из полной кучи}
 Вспомогательный тип данных.
 \begin{code}
   data OR (A B : Set) : Set where
@@ -595,7 +623,10 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
     with fmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d)
   ... | orA (() , _ , _)
   ... | orB res = orA ((minE (# x) (# y)) , res , lemma-<=minE i j)
-\end{code}} Составление полной кучи высотой $h+1$ из двух куч высотой $h$ и одного элемента.
+\end{code}}
+
+\subsection{Удаление минимума из неполной кучи}
+Составление полной кучи высотой $h+1$ из двух куч высотой $h$ и одного элемента.
 \begin{code}
   makeH : ∀ {x y h} → (p : A) → Heap x h full → Heap y h full
     → Heap (min3E x y (# p)) (succ h) full
