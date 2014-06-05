@@ -4,7 +4,6 @@
 module PresentationHeap where
 open import AgdaDescription
 \end{code}
-}
 
 \begin{frame}
 \begin{code}
@@ -46,6 +45,7 @@ cong : ∀ {A B : Set} → ∀ (f : A → B) {x y}
 cong f refl = refl
 \end{code}
 \end{frame}
+}
 
 \begin{frame}
 \begin{code}
@@ -60,6 +60,7 @@ A × B = Σ A (λ _ → B) -- Декартово произведение
 infixr 5 _×_ _,_
 \end{code}
 \end{frame}
+
 \begin{frame}
   \frametitle{Отношения}
 \begin{code}
@@ -95,6 +96,7 @@ Cmp {A} _<_ _==_ = ∀ (x y : A) →
 \end{code} 
 \end{frame}
 
+\AgdaHide{
 \begin{frame}
   \frametitle{Пример отношения}
 \begin{code}
@@ -139,6 +141,7 @@ cmpℕ (succ x) (succ y) with cmpℕ x y
   (cong succ b) (contraposition lemma-succ-≤ ¬c)
 \end{code} 
 \end{frame}
+}
 
 \section{Свойства отношений}
 
@@ -226,6 +229,8 @@ lemma-<=min3 : {A : Set}
   → (_<=_ {_<_ = _<_} {_==_} x (min3 cmp a b c))
 \end{code}
 \end{frame}
+
+\AgdaHide{
 \begin{frame}
 Доказательство \F{lemma-<=min3}
 \begin{code}
@@ -236,6 +241,8 @@ lemma-<=min3 {cmp = cmp} {x} {a} {b} {c}
 ... | tri> _ _ _ = lemma-<=min {cmp = cmp} xb xc
 \end{code}
 \end{frame}
+}
+
 \begin{frame}
   \frametitle{Свойства <=}
 \begin{code}
@@ -254,6 +261,7 @@ resp<= {A}{_<_}{_==_} resp trans sym = left , right where
   right b=c (eq a=b) = eq (trans (sym b=c) a=b)
 \end{code}
 \end{frame}
+
 \begin{frame}
 Транзитивность \D{\_<=\_}.
 \begin{code}
@@ -276,7 +284,7 @@ trans<= r s t== t< (eq a=b) (eq b=c)
 \section{Куча}
 
 \begin{frame}
-  \frametitle{Заголовок модуля}
+  \frametitle{Заголовок модуля — требования}
 \begin{code}
 module Heap (A : Set) (_<_ _==_ : Rel₂ A)
   (cmp : Cmp _<_ _==_)
@@ -478,6 +486,7 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A)
 \end{center}
 \end{frame}
 
+\AgdaHide{
 \begin{frame}
   \frametitle{}
 Высота любой неполной кучи больше нуля.
@@ -501,6 +510,7 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A)
   peekMin (nr p _ _ _ _) = # p
 \end{code}
 \end{frame}
+}
 
 \begin{frame}
   \frametitle{finsert}

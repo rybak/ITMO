@@ -7,7 +7,6 @@
 \>\AgdaKeyword{open} \AgdaKeyword{import} \AgdaModule{AgdaDescription}\<%
 \\
 \>\<\end{code}
-}
 
 \begin{frame}
 \begin{code}\>\<%
@@ -103,6 +102,7 @@
 \\
 \>\<\end{code}
 \end{frame}
+}
 
 \begin{frame}
 \begin{code}\>\<%
@@ -130,6 +130,7 @@
 \\
 \>\<\end{code}
 \end{frame}
+
 \begin{frame}
   \frametitle{Отношения}
 \begin{code}\>\<%
@@ -198,6 +199,7 @@
 \>\<\end{code} 
 \end{frame}
 
+\AgdaHide{
 \begin{frame}
   \frametitle{Пример отношения}
 \begin{code}\>\<%
@@ -286,6 +288,7 @@
 \\
 \>\<\end{code} 
 \end{frame}
+}
 
 \section{Свойства отношений}
 
@@ -452,6 +455,8 @@
 \\
 \>\<\end{code}
 \end{frame}
+
+\AgdaHide{
 \begin{frame}
 Доказательство \F{lemma-<=min3}
 \begin{code}\>\<%
@@ -469,6 +474,8 @@
 \\
 \>\<\end{code}
 \end{frame}
+}
+
 \begin{frame}
   \frametitle{Свойства <=}
 \begin{code}\>\<%
@@ -512,6 +519,7 @@
 \\
 \>\<\end{code}
 \end{frame}
+
 \begin{frame}
 Транзитивность \D{\_<=\_}.
 \begin{code}\>\<%
@@ -556,7 +564,7 @@
 \section{Куча}
 
 \begin{frame}
-  \frametitle{Заголовок модуля}
+  \frametitle{Заголовок модуля — требования}
 \begin{code}\>\<%
 \\
 \>\AgdaKeyword{module} \AgdaModule{Heap} \AgdaSymbol{(}\AgdaBound{A} \AgdaSymbol{:} \AgdaPrimitiveType{Set}\AgdaSymbol{)} \AgdaSymbol{(}\AgdaBound{\_<\_} \AgdaBound{\_==\_} \AgdaSymbol{:} \AgdaFunction{Rel₂} \AgdaBound{A}\AgdaSymbol{)}\<%
@@ -590,7 +598,7 @@
 \>[2]\AgdaKeyword{data} \AgdaDatatype{expanded} \AgdaSymbol{(}\AgdaBound{A} \AgdaSymbol{:} \AgdaPrimitiveType{Set}\AgdaSymbol{)} \AgdaSymbol{:} \AgdaPrimitiveType{Set} \AgdaKeyword{where}\<%
 \\
 \>[2]\AgdaIndent{4}{}\<[4]%
-\>[4]\AgdaInductiveConstructor{\#} \AgdaSymbol{:} \AgdaBound{A} \AgdaSymbol{→} \AgdaDatatype{expanded} \AgdaBound{A} \AgdaComment{-- (\# x) — элемент исходного типа}\<%
+\>[4]\AgdaInductiveConstructor{\#} \AgdaSymbol{:} \AgdaBound{A} \AgdaSymbol{→} \AgdaDatatype{expanded} \AgdaBound{A} \AgdaComment{-- элемент исходного типа}\<%
 \\
 \>[2]\AgdaIndent{4}{}\<[4]%
 \>[4]\AgdaInductiveConstructor{top} \AgdaSymbol{:} \AgdaDatatype{expanded} \AgdaBound{A} \AgdaComment{-- элемент расширение}\<%
@@ -1006,9 +1014,10 @@
 \end{center}
 \end{frame}
 
+\AgdaHide{
 \begin{frame}
   \frametitle{}
-\emph{Замечание}: высота любой неполной кучи больше нуля.
+Высота любой неполной кучи больше нуля.
 \begin{code}\>\<%
 \\
 \>[0]\AgdaIndent{2}{}\<[2]%
@@ -1053,6 +1062,7 @@
 \\
 \>\<\end{code}
 \end{frame}
+}
 
 \begin{frame}
   \frametitle{finsert}
