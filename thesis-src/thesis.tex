@@ -3,20 +3,14 @@
 % \usepackage[T2A]{fontenc}
 % \usepackage[utf8]{inputenc}
 
-\usepackage[dvips]{graphicx}
+\usepackage{graphicx}
 \graphicspath{{pic/}}
-
-\usepackage{amsmath, amssymb, amsthm}
-\usepackage{amsfonts, amsxtra}
-\usepackage{mathtools} % for xleftrightarrow
-\usepackage{sty/dbl12}
-\usepackage{epsfig}
-\usepackage{verbatim}
 
 \usepackage{sty/rac}
 \usepackage{placeins}
 
 % \usepackage[english,russian]{babel}
+\usepackage{fontspec}
 \usepackage{polyglossia}
 \setdefaultlanguage[spelling=modern]{russian}
 \setotherlanguage{english}
@@ -26,15 +20,37 @@
 \newfontfamily\cyrillicfontit{\myfont}
 \newfontfamily\cyrillicfonttt{\myfont}
 
+\usepackage{textcomp}
 \usepackage{csquotes}
+
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{amsfonts, amsxtra}
+\usepackage{mathtools} % for xleftrightarrow
+\usepackage{sty/dbl12}
+% \usepackage{epsfig}
+% \usepackage{verbatim}
+\usepackage{agda}
+%\usepackage[singlelinecheck=false]{caption}
+%%% Unicode characters
+% \input{utils/unicode-characters.tex}
+%%% Agda helper shortcuts -- Rybak
+
+\newcommand{\D}{\AgdaDatatype}
+\newcommand{\F}{\AgdaFunction}
+\newcommand{\DC}{\AgdaInductiveConstructor}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \usepackage[section]{algorithm}
 \usepackage{algorithmic}
 
 % надо сделать нумерацию нумерами, а у меня почему-то рендерится буквами
-\usepackage[backend=biber,bibencoding=utf8,sorting=none,sortcites=true,bibstyle=sty/gost71,maxnames=99,citestyle=numeric-comp,babel=other
-]{biblatex}
+\usepackage[backend=biber,bibencoding=utf8,sorting=none,sortcites=true,bibstyle=sty/gost71,maxnames=99,citestyle=numeric-comp,babel=other]{biblatex}
 
+\binoppenalty=10000
+\relpenalty=10000
+
+\addbibresource{thesis.bib}
 \defbibenvironment{bibliography}
   {\list
      {\printfield[labelnumberwidth]{labelnumber}.}
@@ -48,35 +64,14 @@
   {\endlist}
   {\item}
 
-\usepackage{csquotes}
 %\usepackage[nottoc,notbib]{tocbibind}
 % \usepackage{listings}
 
 \input{utils/braces.tex}
-\usepackage{agda}
-%\usepackage[singlelinecheck=false]{caption}
-%%% Unicode characters
-% \input{utils/unicode-characters.tex}
-%%% Agda helper shortcuts -- Rybak
-
-\newcommand{\D}{\AgdaDatatype}
-\newcommand{\F}{\AgdaFunction}
-\newcommand{\DC}{\AgdaInductiveConstructor}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage{pdfpages}
-\usepackage{tikz}
-\usetikzlibrary{fit}
-
 %%%
 
 %%% Russian captions:
 \input{utils/theorems.tex}
-
-\binoppenalty=10000
-\relpenalty=10000
-
-\addbibresource{thesis.bib}
 
 % \hfuzz=\maxdimen
 % \tolerance=10000

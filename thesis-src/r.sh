@@ -17,7 +17,7 @@ make_thesis()
     ./biber --bblsafechars ../thesis
     run_one
     run_one
-    dvipdf ../thesis.dvi ../thesis.pdf
+    # dvipdf ../thesis.dvi ../thesis.pdf
 }
 
 if [ "x$1" = "xclean" ];
