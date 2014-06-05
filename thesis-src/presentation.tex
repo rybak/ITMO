@@ -1,16 +1,17 @@
-\documentclass[30pt]{beamer}
+\documentclass[17pt]{beamer}
+\hypersetup{pdfstartview={Fit}}
 
 \usepackage{amsmath, amssymb, amsthm}
 \usepackage{amsfonts, amsxtra}
 \usepackage[english,russian]{babel}
 
-% This handles the translation of unicode to latex:
+% This handles the translation of Unicode to latex:
 \usepackage[utf8]{inputenc}
 \usepackage[T2A]{fontenc}
 
-\usepackage{csquotes}
-% \usepackage[pdftex]{graphicx}
-% \graphicspath{{pic/}}
+\usepackage{graphicx}
+\graphicspath{{pic/}}
+
 \usepackage{agda}
 \usepackage{catchfilebetweentags}
 
@@ -20,6 +21,10 @@
 \newcommand{\F}{\AgdaFunction}
 \newcommand{\DC}{\AgdaInductiveConstructor}
 
+\setbeamerfont{frametitle}{
+    size={\fontsize{14}{12}}
+}
+
 \setbeamertemplate{headline}{}
 
 \title[Представление структур данных индуктивными семействами и доказательства их свойств]{Представление структур данных индуктивными семействами и доказательства их свойств}
@@ -27,7 +32,7 @@
 \author[Рыбак А.В.]{Рыбак Андрей Викторович , группа 4538
 \newline НР: Малаховски Ян Михайлович}
 \date{
-Май 2014
+Июнь 2014
 }
 
 \usetheme{Madrid}
@@ -38,8 +43,8 @@
 
 \begin{frame}
     \frametitle{Индуктивные семейства}
-        \emph{Индуктивное семейство} — это семейство типов данных,
-        которые могут зависеть от других типов и значений.
+    \emph{Индуктивное семейство} — индуктивный (рекурсивный) тип данных,
+        который может зависеть от других типов и значений.
 \end{frame}
 
 \begin{frame}
@@ -50,10 +55,7 @@
     \end{itemize}
 \end{frame}
 
-\begin{frame}
-    \frametitle{Agda}
-    \input{latex/AgdaPresentation.tex}
-\end{frame}
+\input{latex/AgdaPresentation.tex}
 
 \begin{frame}
     \frametitle{Куча}
@@ -67,20 +69,19 @@
     \frametitle{Пример}
     \includegraphics[width=0.6\textwidth]{pic/min-heap.png}
 \end{frame}
-\begin{frame}
-Дерево высоты $h$ \emph{заполнено слева} $ \iff $
-выполняется ровно один из пунктов:
-  \begin{itemize}
-    \item дерево — пустое
-    \item дерево — полное
-    \item левое поддерево — полное высотой $h-1$ и правое поддерево — полное высотой $h-2$
-    \item левое поддерево — заполнено слева высотой $h-1$ и правое поддерево — полное высотой $h-2$
-    \item левое поддерево — полное высотой $h-1$ и правое поддерево — заполнено слева высотой $h-1$
-  \end{itemize}
+% \begin{frame}
+% Дерево высоты $h$ \emph{заполнено слева} $ \iff $
+% выполняется ровно один из пунктов:
+%   \begin{itemize}
+%     \item дерево — пустое
+%     \item дерево — полное
+%     \item левое поддерево — полное высотой $h-1$ и правое поддерево — полное высотой $h-2$
+%     \item левое поддерево — заполнено слева высотой $h-1$ и правое поддерево — полное высотой $h-2$
+%     \item левое поддерево — полное высотой $h-1$ и правое поддерево — заполнено слева высотой $h-1$
+%   \end{itemize}
+% \end{frame}
+\fontsize{14pt}{14pt}\selectfont
+\input{latex/PresentationHeap.tex}
 
-\end{frame}
-\begin{frame}
-    \input{latex/PresentationHeap.tex}
-\end{frame}
 \end{document}
 
