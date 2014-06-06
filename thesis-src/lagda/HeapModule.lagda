@@ -509,6 +509,7 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   ... | full   , newleft | l1 | l2 = almost , nd z l1 l2 newleft c
   ... | almost , newleft | l1 | l2 = almost , nl z l1 l2 newleft c
 \end{code}
+TODO из-за непонятного бага в LaTeX некоторые строки на Agda не отрендерены
 \AgdaHide{
 \begin{code}
   finsert z (nf p i j (nf x i₁ j₁ a b) c) | tri> _ _ z<p
@@ -527,15 +528,14 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
 \begin{code}
   ainsert : ∀ {h m} → (z : A) → Heap m h almost
     → Σ HeapState (Heap (minE m (# z)) h)
-\end{code}
-\AgdaHide{
-\begin{code}
-
   ainsert z (nd p i j a b) with cmp p z
   ainsert z (nd p i j a b) | tri< p<z _ _
     with finsert z b | lemma-<=minE j (le (base p<z))
   ... | full   , nb | l1 = full   , nf p i l1 a nb
   ... | almost , nb | l1 = almost , nr p i l1 a nb
+\end{code}
+\AgdaHide{
+\begin{code}
   ainsert z (nd p i j a b) | tri= _ p=z _
     with finsert p b | snd resp≤ (base p=z) i
     | lemma-<=minE
@@ -547,7 +547,6 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
     | lemma-<=minE (trans≤ (le (base z<p)) j) (le (base z<p))
   ... | full   , nb | l1 | l2 = full   , nf z l1 l2 a nb
   ... | almost , nb | l1 | l2 = almost , nr z l1 l2 a nb
-
   ainsert z (nl p i j a b) with cmp p z
   ainsert z (nl p i j a b) | tri< p<z _ _
     with ainsert z a | lemma-<=minE i (le (base p<z))
@@ -563,7 +562,6 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
       (le (base z<p)) | trans≤ (le (base z<p)) j
   ... | full   , na | l1 | l2 = almost , nd z l1 l2 na b
   ... | almost , na | l1 | l2 = almost , nl z l1 l2 na b
-
   ainsert z (nr p i j a b) with cmp p z
   ainsert z (nr p i j a b) | tri< p<z _ _
     with ainsert z b | lemma-<=minE j (le (base p<z))
@@ -579,7 +577,6 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
     | lemma-<=minE (trans≤ (le (base z<p)) j) (le (base z<p))
   ... | full   , nb | l1 | l2 = full   , nf z l1 l2 a nb
   ... | almost , nb | l1 | l2 = almost , nr z l1 l2 a nb
-
 \end{code}}
 
 \subsection{Удаление минимума из полной кучи}
@@ -593,25 +590,28 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   fmerge : ∀ {x y h} → Heap x h full → Heap y h full
     → OR (Heap x zero full × (x ≡ y) × (h ≡ zero))
          (Heap (minE x y) (succ h) almost)
-\end{code}
-\AgdaHide{
-\begin{code}
   fmerge eh eh = orA (eh , refl , refl)
   fmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d) with cmp x y
   fmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d) | tri< x<y _ _ with fmerge a b
   ... | orA (eh , refl , refl) = orB (nd x (le (base x<y)) j₁ (nf y i₂ j₂ c d) eh)
   ... | orB ab = orB
     (nr x (le (base x<y)) (lemma-<=minE i₁ j₁) (nf y i₂ j₂ c d) ab)
+\end{code}
+\AgdaHide{
+\begin{code}
   fmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d) | tri= _ x=y _ with fmerge c d
   ... | orA (eh , refl , refl) = orB
     (nd y (eq (base (sym== x=y))) j₂ (nf x i₁ j₁ a b) eh)
   ... | orB cd = orB
     (nr y (eq (base (sym== x=y))) (lemma-<=minE i₂ j₂) (nf x i₁ j₁ a b) cd) 
+\end{code}}
+\begin{code}
   fmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d) | tri> _ _ y<x with fmerge c d
   ... | orA (eh , refl , refl) = orB (nd y (le (base y<x)) j₂ (nf x i₁ j₁ a b) eh)
   ... | orB cd = orB
     (nr y (le (base y<x)) (lemma-<=minE i₂ j₂) (nf x i₁ j₁ a b) cd)
-\end{code}} Извлечение минимума из полной кучи.
+\end{code}
+Извлечение минимума из полной кучи.
 \begin{code}
   fpop : ∀ {m h} → Heap m (succ h) full → OR
     (Σ (expanded A) (λ x → (Heap x (succ h) almost) × (m ≤ x)))

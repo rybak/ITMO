@@ -13,8 +13,8 @@ run_one()
 make_thesis()
 {
     run_one
-    ./biber --version
-    ./biber --bblsafechars ../thesis
+    biber --version
+    biber --bblsafechars ../thesis
     run_one
     run_one
     # dvipdf ../thesis.dvi ../thesis.pdf
@@ -37,20 +37,20 @@ then
     done
 else
     export TEXINPUTS="$TEXINPUTS:./sty:"
-    cd latex
-        for i in `cat ../lagda.txt`;
-        do
-            rm $i.tex
-        done
-    cd ../
     if [ "x$1" = "xagda" ];
     then
-        for i in `cat lagda.txt`;
+        cd latex
+            for i in `cat ../lagda.txt`;
+            do
+                rm $i.tex
+            done
+        cd ../
+        cd lagda
+        for i in `cat ../lagda.txt`;
         do
-            cd lagda
-                agda --latex-dir "../latex" --latex "$i.lagda" --no-termination-check
-            cd ../
+            ./agda.sh "$i"
         done
+        cd ../
     fi
     . ./m.sh
     make_thesis
