@@ -5,8 +5,8 @@ module AVLBalance where
   infix 4 _∼_
   testˡ : ℕ
   testˡ = succ zero
-\end{code}
-}
+\end{code}}
+
 Если $m \sim n$, то разница между $m$ и $n$ не больше чем один:
 \begin{code}
   data _∼_ : ℕ → ℕ → Set where

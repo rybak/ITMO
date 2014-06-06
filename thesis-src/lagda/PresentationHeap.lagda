@@ -1,5 +1,4 @@
 \AgdaHide{
-
 \begin{code}
 module PresentationHeap where
 open import AgdaDescription
@@ -9,6 +8,7 @@ open import AgdaDescription
 \begin{code}
 data ⊥ : Set where -- пустой тип
 \end{code}
+}
 \AgdaHide{
 \begin{code}
 module Level where
@@ -31,7 +31,7 @@ flip : ∀ {a b c}
      → ((x : A) → (y : B) → C x y)
      → ((y : B) → (x : A) → C x y)
 flip f x y = f y x
-\end{code}}
+\end{code}
 \begin{code}
 ¬ : ∀ {a} → Set a → Set a -- Логическое отрицание
 ¬ P = P → ⊥
@@ -329,7 +329,8 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A)
   trans=E : Trans _=E_
 
   respE : _<E_ Respects₂ _=E_
-\end{code}\AgdaHide{
+\end{code}
+\AgdaHide{
 \begin{code}
   lemma-<E (base r) = r
   trans<E {# _} {# _} {# _} a<b b<c =
@@ -356,7 +357,8 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A)
     right {top} {# _} {# _} _ ext = ext
     right {_} {# _} {top} () _
     right {_} {top} {_} _ ()
-\end{code}}
+\end{code}
+}
 \end{frame}
 
 \begin{frame}

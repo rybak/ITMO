@@ -50,7 +50,8 @@ module Logic where
 \begin{code}
   ¬ : ∀ {a} → Set a → Set a
   ¬ P = P → ⊥
-\end{code} \end{minipage}
+\end{code}
+\end{minipage}
 \begin{code}
   private
    module DummyAB {a b} {A : Set a} {B : Set b} where
@@ -478,16 +479,14 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   peekMin (nf p _ _ _ _) = # p
   peekMin (nl p _ _ _ _) = # p
   peekMin (nr p _ _ _ _) = # p
-\end{code}\end{minipage}
+\end{code}
+\end{minipage}
 
 \subsection{Функции вставки в кучу}
 Функция вставки элемента в полную кучу.
 \begin{code}
   finsert : ∀ {h m} → (z : A) → Heap m h full
     → Σ HeapState (Heap (minE m (# z)) (succ h))
-\end{code}
-\AgdaHide{
-\begin{code}
   finsert {0} z eh = full , nf z (le ext) (le ext) eh eh
   finsert {1} z (nf p i j eh eh) with cmp p z
   ... | tri< p<z _ _ = almost ,
@@ -505,10 +504,13 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   finsert z (nf p i j (nf x i₁ j₁ a b) c) | tri= _ p=z _
     with finsert p (nf x i₁ j₁ a b)
     | lemma-<=minE {# z} {# x} {# p}
-       (snd resp≤ (base p=z) i) (eq (base (sym== p=z)))
+        (snd resp≤ (base p=z) i) (eq (base (sym== p=z)))
     | snd resp≤ (base p=z) j
   ... | full   , newleft | l1 | l2 = almost , nd z l1 l2 newleft c
   ... | almost , newleft | l1 | l2 = almost , nl z l1 l2 newleft c
+\end{code}
+\AgdaHide{
+\begin{code}
   finsert z (nf p i j (nf x i₁ j₁ a b) c) | tri> _ _ z<p
     with finsert p (nf x i₁ j₁ a b)
     | lemma-<=minE {# z} {# x} {# p}

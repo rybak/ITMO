@@ -37,14 +37,18 @@ then
     done
 else
     export TEXINPUTS="$TEXINPUTS:./sty:"
+    cd latex
+        for i in `cat ../lagda.txt`;
+        do
+            rm $i.tex
+        done
+    cd ../
     if [ "x$1" = "xagda" ];
     then
         for i in `cat lagda.txt`;
         do
             cd lagda
-            agda --latex-dir "../latex" --latex "$i.lagda" --no-termination-check
-
-            # mv latex/* ../latex
+                agda --latex-dir "../latex" --latex "$i.lagda" --no-termination-check
             cd ../
         done
     fi

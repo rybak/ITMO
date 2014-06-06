@@ -37,7 +37,6 @@ else
         do
             cd lagda
             agda --latex-dir "../latex" --latex "$i.lagda" --no-termination-check --allow-unsolved-metas
-
             # mv latex/* ../latex
             cd ../
         done
