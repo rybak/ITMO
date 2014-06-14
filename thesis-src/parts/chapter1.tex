@@ -17,7 +17,9 @@
 и одной операцией \emph{бета-редукции}.
 При этом говорят, что вхождение переменной является \emph{свободным},
 если оно не связано какой-либо абстракцией.
+Множество пре-лямбда-термов обозначают $\Lambda^{-}$.
 \emph{Лямбда-термы}~--- это пре-лямбда-термы, факторизованные по отношению \emph{альфа-эквивалентности}.
+Обозначение: $\Lambda = \Lambda^{-} / =_{\alpha} $.
 
 \emph{Альфа-эквивалентность} ($\alpha$-equality) отождествляет два пре-лямбда-терма, если один из них может быть получен из другого путём некоторого \emph{корректного} переименовывания переменных~--- переименования не нарушающего отношение связанности.
 
@@ -30,8 +32,52 @@
 За более подробной информацией об этом формализме следует обращаться к~\cite{TTFP} и~\cite{Sorensen}.
 
 \section{Лямбда-исчисление с простыми типами}
-TODO написать про $\lambda^\to$
-\cite{ChurchSTLC, Sorensen}
+\begin{definition}
+    Пусть $U$ — бесконечное счетное множество, элементы которого мы будем
+    называть \emph{переменными типы}.
+    Множество \emph{простых типов} $\Pi$ — множество строк определенных грамматикой:
+
+    $$ \Pi ::= U \mid (\Pi \to \Pi) $$
+
+    Для обозначения элементов множества $\Pi$ используют буквы греческого алфавита:
+    $\sigma, \tau \ldots $.
+\end{definition}
+\begin{definition}
+    Множество контекстов $C$ — это множество всех множеств пар такого вида:
+    $$ \{ x_1 : \tau_1 , \ldots , x_n : \tau_n \} $$
+    где $ \tau_1 , \ldots , \tau_n \in \Pi$, а
+    $ x_1 , \ldots , x_n \in V $ (переменные из $\Lambda$) и $x_i \neq x_j$ если $i \neq j$.
+\end{definition}
+\begin{definition}
+    \emph{Домен} контекста $\Gamma$ = $ \{ x_1 : \tau_1 , \ldots , x_n : \tau_n \} $:
+    $$ \operatorname{dom} (\Gamma) = \{ x_1 , \ldots , x_n \} $$ и $x_i \neq x_j$ при $i \neq j$.
+\end{definition}
+% \begin{definition}
+%     \emph{Range} контекста $\Gamma$ = $ \{ x_1 : \tau_1 , \ldots , x_n : \tau_n \} $:
+%     $$ |\Gamma| = \{ \tau \in \Pi \mid \exists x : (x : \tau) \in \Gamma \} $$
+% \end{definition}
+\begin{definition}
+    Отношение \emph{типизации} (англ. \emph{typability}) $ \vdash $ на множестве
+    $ C \times \Lambda \times \Pi $ определяется следующими правилами:
+
+    $$ \frac {} {\Gamma, x : \tau \vdash x : \tau}
+    \quad
+    \frac{\Gamma, x : \sigma \vdash M : \tau}
+    {\Gamma \vdash \lambda x . M : \sigma \to \tau}
+    \quad
+    \frac{\Gamma \vdash M : \sigma \to \tau \quad \Gamma \vdash N : \sigma}
+    {\Gamma \vdash M N : \tau}
+    $$
+    В первом и втором правиле мы требуем $x \ni \operatorname{dom}(\Gamma).$
+\end{definition}
+\begin{definition}
+    \emph{Лямбда-исчисление с простыми типами} или $\lambda^{\to}$ — это тройка
+    $ (\Lambda , \Pi , \vdash) $.
+    Чтобы отличать это определение системы $\lambda^{\to}$ от других вариантов,
+    эту систему называют \emph{лямбда-исчисление с простыми типами по Карри} или $\lambda^{\to}$ по Карри.
+\end{definition}
+За более подробной информацией об этом формализме следует
+обращаться к~\cite{ChurchSTLC} и~\cite{Sorensen}.
 
 \section{Алгебраические типы данных и сопоставление с образцом}
 
