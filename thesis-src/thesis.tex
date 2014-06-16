@@ -6,19 +6,21 @@
 \usepackage{graphicx}
 \graphicspath{{pic/}}
 
-\usepackage{sty/rac}
-\usepackage{placeins}
+% \usepackage{placeins}
 
-% \usepackage[english,russian]{babel}
 \usepackage{fontspec}
 \usepackage{polyglossia}
 \setdefaultlanguage[spelling=modern]{russian}
 \setotherlanguage{english}
-\newcommand{\myfont}[0]{FreeSerif}
+
+\newcommand{\myfont}[0]{CMU Serif}
 \setmainfont[Ligatures=TeX]{\myfont}
+\newfontfamily\cyrillicfont{\myfont}
 \newfontfamily\cyrillicfontsf{\myfont}
 \newfontfamily\cyrillicfontit{\myfont}
 \newfontfamily\cyrillicfonttt{\myfont}
+
+\usepackage{sty/rac}
 
 \usepackage{textcomp}
 \usepackage{csquotes}
@@ -81,11 +83,10 @@
 %%% Russian captions:
 \input{utils/theorems.tex}
 
-% \hfuzz=\maxdimen
-% \tolerance=10000
-% \hbadness=10000
-% \hbadness=10000 % overfull + underfull
-
+% \usepackage{bold-extra}
+% \usepackage{titlesec}
+% \titleformat*{\chapter}{\filcenter}
+% \titleformat*{\section}{\scshape\bfseries\filcenter}
 \begin{document}
 
 \initializefrontsections

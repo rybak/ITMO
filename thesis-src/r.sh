@@ -55,4 +55,4 @@ else
     . ./m.sh
     make_thesis
 fi
-
+notify-send "$0 finished"
