@@ -7,21 +7,27 @@ etex
 
 beginfig(1)
     u := 0.5cm;
+    h := 3u;
     vardef dtr(expr a,b,c) =
         draw a--b--c--cycle;
     enddef;
     qu := 0.5;
     vardef dfull(expr x, d) =
         pair L,R;
-        L = x + (-1u,-3u + d * 0.5u);
-        R = x + ( 1u,-3u + d * 0.5u);
-        dtr(x,L,R);
-        fill x--L--R--cycle withcolor .5white;
+        L = x + (-1u, -3u);
+        R = x + ( 1u, -3u);
+        pair Lx, Rx;
+        q := (0.5 * d * u) / h;
+        Lx = (q * x + (1 - q) * L);
+        Rx = (q * x + (1 - q) * R);
+        % dtr(x,L,R);
+        dtr(x,Lx,Rx);
+        % fill x--L--R--cycle withcolor .5white;
+        fill x--Lx--Rx--cycle withcolor .5white;
     enddef;
 
     vardef dalmost(expr x, d) =
         pair L, R, C, Cx, Rx;
-        h := 3u;
         L = x + (-1u, -h);
         R = x + ( 1u, -h);
         C = 0.5 * (L + R);

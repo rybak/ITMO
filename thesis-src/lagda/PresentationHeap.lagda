@@ -4,10 +4,6 @@ module PresentationHeap where
 open import AgdaDescription
 \end{code}
 
-\begin{frame}
-\begin{code}
-data ⊥ : Set where -- пустой тип
-\end{code}
 }
 \AgdaHide{
 \begin{code}
@@ -32,21 +28,33 @@ flip : ∀ {a b c}
      → ((y : B) → (x : A) → C x y)
 flip f x y = f y x
 \end{code}
+}
+
+\begin{frame}
+\frametitle{}
+Пустой тип
 \begin{code}
-¬ : ∀ {a} → Set a → Set a -- Логическое отрицание
+data ⊥ : Set where -- нет конструкторов
+\end{code}
+Логическое отрицание
+\begin{code}
+¬ : ∀ {a} → Set a → Set a
 ¬ P = P → ⊥
-contraposition : ∀ {A B : Set} -- Контрапозиция
+\end{code}
+Контрапозиция
+\begin{code}
+contraposition : ∀ {A B : Set}
   → (A → B) → (¬ B → ¬ A)
-contraposition = flip _∘_
--- data _≡_ {a} {A : Set a} (x : A) : A → Set a where
---   refl : x ≡ x -- Пропозициональное равенство 
+contraposition f ¬b a = ¬b (f a)
+\end{code}
+\end{frame}
+
+\AgdaHide{
+\begin{code}
 cong : ∀ {A B : Set} → ∀ (f : A → B) {x y}
   → x ≡ y → f x ≡ f y -- Конгруэнтность
 cong f refl = refl
 \end{code}
-\end{frame}
-}
-
 \begin{frame}
 \begin{code}
 record Σ {a b} (A : Set a) (B : A → Set b)
@@ -54,12 +62,22 @@ record Σ {a b} (A : Set a) (B : A → Set b)
   constructor _,_
   field fst : A ; snd : B fst
 open Σ
-
 _×_ : ∀ {a b} (A : Set a) → (B : Set b) → Set (a ⊔ b)
 A × B = Σ A (λ _ → B) -- Декартово произведение
 infixr 5 _×_ _,_
 \end{code}
 \end{frame}
+}
+\AgdaHide{
+\begin{frame}
+  \frametitle{OR}
+\begin{code}
+data OR (A B : Set) : Set where
+  orA : A → OR A B
+  orB : B → OR A B
+\end{code}
+\end{frame}
+}
 
 \begin{frame}
   \frametitle{Отношения}
@@ -69,6 +87,13 @@ Rel₂ A = A → A → Set
 \end{code}
 \end{frame}
 
+\AgdaHide{
+\begin{code} 
+flip₁ : ∀ {A B : Set} {C : Set₁}
+  → (A → B → C) → B → A → C
+flip₁ f a b = f b a
+\end{code} 
+}
 \begin{frame}
   \frametitle{Трихотомия}
 \begin{code}
@@ -80,16 +105,8 @@ data Tri {A : Set} (_<_ _==_ _>_ : Rel₂ A) (a b : A)
     → Tri _<_ _==_ _>_ a b -- равно
   tri> : ¬ (a < b) → ¬ (a == b) →   (a > b)
     → Tri _<_ _==_ _>_ a b -- больше
-\end{code} 
-\end{frame}
-
-\begin{frame}
-  \frametitle{Компаратор}
-\begin{code} 
-flip₁ : ∀ {A B : Set} {C : Set₁}
-  → (A → B → C) → B → A → C
-flip₁ f a b = f b a
-
+\end{code}
+\begin{code}
 Cmp : {A : Set} → Rel₂ A → Rel₂ A → Set
 Cmp {A} _<_ _==_ = ∀ (x y : A) →
   Tri (_<_) (_==_) (flip₁ _<_) x y
@@ -143,15 +160,16 @@ cmpℕ (succ x) (succ y) with cmpℕ x y
 \end{frame}
 }
 
-\section{Свойства отношений}
-
 \begin{frame}
-  \frametitle{Транзитивность и симметричность}
+  \frametitle {Свойства отношений}
+Транзитивность 
 \begin{code}
 Trans : {A : Set} → Rel₂ A → Set
 Trans {A} _rel_ = {a b c : A}
   → (a rel b) → (b rel c) → (a rel c)
-
+\end{code}
+Симметричность
+\begin{code}
 Symmetric : ∀ {A : Set} → Rel₂ A → Set
 Symmetric _rel_ = ∀ {a b} → a rel b → b rel a
 \end{code}
@@ -183,8 +201,7 @@ data _<=_ {A : Set}
 \end{code}
 \end{frame}
 
-\begin{frame}
-  \frametitle{min}
+\AgdaHide{
 \begin{code}
 min : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A}
   → (cmp : Cmp _<_ _==_) → A → A → A
@@ -192,10 +209,17 @@ min cmp x y with cmp x y
 ... | tri< _ _ _ = x
 ... | _ = y
 \end{code}
-\end{frame}
-
-\begin{frame}
-  \frametitle{lemma-<=min}
+}
+\AgdaHide{
+\begin{code}
+min3 : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A}
+  → (cmp : Cmp _<_ _==_) → A → A → A → A
+min3 cmp x y z with cmp x y
+... | tri< _ _ _ = min cmp x z
+... | _ = min cmp y z
+\end{code}
+}
+\AgdaHide{
 \begin{code}
 lemma-<=min : {A : Set}
   {_<_ : Rel₂ A}{_==_ : Rel₂ A}
@@ -203,23 +227,8 @@ lemma-<=min : {A : Set}
   → (_<=_ {_<_ = _<_} {_==_} a b)
   → (_<=_ {_<_ = _<_} {_==_} a c)
   → (_<=_ {_<_ = _<_} {_==_} a (min cmp b c))
-lemma-<=min {cmp = cmp} {_} {b} {c}
-  ab ac with cmp b c
-... | tri< _ _ _ = ab
-... | tri= _ _ _ = ac
-... | tri> _ _ _ = ac
 \end{code}
-\end{frame}
-
-\begin{frame}
-  \frametitle{min3}
 \begin{code}
-min3 : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A}
-  → (cmp : Cmp _<_ _==_) → A → A → A → A
-min3 cmp x y z with cmp x y
-... | tri< _ _ _ = min cmp x z
-... | _ = min cmp y z
-
 lemma-<=min3 : {A : Set}
   {_<_ : Rel₂ A}{_==_ : Rel₂ A}
   {cmp : Cmp _<_ _==_} {x a b c : A}
@@ -228,8 +237,16 @@ lemma-<=min3 : {A : Set}
   → (_<=_ {_<_ = _<_} {_==_} x c)
   → (_<=_ {_<_ = _<_} {_==_} x (min3 cmp a b c))
 \end{code}
-\end{frame}
-
+}
+\AgdaHide{
+\begin{code}
+lemma-<=min {cmp = cmp} {_} {b} {c}
+  ab ac with cmp b c
+... | tri< _ _ _ = ab
+... | tri= _ _ _ = ac
+... | tri> _ _ _ = ac
+\end{code}
+}
 \AgdaHide{
 \begin{frame}
 Доказательство \F{lemma-<=min3}
@@ -252,6 +269,19 @@ resp<= : {A : Set} {_<_ : Rel₂ A}
   → (trans== : Trans _==_)
   → (sym== : Symmetric _==_)
   → (_<=_ {A}{_<_}{_==_}) Respects₂ _==_
+\end{code}
+% Транзитивность \D{\_<=\_}.
+\begin{code}
+trans<= : {A : Set}
+  {_<_ : Rel₂ A} {_==_ : Rel₂ A}
+  → _<_ Respects₂ _==_ → Symmetric _==_
+  → Trans _==_ → Trans _<_
+  → Trans (_<=_ {A}{_<_}{_==_})
+\end{code}
+\end{frame}
+
+\AgdaHide{
+\begin{code}
 resp<= {A}{_<_}{_==_} resp trans sym = left , right where
   left : ∀ {a b c : A} → b == c → a <= b → a <= c
   left b=c (le a<b) = le (fst resp b=c a<b)
@@ -260,16 +290,7 @@ resp<= {A}{_<_}{_==_} resp trans sym = left , right where
   right b=c (le a<b) = le (snd resp b=c a<b)
   right b=c (eq a=b) = eq (trans (sym b=c) a=b)
 \end{code}
-\end{frame}
-
-\begin{frame}
-Транзитивность \D{\_<=\_}.
 \begin{code}
-trans<= : {A : Set}
-  {_<_ : Rel₂ A} {_==_ : Rel₂ A}
-  → _<_ Respects₂ _==_ → Symmetric _==_
-  → Trans _==_ → Trans _<_
-  → Trans (_<=_ {A}{_<_}{_==_})
 trans<= r s t== t< (le a<b) (le b<c)
   = le (t< a<b b<c)
 trans<= r s t== t< (le a<b) (eq b=c)
@@ -279,12 +300,13 @@ trans<= r s t== t< (eq a=b) (le b<c)
 trans<= r s t== t< (eq a=b) (eq b=c)
   = eq (t== a=b b=c)
 \end{code}
-\end{frame}
+}
 
 \section{Куча}
 
 \begin{frame}
-  \frametitle{Заголовок модуля — требования}
+  \frametitle{Заголовок модуля}
+Требования к исходному типу
 \begin{code}
 module Heap (A : Set) (_<_ _==_ : Rel₂ A)
   (cmp : Cmp _<_ _==_)
@@ -303,10 +325,7 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A)
     # : A → expanded A -- элемент исходного типа
     top : expanded A -- элемент расширение
 \end{code}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Расширенные отношения}
+Расширенные отношения
 \begin{code}
   data _<E_ : Rel₂ (expanded A) where
     base : ∀ {x y : A} → x < y → (# x) <E (# y)
@@ -329,7 +348,10 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A)
   trans=E : Trans _=E_
 
   respE : _<E_ Respects₂ _=E_
+
+  cmpE : Cmp {expanded A} _<E_ _=E_
 \end{code}
+\end{frame}
 \AgdaHide{
 \begin{code}
   lemma-<E (base r) = r
@@ -359,7 +381,28 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A)
     right {_} {top} {_} _ ()
 \end{code}
 }
-\end{frame}
+\AgdaHide{
+\begin{code}
+  cmpE (# x) (# y) with cmp x y
+  cmpE (# x) (# y) | tri< a b c = tri<
+    (base a)
+    (contraposition lemma-=E b)
+    (contraposition lemma-<E c)
+  cmpE (# x) (# y) | tri= a b c = tri=
+    (contraposition lemma-<E a)
+    (base b)
+    (contraposition lemma-<E c)
+  cmpE (# x) (# y) | tri> a b c = tri>
+    (contraposition lemma-<E a)
+    (contraposition lemma-=E b)
+    (base c)
+\end{code}
+\begin{code}
+  cmpE (# x) top = tri< ext (λ ()) (λ ())
+  cmpE top (# y) = tri> (λ ()) (λ ()) ext
+  cmpE top top   = tri= (λ ()) ext (λ ())
+\end{code}
+}
 
 \begin{frame}
   \frametitle{$ \_\leq\_ $}
@@ -376,78 +419,57 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A)
 \end{frame}
 
 \begin{frame}
-  \frametitle{cmpE}
-\begin{code}
-  cmpE : Cmp {expanded A} _<E_ _=E_
-  cmpE (# x) (# y) with cmp x y
-  cmpE (# x) (# y) | tri< a b c = tri<
-    (base a)
-    (contraposition lemma-=E b)
-    (contraposition lemma-<E c)
-  cmpE (# x) (# y) | tri= a b c = tri=
-    (contraposition lemma-<E a)
-    (base b)
-    (contraposition lemma-<E c)
-  cmpE (# x) (# y) | tri> a b c = tri>
-    (contraposition lemma-<E a)
-    (contraposition lemma-=E b)
-    (base c)
-\end{code}
-\end{frame}
-\begin{frame}
-  \frametitle{cmpE}
-\begin{code}
-  cmpE (# x) top = tri< ext (λ ()) (λ ())
-  cmpE top (# y) = tri> (λ ()) (λ ()) ext
-  cmpE top top   = tri= (λ ()) ext (λ ())
-\end{code}
-\end{frame}
-
-\begin{frame}
   \frametitle{minE}
 \begin{code}
   minE : (x y : expanded A) → expanded A
   minE = min cmpE
-  lemma-<=minE : ∀ {a b c} → 
-    a ≤ b → a ≤ c → a ≤ (minE b c)
-  lemma-<=minE = 
-    lemma-<=min {expanded A}{_<E_}{_=E_}{cmpE}
-
   min3E : (expanded A) → (expanded A)
     → (expanded A) → (expanded A)
   min3E x y z = min3 cmpE x y z
+\end{code}
+\begin{code}
+  lemma-<=minE : ∀ {a b c} → 
+    a ≤ b → a ≤ c → a ≤ (minE b c)
+
   lemma-<=min3E : ∀ {x a b c}
     → x ≤ a → x ≤ b → x ≤ c → x ≤ (min3E a b c)
+\end{code}
+\AgdaHide{
+\begin{code}
+  lemma-<=minE = 
+    lemma-<=min {expanded A}{_<E_}{_=E_}{cmpE}
   lemma-<=min3E =
     lemma-<=min3 {expanded A}{_<E_}{_=E_}{cmpE}
 \end{code}
-\end{frame}
-
-\begin{frame}
-  \frametitle{HeapState}
-\begin{code}
-  data HeapState : Set where
-    full almost : HeapState
-\end{code}
-\end{frame}
+}
+\end{frame} % minE
 
 \begin{frame}
   \frametitle{Heap}
 \begin{code}
+  data HeapState : Set where
+    full almost : HeapState
+
   data Heap : (expanded A) -- минимум
     → (h : ℕ) -- высота
     → HeapState -- заполненность
     → Set where
     eh : Heap top zero full -- Пустая куча
+\end{code}
+\end{frame} % Heap
+
+\begin{frame}
+\begin{code}
     nf : ∀ {n} {x y} → (p : A)
       → (i : (# p) ≤ x) → (j : (# p) ≤ y)
-      → (a : Heap x n full) → (b : Heap y n full)
-      → Heap (# p) (succ n) full -- Полная куча
+      → (a : Heap x n full)
+      → (b : Heap y n full) -- a b одной высоты
+      → Heap (# p) (succ n) full
 \end{code}
 \begin{center}
 \includegraphics{pic/p-nodes-1.pdf}
 \end{center}
-\end{frame}
+\end{frame} % nf
 
 \begin{frame}
 \begin{code}
@@ -460,33 +482,33 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A)
 \begin{center}
 \includegraphics{pic/p-nodes-2.pdf}
 \end{center}
-\end{frame}
+\end{frame} % nd
 
 \begin{frame}
 \begin{code}
     nl : ∀ {n} {x y} → (p : A)
       → (i : (# p) ≤ x) → (j : (# p) ≤ y)
       → (a : Heap x (succ n) almost)
-      → (b : Heap y n full) -- b — полная
+      → (b : Heap y n full) -- b - полная
       → Heap (# p) (succ (succ n)) almost
 \end{code}
 \begin{center}
 \includegraphics{pic/p-nodes-3.pdf}
 \end{center}
-\end{frame}
+\end{frame} % nl
 
 \begin{frame}
 \begin{code}
     nr : ∀ {n} {x y} → (p : A)
       → (i : (# p) ≤ x) → (j : (# p) ≤ y)
-      → (a : Heap x (succ n) full) -- a — полная
+      → (a : Heap x (succ n) full) -- a - полная
       → (b : Heap y (succ n) almost)
       → Heap (# p) (succ (succ n)) almost
 \end{code}
 \begin{center}
 \includegraphics{pic/p-nodes-4.pdf}
 \end{center}
-\end{frame}
+\end{frame} % nr
 
 \AgdaHide{
 \begin{frame}
@@ -499,8 +521,9 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A)
   lemma-almost-height (nl _ _ _ _ _) = s≤s z≤n
   lemma-almost-height (nr _ _ _ _ _) = s≤s z≤n
 \end{code}
-\end{frame}
-
+\end{frame} % lah
+}
+\AgdaHide{
 \begin{frame}
   \frametitle{peekMin}
 \begin{code}
@@ -511,104 +534,10 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A)
   peekMin (nl p _ _ _ _) = # p
   peekMin (nr p _ _ _ _) = # p
 \end{code}
-\end{frame}
+\end{frame} peek
 }
-
-\begin{frame}
-  \frametitle{finsert}
-Вставка в полную кучу
-\begin{code}
-  finsert : ∀ {h m} → (z : A)
-    → Heap m h full
-    → Σ HeapState 
-        (Heap (minE m (# z)) (succ h))
-\end{code}
-\end{frame}
 
 \AgdaHide{
-\begin{code}
-  finsert = {!!}
-\end{code}
-}
-
-\begin{frame}
-  \frametitle{ainsert}
-Вставка в неполную кучу
-\begin{code}
-  ainsert : ∀ {h m} → (z : A)
-    → Heap m h almost
-    → Σ HeapState
-        (Heap (minE m (# z)) h)
-\end{code}
-\end{frame}
-
-\AgdaHide{
-\begin{code}
-  ainsert = {!!}
-\end{code}
-}
- 
-\begin{frame}
-  \frametitle{OR}
-\begin{code}
-  data OR (A B : Set) : Set where
-    orA : A → OR A B
-    orB : B → OR A B
-\end{code}
-\end{frame}
-
-\begin{frame}
-  \frametitle{fmerge}
-Слияние двух полных куч одной высоты
-\begin{code}
-  fmerge : ∀ {x y h}
-    → Heap x h full → Heap y h full
-    → OR (Heap x zero full × (x ≡ y) × (h ≡ zero))
-         (Heap (minE x y) (succ h) almost)
-\end{code}
-\end{frame}
-
-\AgdaHide{
-\begin{code}
-  fmerge = {!!}
-\end{code}
-}
- 
-\begin{frame}
-  \frametitle{fpop}
-Извлечение минимума из полной кучи
-\begin{code}
-  fpop : ∀ {m h} → Heap m (succ h) full
-    → OR
-    (Σ (expanded A) 
-       (λ x → (Heap x (succ h) almost) × (m ≤ x))
-    )
-    (Heap top h full)
-\end{code}
-\end{frame}
-
-\AgdaHide{
-\begin{code}
-  fpop = {!!}
-\end{code}
-}
- 
-\begin{frame}
-  \frametitle{makeH}
-Составление полной кучи высотой $h+1$ из двух куч высотой $h$ и одного элемента
-\begin{code}
-  makeH : ∀ {x y h} → (p : A)
-    → Heap x h full → Heap y h full
-    → Heap (min3E x y (# p)) (succ h) full
-\end{code}
-\end{frame}
-
-\AgdaHide{
-\begin{code}
-  makeH = {!!}
-\end{code}
-}
-
 \begin{frame}
   \frametitle{Вспомогательные леммы}
 \begin{code}
@@ -625,7 +554,57 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A)
     (trans≤ (le (base y<x)) i)
     (trans≤ (le (base y<x)) j)
 \end{code}
-\end{frame}
+\end{frame} % lemmas
+}
+
+\begin{frame}
+  \frametitle{Вставка}
+Вставка в полную кучу
+\begin{code}
+  finsert : ∀ {h m} → (z : A)
+    → Heap m h full
+    → Σ HeapState (Heap (minE m (# z)) (succ h))
+\end{code}
+Вставка в неполную кучу
+\begin{code}
+  ainsert : ∀ {h m} → (z : A)
+    → Heap m h almost
+    → Σ HeapState (Heap (minE m (# z)) h)
+\end{code}
+\end{frame} % inserts
+
+\AgdaHide{
+\begin{code}
+  finsert = {!!}
+\end{code}
+}
+\AgdaHide{
+\begin{code}
+  ainsert = {!!}
+\end{code}
+} 
+
+\section{Слияние куч} 
+\begin{frame}
+  \frametitle{fmerge}
+Слияние двух полных куч одной высоты
+\begin{code}
+  fmerge : ∀ {x y h}
+    → Heap x h full → Heap y h full
+    → OR (Heap x zero full × (x ≡ y) × (h ≡ zero))
+         (Heap (minE x y) (succ h) almost)
+\end{code}
+\end{frame} % fm
+
+\begin{frame}
+  \frametitle{makeH}
+Составление полной кучи высотой $h+1$ из двух куч высотой $h$ и одного элемента
+\begin{code}
+  makeH : ∀ {x y h} → (p : A)
+    → Heap x h full → Heap y h full
+    → Heap (min3E x y (# p)) (succ h) full
+\end{code}
+\end{frame} % mH
 
 \begin{frame}
   \frametitle{ndmerge}
@@ -636,12 +615,7 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A)
     → Heap y (succ h) full
     → Heap (minE x y) (succ (succ (succ h))) almost
 \end{code}
-\end{frame}
-\AgdaHide{
-\begin{code}
-  ndmerge = {!!}
-\end{code}
-}
+\end{frame} % ndm
 
 \begin{frame}
   \frametitle{afmerge}
@@ -654,7 +628,23 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A)
     → OR (Heap (minE x y) (succ (succ h)) full)
          (Heap (minE x y) (succ (succ (succ h))) almost)
 \end{code}
-\end{frame}
+\end{frame} % afm
+
+\AgdaHide{
+\begin{code}
+  fmerge = {!!}
+\end{code}
+}
+\AgdaHide{
+\begin{code}
+  makeH = {!!}
+\end{code}
+}
+\AgdaHide{
+\begin{code}
+  ndmerge = {!!}
+\end{code}
+}
 \AgdaHide{
 \begin{code}
   afmerge = {!!}
@@ -662,20 +652,32 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A)
 }
 
 \begin{frame}
-  \frametitle{apop}
+  \frametitle{Извлечение минимума}
+Извлечение минимума из полной кучи
+\begin{code}
+  fpop : ∀ {m h} → Heap m (succ h) full
+    → OR
+    (Σ (expanded A) 
+       (λ x → (Heap x (succ h) almost) × (m ≤ x)))
+    (Heap top h full)
+\end{code}
 Извлечение минимума из неполной кучи
 \begin{code}
   apop : ∀ {m h} → Heap m (succ h) almost
     → OR (Σ (expanded A)
         (λ x → (Heap x (succ h) almost) × (m ≤ x)))
-
          (Σ (expanded A)
         (λ x → (Heap x h full) × (m ≤ x)))
 \end{code}
-\end{frame}
+\end{frame} % pops
 \AgdaHide{
 \begin{code}
   apop = {!!}
 \end{code}
 }
-
+\AgdaHide{
+\begin{code}
+  fpop = {!!}
+\end{code}
+}
+ 

@@ -13,7 +13,6 @@
 \graphicspath{{pic/}}
 
 \usepackage{agda}
-\usepackage{catchfilebetweentags}
 
 \input{utils/unicode-characters.tex}
 %%% Agda helper shortcuts -- Rybak
@@ -21,31 +20,42 @@
 \newcommand{\F}{\AgdaFunction}
 \newcommand{\DC}{\AgdaInductiveConstructor}
 
+\usetheme{Madrid}
+\setbeamertemplate{headline}{}
 \setbeamerfont{frametitle}{
     size={\fontsize{14}{12}}
 }
+\setbeamertemplate{caption}[numbered]
+\setbeamerfont{page number in head/foot}{size=\normalsize}
+\setbeamertemplate{footline}[frame number]
 
-\setbeamertemplate{headline}{}
-
-\title[Представление структур данных индуктивными семействами и доказательства их свойств]{Представление структур данных индуктивными семействами и доказательства их свойств}
+\title{Представление структур данных индуктивными семействами и доказательства их свойств}
 \institute{НИУ ИТМО}
-\author[Рыбак А.В.]{Рыбак Андрей Викторович , группа 4538
-\newline НР: Малаховски Ян Михайлович}
+\author{Андрей Рыбак}
 \date{
 Июнь 2014
 }
 
-\usetheme{Madrid}
-\usecolortheme{default}
 \begin{document}
-
-\maketitle
-
+{
+\fontsize{14pt}{14pt}\selectfont
+\setbeamertemplate{footline}{}
 \begin{frame}
-    \frametitle{Индуктивные семейства}
-    \emph{Индуктивное семейство} — индуктивный (рекурсивный) тип данных,
-        который может зависеть от других типов и значений.
+  \maketitle
+  \begin{flushright}
+    Научный руководитель: Малаховски Я. М.
+  \end{flushright}
 \end{frame}
+}
+
+% \begin{frame}
+%     \frametitle{Изоморфизм Карри—Ховарда}
+% \end{frame}
+% \begin{frame}
+%     \frametitle{Индуктивные семейства}
+%     \emph{Индуктивное семейство} — индуктивный (рекурсивный) тип данных,
+%         который может зависеть от других типов и значений.
+% \end{frame}
 
 \begin{frame}
     \frametitle{}
