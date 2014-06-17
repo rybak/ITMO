@@ -30,6 +30,7 @@ flip f x y = f y x
 \end{code}
 }
 
+\AgdaHide{
 \begin{frame}
 \frametitle{}
 Пустой тип
@@ -48,6 +49,7 @@ contraposition : ∀ {A B : Set}
 contraposition f ¬b a = ¬b (f a)
 \end{code}
 \end{frame}
+}
 
 \AgdaHide{
 \begin{code}

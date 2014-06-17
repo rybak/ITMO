@@ -1,0 +1,143 @@
+% ----------------------------------------------------------------------
+% Some useful commands when doing highlightning of Agda code in LaTeX.
+% ----------------------------------------------------------------------
+
+\ProvidesPackage{agda-print}
+
+\usepackage{ifxetex, xcolor, polytable}
+
+% XeLaTeX
+\ifxetex
+    \usepackage{polyglossia}
+    \usepackage{fontspec}
+    \usepackage[]{unicode-math}
+
+% pdfLaTeX
+\else
+    \usepackage{amsfonts, amssymb}
+    \usepackage[safe]{tipa} % See page 12 of the tipa manual for what
+                            % safe does.
+
+    % FIX: This doesn't seem to help solve the pipe problem?
+    % http://tex.stackexchange.com/questions/1774/how-to-insert-pipe-symbol-in-latex
+    \usepackage[T1]{fontenc}
+    % Rybak : orig : \usepackage[utf8x]{inputenc}
+    \usepackage[utf8]{inputenc}
+
+\fi
+% ----------------------------------------------------------------------
+% Font styles.
+
+% Default font style.
+\newcommand{\AgdaFontStyle}[1]{\textsf{#1}}
+
+% String font style.
+\newcommand{\AgdaStringFontStyle}[1]{\texttt{#1}}
+
+% Comment font style.
+\newcommand{\AgdaCommentFontStyle}[1]{\texttt{#1}}
+
+% Bounded variables font style.
+\newcommand{\AgdaBoundFontStyle}[1]{\textit{#1}}
+
+% ----------------------------------------------------------------------
+% Colours.
+
+% Aspect colours.
+\definecolor{AgdaComment}      {HTML}{511111}
+\definecolor{AgdaKeyword}      {HTML}{663300}
+\definecolor{AgdaString}       {HTML}{511111}
+\definecolor{AgdaNumber}       {HTML}{501070}
+\definecolor{AgdaSymbol}       {HTML}{202020}
+\definecolor{AgdaPrimitiveType}{HTML}{000066}
+\definecolor{AgdaOperator}     {HTML}{000000}
+
+% NameKind colours.
+\definecolor{AgdaBound}                 {HTML}{000000}
+\definecolor{AgdaInductiveConstructor}  {HTML}{004500}
+\definecolor{AgdaCoinductiveConstructor}{HTML}{453200}
+\definecolor{AgdaDatatype}              {HTML}{000066}
+\definecolor{AgdaField}                 {HTML}{770144}
+\definecolor{AgdaFunction}              {HTML}{000066}
+\definecolor{AgdaModule}                {HTML}{501070}
+\definecolor{AgdaPostulate}             {HTML}{000066}
+\definecolor{AgdaPrimitive}             {HTML}{000066}
+\definecolor{AgdaRecord}                {HTML}{000066}
+
+% Other aspect colours.
+\definecolor{AgdaDottedPattern}     {HTML}{000000}
+\definecolor{AgdaUnsolvedMeta}      {HTML}{777700}
+\definecolor{AgdaTerminationProblem}{HTML}{775035}
+\definecolor{AgdaIncompletePattern} {HTML}{726751}
+\definecolor{AgdaError}             {HTML}{770000}
+
+% Misc.
+\definecolor{AgdaHole}              {HTML}{467746}
+
+% ----------------------------------------------------------------------
+% Commands.
+
+% Aspect commands.
+\newcommand{\AgdaComment}     [1]
+    {\AgdaCommentFontStyle{\textcolor{AgdaComment}{#1}}}
+\newcommand{\AgdaKeyword}     [1]
+    {\AgdaFontStyle{\textcolor{AgdaKeyword}{#1}}}
+\newcommand{\AgdaString}      [1]{\AgdaStringFontStyle{\textcolor{AgdaString}{#1}}}
+\newcommand{\AgdaNumber}      [1]{\textcolor{AgdaNumber}{#1}}
+\newcommand{\AgdaSymbol}      [1]{\textcolor{AgdaSymbol}{#1}}
+\newcommand{\AgdaPrimitiveType}[1]
+    {\AgdaFontStyle{\textcolor{AgdaPrimitiveType}{#1}}}
+\newcommand{\AgdaOperator}    [1]{\textcolor{AgdaOperator}{#1}}
+
+% NameKind commands.
+\newcommand{\AgdaBound}    [1]{\AgdaBoundFontStyle{\textcolor{AgdaBound}{#1}}}
+\newcommand{\AgdaInductiveConstructor}[1]
+    {\AgdaFontStyle{\textcolor{AgdaInductiveConstructor}{#1}}}
+\newcommand{\AgdaCoinductiveConstructor}[1]
+    {\AgdaFontStyle{\textcolor{AgdaCoinductiveConstructor}{#1}}}
+\newcommand{\AgdaDatatype} [1]{\AgdaFontStyle{\textcolor{AgdaDatatype}{#1}}}
+\newcommand{\AgdaField}    [1]{\AgdaFontStyle{\textcolor{AgdaField}{#1}}}
+\newcommand{\AgdaFunction} [1]{\AgdaFontStyle{\textcolor{AgdaFunction}{#1}}}
+\newcommand{\AgdaModule}   [1]{\AgdaFontStyle{\textcolor{AgdaModule}{#1}}}
+\newcommand{\AgdaPostulate}[1]{\AgdaFontStyle{\textcolor{AgdaPostulate}{#1}}}
+\newcommand{\AgdaPrimitive}[1]{\AgdaFontStyle{\textcolor{AgdaPrimitive}{#1}}}
+\newcommand{\AgdaRecord}   [1]{\AgdaFontStyle{\textcolor{AgdaRecord}{#1}}}
+
+% Other aspect commands.
+\newcommand{\AgdaDottedPattern}     [1]{\textcolor{AgdaDottedPattern}{#1}}
+\newcommand{\AgdaUnsolvedMeta}      [1]
+    {\AgdaFontStyle{\colorbox{AgdaUnsolvedMeta}{#1}}}
+\newcommand{\AgdaTerminationProblem}[1]
+    {\AgdaFontStyle{\colorbox{AgdaTerminationProblem}{#1}}}
+\newcommand{\AgdaIncompletePattern} [1]{\colorbox{AgdaIncompletePattern}{#1}}
+\newcommand{\AgdaError}             [1]
+    {\AgdaFontStyle{\textcolor{AgdaError}{\underline{#1}}}}
+
+% Misc.
+\newcommand{\AgdaHole}[1]{\colorbox{AgdaHole}{#1}}
+\long\def\AgdaHide#1{} % Used to hide code from LaTeX.
+
+\newcommand{\AgdaIndent}[1]{\quad}
+
+% ----------------------------------------------------------------------
+% The code environment.
+
+\newcommand{\AgdaCodeStyle}{}
+% \newcommand{\AgdaCodeStyle}{\tiny}
+
+\ifdefined\mathindent
+  {}
+\else
+  \newdimen\mathindent\mathindent\leftmargini
+\fi
+
+\newenvironment{code}%
+{\noindent\ignorespaces
+   %\advance
+   %\leftskip\mathindent
+\AgdaCodeStyle\pboxed}%
+{\endpboxed\par\noindent%
+\ignorespacesafterend}
+
+% Default column for polytable.
+\defaultcolumn{l}
