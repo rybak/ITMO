@@ -49,4 +49,4 @@ else
     . ./m.sh
     make_presentation
 fi
-
+notify-send "$0 finished"
