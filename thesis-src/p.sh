@@ -33,13 +33,18 @@ else
     export TEXINPUTS="$TEXINPUTS:./sty:"
     if [ "x$1" = "xagda" ];
     then
-        for i in `cat plagda.txt`;
-        do
-            cd lagda
-            agda --latex-dir "../latex" --latex "$i.lagda" --no-termination-check --allow-unsolved-metas
-            # mv latex/* ../latex
-            cd ../
-        done
+        cd latex
+            for i in `cat ../plagda.txt`;
+            do
+                rm $i.tex
+            done
+        cd ../
+        cd lagda
+            for i in `cat ../plagda.txt`;
+            do
+                ./agda.sh "$i"
+            done
+        cd ../
     fi
     . ./m.sh
     make_presentation

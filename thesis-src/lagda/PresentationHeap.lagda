@@ -38,8 +38,8 @@ flip f x y = f y x
 contraposition : ∀ {A B : Set} -- Контрапозиция
   → (A → B) → (¬ B → ¬ A)
 contraposition = flip _∘_
-data _≡_ {a} {A : Set a} (x : A) : A → Set a where
-  refl : x ≡ x -- Пропозициональное равенство 
+-- data _≡_ {a} {A : Set a} (x : A) : A → Set a where
+--   refl : x ≡ x -- Пропозициональное равенство 
 cong : ∀ {A B : Set} → ∀ (f : A → B) {x y}
   → x ≡ y → f x ≡ f y -- Конгруэнтность
 cong f refl = refl
