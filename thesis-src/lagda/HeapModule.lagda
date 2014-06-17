@@ -507,18 +507,18 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
     | snd resp≤ (base p=z) j
   ... | full   , newleft | l1 | l2 = almost , nd z l1 l2 newleft c
   ... | almost , newleft | l1 | l2 = almost , nl z l1 l2 newleft c
-\end{code}
-TODO из-за непонятного бага в LaTeX некоторые строки на Agda не отрендерены
-\AgdaHide{
-\begin{code}
   finsert z (nf p i j (nf x i₁ j₁ a b) c) | tri> _ _ z<p
     with finsert p (nf x i₁ j₁ a b)
     | lemma-<=minE {# z} {# x} {# p}
         (trans≤ (le (base z<p)) i) (le (base z<p))
-  ... | full   , newleft | l1 = almost ,
-    nd z l1 (trans≤ (le (base z<p)) j) newleft c
+\end{code}
+TODO из-за непонятного бага в LaTeX некоторые строки на Agda не отрендерены
+\AgdaHide{
+\begin{code}
+  ... | full , newleft
 \end{code}}
 \begin{code}
+   | l1 = almost , nd z l1 (trans≤ (le (base z<p)) j) newleft c
   ... | almost , newleft | l1 = almost ,
     nl z l1 (trans≤ (le (base z<p)) j) newleft c
 
