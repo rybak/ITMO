@@ -3,6 +3,7 @@
 cd pic
 for i in *.mp
 do
+    echo "FILE $i"
     if [ -f "$i" ];
     then
         fn=${i%.*}
