@@ -108,6 +108,7 @@ data Tri {A : Set} (_<_ _==_ _>_ : Rel₂ A) (a b : A)
   tri> : ¬ (a < b) → ¬ (a == b) →   (a > b)
     → Tri _<_ _==_ _>_ a b -- больше
 \end{code}
+\pause
 \begin{code}
 Cmp : {A : Set} → Rel₂ A → Rel₂ A → Set
 Cmp {A} _<_ _==_ = ∀ (x y : A) →
@@ -327,6 +328,7 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A)
     # : A → expanded A -- элемент исходного типа
     top : expanded A -- элемент расширение
 \end{code}
+\pause
 Расширенные отношения
 \begin{code}
   data _<E_ : Rel₂ (expanded A) where
@@ -340,7 +342,7 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A)
 \end{frame}
 
 \begin{frame}
-  \frametitle{Свойства}
+  \frametitle{Свойства расширенных отношений}
 \begin{code}
   lemma-<E : ∀ {x} {y} → (# x) <E (# y) → x < y
   trans<E : Trans _<E_
@@ -596,7 +598,7 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A)
     → OR (Heap x zero full × (x ≡ y) × (h ≡ zero))
          (Heap (minE x y) (succ h) almost)
 \end{code}
-\end{frame} % fm
+\end{frame} % fmerge
 
 \begin{frame}
   \frametitle{makeH}
@@ -606,7 +608,7 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A)
     → Heap x h full → Heap y h full
     → Heap (min3E x y (# p)) (succ h) full
 \end{code}
-\end{frame} % mH
+\end{frame} % makeH
 
 \begin{frame}
   \frametitle{ndmerge}
@@ -617,7 +619,7 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A)
     → Heap y (succ h) full
     → Heap (minE x y) (succ (succ (succ h))) almost
 \end{code}
-\end{frame} % ndm
+\end{frame} % ndmerge
 
 \begin{frame}
   \frametitle{afmerge}
@@ -630,7 +632,7 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A)
     → OR (Heap (minE x y) (succ (succ h)) full)
          (Heap (minE x y) (succ (succ (succ h))) almost)
 \end{code}
-\end{frame} % afm
+\end{frame} % afmerge
 
 \AgdaHide{
 \begin{code}
