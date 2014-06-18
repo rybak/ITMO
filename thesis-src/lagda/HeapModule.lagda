@@ -65,11 +65,11 @@ module Logic where
   open DummyAB public
 open Logic public
 \end{code}
-Определения интуционистской теории типов.
+Определения интуиционистской теории типов.
 \begin{code}
 module MLTT where
 \end{code}
-Пропозициональное равенство из интуционистской теории типов~\cite{MLTT}.
+Пропозициональное равенство из интуиционистской теории типов~\cite{MLTT}.
 \begin{code}
   infix 4 _≡_
   data _≡_ {a} {A : Set a} (x : A) : A → Set a where
@@ -245,7 +245,7 @@ lemma-<=min3 {cmp = cmp} {x} {a} {b} {c} xa xb xc with cmp a b
 ... | tri> _ _ _ = lemma-<=min {cmp = cmp} xb xc
 \end{code} Леммы \F{lemma-<=min} и \F{lemma-<=min3} понадобятся
 при доказательстве соотношений между элементами,
-из которорых составляются новые кучи при их обработке.
+из которых составляются новые кучи при их обработке.
 
 Отношение \AgdaOperator{\_<=\_} соблюдает отношение равенства \AgdaOperator{\_==\_},
 с помощью которого оно определено.
@@ -403,7 +403,7 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
 \begin{code}
   data HeapState : Set where
     full almost : HeapState
-\end{code} Тип данных для кучи, проиндексированный
+\end{code} Тип данных для кучи, индексированный
 минимальным элементом кучи, высотой и заполненностью.
 \begin{code}
   data Heap : (expanded A) → (h : ℕ) → HeapState → Set where
@@ -634,8 +634,8 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
     nf y (eq (base (sym== x=y))) (lemma-<=min3E i₁ j₁ (le (base y<p)))
       (nf x i j a b) (makeH p c d)
   makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri= _ x=y _ | tri= _ y=p _ =
-    nf p (eq (base (trans== (sym== y=p) (sym== x=y)))) (eq (base (sym== y=p)))
-      (nf x i j a b) (nf y i₁ j₁ c d)
+    nf p (eq (base (trans== (sym== y=p) (sym== x=y))))
+      (eq (base (sym== y=p))) (nf x i j a b) (nf y i₁ j₁ c d)
   makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri= _ x=y _ | tri> _ _ p<y =
     nf p (le (base (fst resp (sym== x=y) p<y))) (le (base p<y))
       (nf x i j a b) (nf y i₁ j₁ c d)
