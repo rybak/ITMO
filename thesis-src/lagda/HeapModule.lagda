@@ -1,5 +1,4 @@
 \section{Вспомогательные определения}
-% TODO сделать введение
 
 \subsection{Общие определения}
 Некоторые общеизвестные определения заимствованы из стандартной библиотеки
@@ -502,26 +501,16 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   ... | almost , newleft | l1 = almost , nl p l1 j newleft c
   finsert z (nf p i j (nf x i₁ j₁ a b) c) | tri= _ p=z _
     with finsert p (nf x i₁ j₁ a b)
-    | lemma-<=minE {# z} {# x} {# p}
-        (snd resp≤ (base p=z) i) (eq (base (sym== p=z)))
+    | lemma-<=minE (snd resp≤ (base p=z) i) (eq (base (sym== p=z)))
     | snd resp≤ (base p=z) j
   ... | full   , newleft | l1 | l2 = almost , nd z l1 l2 newleft c
   ... | almost , newleft | l1 | l2 = almost , nl z l1 l2 newleft c
   finsert z (nf p i j (nf x i₁ j₁ a b) c) | tri> _ _ z<p
     with finsert p (nf x i₁ j₁ a b)
-    | lemma-<=minE {# z} {# x} {# p}
-        (trans≤ (le (base z<p)) i) (le (base z<p))
-\end{code}
-TODO из-за непонятного бага в LaTeX некоторые строки на Agda не отрендерены
-\AgdaHide{
-\begin{code}
-  ... | full , newleft
-\end{code}}
-\begin{code}
-   | l1 = almost , nd z l1 (trans≤ (le (base z<p)) j) newleft c
+    | lemma-<=minE (trans≤ (le (base z<p)) i) (le (base z<p))
+  ... | full , newleft | l1 = almost , nd z l1 (trans≤ (le (base z<p)) j) newleft c
   ... | almost , newleft | l1 = almost ,
     nl z l1 (trans≤ (le (base z<p)) j) newleft c
-
 \end{code}
 Вставка элемента в неполную кучу.
 \begin{code}
@@ -530,53 +519,51 @@ TODO из-за непонятного бага в LaTeX некоторые ст�
   ainsert z (nd p i j a b) with cmp p z
   ainsert z (nd p i j a b) | tri< p<z _ _
     with finsert z b | lemma-<=minE j (le (base p<z))
-  ... | full   , nb | l1 = full   , nf p i l1 a nb
+  ... | full , nb | l1 = full , nf p i l1 a nb
   ... | almost , nb | l1 = almost , nr p i l1 a nb
-\end{code}
-\AgdaHide{
-\begin{code}
   ainsert z (nd p i j a b) | tri= _ p=z _
     with finsert p b | snd resp≤ (base p=z) i
-    | lemma-<=minE
-        (snd resp≤ (base p=z) j) (eq (base (sym== p=z)))
-  ... | full   , nb | l1 | l2 = full   , nf z l1 l2 a nb
+    | lemma-<=minE (snd resp≤ (base p=z) j) (eq (base (sym== p=z)))
+  ... | full , nb | l1 | l2 = full , nf z l1 l2 a nb
   ... | almost , nb | l1 | l2 = almost , nr z l1 l2 a nb
   ainsert z (nd p i j a b) | tri> _ _ z<p
     with finsert p b | trans≤ (le (base z<p)) i
     | lemma-<=minE (trans≤ (le (base z<p)) j) (le (base z<p))
-  ... | full   , nb | l1 | l2 = full   , nf z l1 l2 a nb
+  ... | full , nb | l1 | l2 = full , nf z l1 l2 a nb
   ... | almost , nb | l1 | l2 = almost , nr z l1 l2 a nb
+\end{code}
+\begin{code}
   ainsert z (nl p i j a b) with cmp p z
   ainsert z (nl p i j a b) | tri< p<z _ _
     with ainsert z a | lemma-<=minE i (le (base p<z))
-  ... | full   , na | l1 = almost , nd p l1 j na b
+  ... | full , na | l1 = almost , nd p l1 j na b
   ... | almost , na | l1 = almost , nl p l1 j na b
   ainsert z (nl p i j a b) | tri= _ p=z _
     with ainsert p a | lemma-<=minE (snd resp≤ (base p=z) i)
       (eq (base (sym== p=z))) | snd resp≤ (base p=z) j
-  ... | full   , na | l1 | l2 = almost , nd z l1 l2 na b
+  ... | full , na | l1 | l2 = almost , nd z l1 l2 na b
   ... | almost , na | l1 | l2 = almost , nl z l1 l2 na b
   ainsert z (nl p i j a b) | tri> _ _ z<p
     with ainsert p a | lemma-<=minE (trans≤ (le (base z<p)) i)
       (le (base z<p)) | trans≤ (le (base z<p)) j
-  ... | full   , na | l1 | l2 = almost , nd z l1 l2 na b
+  ... | full , na | l1 | l2 = almost , nd z l1 l2 na b
   ... | almost , na | l1 | l2 = almost , nl z l1 l2 na b
   ainsert z (nr p i j a b) with cmp p z
   ainsert z (nr p i j a b) | tri< p<z _ _
     with ainsert z b | lemma-<=minE j (le (base p<z))
-  ... | full   , nb | l1 = full   , nf p i l1 a nb
+  ... | full , nb | l1 = full   , nf p i l1 a nb
   ... | almost , nb | l1 = almost , nr p i l1 a nb
   ainsert z (nr p i j a b) | tri= _ p=z _
     with ainsert p b | snd resp≤ (base p=z) i
     | lemma-<=minE (snd resp≤ (base p=z) j) (eq (base (sym== p=z)))
-  ... | full   , nb | l1 | l2 = full   , nf z l1 l2 a nb
+  ... | full , nb | l1 | l2 = full   , nf z l1 l2 a nb
   ... | almost , nb | l1 | l2 = almost , nr z l1 l2 a nb
   ainsert z (nr p i j a b) | tri> _ _ z<p
     with ainsert p b | trans≤ (le (base z<p)) i
     | lemma-<=minE (trans≤ (le (base z<p)) j) (le (base z<p))
   ... | full   , nb | l1 | l2 = full   , nf z l1 l2 a nb
   ... | almost , nb | l1 | l2 = almost , nr z l1 l2 a nb
-\end{code}}
+\end{code}
 
 \subsection{Удаление минимума из полной кучи}
 Вспомогательный тип данных.
@@ -596,14 +583,13 @@ TODO из-за непонятного бага в LaTeX некоторые ст�
   ... | orB ab = orB
     (nr x (le (base x<y)) (lemma-<=minE i₁ j₁) (nf y i₂ j₂ c d) ab)
 \end{code}
-\AgdaHide{
 \begin{code}
   fmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d) | tri= _ x=y _ with fmerge c d
   ... | orA (eh , refl , refl) = orB
     (nd y (eq (base (sym== x=y))) j₂ (nf x i₁ j₁ a b) eh)
   ... | orB cd = orB
     (nr y (eq (base (sym== x=y))) (lemma-<=minE i₂ j₂) (nf x i₁ j₁ a b) cd) 
-\end{code}}
+\end{code}
 \begin{code}
   fmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d) | tri> _ _ y<x with fmerge c d
   ... | orA (eh , refl , refl) = orB (nd y (le (base y<x)) j₂ (nf x i₁ j₁ a b) eh)
@@ -617,24 +603,19 @@ TODO из-за непонятного бага в LaTeX некоторые ст�
     (Heap top h full)
 
 \end{code}
-\AgdaHide{
 \begin{code}
   fpop (nf _ _ _ eh eh) = orB eh
   fpop (nf _ i j (nf x i₁ j₁ a b) (nf y i₂ j₂ c d))
     with fmerge (nf x i₁ j₁ a b) (nf y i₂ j₂ c d)
   ... | orA (() , _ , _)
   ... | orB res = orA ((minE (# x) (# y)) , res , lemma-<=minE i j)
-\end{code}}
+\end{code}
 
 \subsection{Удаление минимума из неполной кучи}
 Составление полной кучи высотой $h+1$ из двух куч высотой $h$ и одного элемента.
 \begin{code}
   makeH : ∀ {x y h} → (p : A) → Heap x h full → Heap y h full
     → Heap (min3E x y (# p)) (succ h) full
-
-\end{code}
-\AgdaHide{
-\begin{code}
   makeH p eh eh = nf p (le ext) (le ext) eh eh
   makeH p (nf x i j a b) (nf y i₁ j₁ c d) with cmp x y
   makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri< x<y _ _ with cmp x p
@@ -648,7 +629,6 @@ TODO из-за непонятного бага в LaTeX некоторые ст�
   makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri< x<y _ _ | tri> _ _ p<x =
     nf p (le (base p<x)) (le (base (trans< p<x x<y)))
       (nf x i j a b) (nf y i₁ j₁ c d)
-
   makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri= _ x=y _ with cmp y p
   makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri= _ x=y _ | tri< y<p _ _ =
     nf y (eq (base (sym== x=y))) (lemma-<=min3E i₁ j₁ (le (base y<p)))
@@ -659,7 +639,8 @@ TODO из-за непонятного бага в LaTeX некоторые ст�
   makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri= _ x=y _ | tri> _ _ p<y =
     nf p (le (base (fst resp (sym== x=y) p<y))) (le (base p<y))
       (nf x i j a b) (nf y i₁ j₁ c d)
-
+\end{code}
+\begin{code}
   makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri> _ _ y<x with cmp y p
   makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri> _ _ y<x | tri< y<p _ _ =
     nf y (le (base y<x)) (lemma-<=min3E i₁ j₁ (le (base y<p)))
@@ -670,7 +651,7 @@ TODO из-за непонятного бага в LaTeX некоторые ст�
   makeH p (nf x i j a b) (nf y i₁ j₁ c d) | tri> _ _ y<x | tri> _ _ p<y =
     nf p (le (base (trans< p<y y<x))) (le (base p<y))
       (nf x i j a b) (nf y i₁ j₁ c d)
-\end{code}} Вспомогательные леммы, использующие \F{lemma-<=minE}.
+\end{code} Вспомогательные леммы, использующие \F{lemma-<=minE}.
 \begin{code}
   lemma-resp : ∀ {x y a b} → x == y → (# x) ≤ a → (# x) ≤ b
     → (# y) ≤ minE a b
