@@ -28,14 +28,11 @@ module Function where
 \end{code}
 Композиция функций.
 \begin{code}
-  _∘_ : ∀ {a b c}
-      → {A : Set a} {B : Set b} {C : Set c}
+  _∘_ : ∀ {a b c} → {A : Set a} {B : Set b} {C : Set c}
       → (B → C) → (A → B) → (A → C)
   f ∘ g = λ x → f (g x)
-  flip : ∀ {a b c}
-       → {A : Set a} {B : Set b} {C : A → B → Set c} 
-       → ((x : A) → (y : B) → C x y)
-       → ((y : B) → (x : A) → C x y)
+  flip : ∀ {a b c} → {A : Set a} {B : Set b} {C : A → B → Set c} 
+       → ((x : A) → (y : B) → C x y) → ((y : B) → (x : A) → C x y)
   flip f x y = f y x
 open Function public
 module Logic where
@@ -51,6 +48,8 @@ module Logic where
   ¬ P = P → ⊥
 \end{code}
 \end{minipage}
+
+\begin{minipage}{\textwidth}
 \begin{code}
   private
    module DummyAB {a b} {A : Set a} {B : Set b} where
@@ -58,18 +57,20 @@ module Logic where
 \begin{code}
     contradiction : A → ¬ A → B
     contradiction a ¬a = ⊥-elim (¬a a)
-\end{code} Контрапозиция
+\end{code}
+\end{minipage}
+Контрапозиция
 \begin{code}
     contraposition : (A → B) → (¬ B → ¬ A)
     contraposition = flip _∘_
   open DummyAB public
 open Logic public
 \end{code}
-Определения интуиционистской теории типов.
+Определения интуиционистской теории типов Матрина-Лёфа~\cite{MLTT}.
 \begin{code}
 module MLTT where
 \end{code}
-Пропозициональное равенство из интуиционистской теории типов~\cite{MLTT}.
+Пропозициональное равенство из интуиционистской теории типов.
 \begin{code}
   infix 4 _≡_
   data _≡_ {a} {A : Set a} (x : A) : A → Set a where
@@ -176,6 +177,7 @@ cmpℕ (succ x) (succ y) with cmpℕ x y
   (cong succ b) (contraposition lemma-succ-≤ ¬c)
 \end{code}
 \begin{minipage}{\textwidth}
+Определим типы данных для задания свойств отношений.
 Транзитивность отношения.
 \begin{code}
 Trans : {A : Set} → Rel₂ A → Set
@@ -219,7 +221,6 @@ lemma-<=min : {A : Set} {_<_ : Rel₂ A} {_==_ : Rel₂ A}
   → (_<=_ {_<_ = _<_} {_==_} a b)
   → (_<=_ {_<_ = _<_} {_==_} a c)
   → (_<=_ {_<_ = _<_} {_==_} a (min cmp b c))
-
 lemma-<=min {cmp = cmp} {_} {b} {c} ab ac with cmp b c
 ... | tri< _ _ _ = ab
 ... | tri= _ _ _ = ac
@@ -350,11 +351,15 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
 
     right {_} {# _} {top} () _
     right {_} {top} {_} _ ()
-\end{code} Отношение меньше-равно для расширенного типа.
+\end{code}
+\begin{minipage}{\textwidth}
+Отношение меньше-равно для расширенного типа.
 \begin{code}
   _≤_ : Rel₂ (expanded A)
   _≤_ = _<=_ {expanded A} {_<E_} {_=E_}
-\end{code} Транзитивность меньше-равно следует из свойств
+\end{code}
+\end{minipage}
+Транзитивность меньше-равно следует из свойств
 отношений \F{\_=E\_} и \F{\_<E\_}:
 \begin{code}
   trans≤ : Trans _≤_
@@ -462,7 +467,6 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
 \emph{Замечание}: высота любой неполной кучи больше нуля.
 \begin{code}
   lemma-almost-height : ∀ {m h} → Heap m h almost → h ℕ> 0
-
   lemma-almost-height (nd _ _ _ _ _) = s≤s z≤n
   lemma-almost-height (nl _ _ _ _ _) = s≤s z≤n
   lemma-almost-height (nr _ _ _ _ _) = s≤s z≤n
@@ -519,17 +523,17 @@ module Heap (A : Set) (_<_ _==_ : Rel₂ A) (cmp : Cmp _<_ _==_)
   ainsert z (nd p i j a b) with cmp p z
   ainsert z (nd p i j a b) | tri< p<z _ _
     with finsert z b | lemma-<=minE j (le (base p<z))
-  ... | full , nb | l1 = full , nf p i l1 a nb
+  ... | full   , nb | l1 = full , nf p i l1 a nb
   ... | almost , nb | l1 = almost , nr p i l1 a nb
   ainsert z (nd p i j a b) | tri= _ p=z _
     with finsert p b | snd resp≤ (base p=z) i
     | lemma-<=minE (snd resp≤ (base p=z) j) (eq (base (sym== p=z)))
-  ... | full , nb | l1 | l2 = full , nf z l1 l2 a nb
+  ... | full   , nb | l1 | l2 = full , nf z l1 l2 a nb
   ... | almost , nb | l1 | l2 = almost , nr z l1 l2 a nb
   ainsert z (nd p i j a b) | tri> _ _ z<p
     with finsert p b | trans≤ (le (base z<p)) i
     | lemma-<=minE (trans≤ (le (base z<p)) j) (le (base z<p))
-  ... | full , nb | l1 | l2 = full , nf z l1 l2 a nb
+  ... | full   , nb | l1 | l2 = full , nf z l1 l2 a nb
   ... | almost , nb | l1 | l2 = almost , nr z l1 l2 a nb
 \end{code}
 \begin{code}
