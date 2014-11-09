@@ -21,7 +21,7 @@ function daemon {
         do
             url=`cat "$a"`
             rm "$a"
-            wget -c "$url" 2> $ELOG
+            wget -c "$url" 2>> $ELOG
         done
         sleep 5
     done
