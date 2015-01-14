@@ -1,1 +1,1 @@
-Numerical methods. Homeworks written using Haskell.
+Numerical methods. Homeworks made using Haskell.
