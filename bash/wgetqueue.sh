@@ -5,25 +5,24 @@ function dpid {
     cat "$DAEMON"
 }
 
-function exit_error {
-    print_log $1
-    exit 255
+function print_dl {
+    echo "URL $1 > $2"
 }
 
 function print_log {
-    pid=$(dpid)
+    local pid=$(dpid)
     echo -n `date -Iseconds` >> "$ELOG"
     echo -n " $$ " >> "$ELOG"
     echo "PID = $pid" >> "$ELOG"
-    echo -e $1 >> "$ELOG"
+    local MESSAGE=$1
+    local URL=$2
+    local FILENAME=$3
+    echo -e "$1\n\t" >> "$ELOG"
+    echo -e "$(print_dl "$URL" "$FILENAME")"
 }
 
 function my_notify {
     notify-send -i "$ICON" -u $1 "$TITLE" "$2"
-}
-
-function print_dl {
-    echo "URL $1 > $2"
 }
 
 function daemon {
@@ -33,9 +32,11 @@ function daemon {
         for r in "$QPATH/requests"/*$SUFREQ
         do
             echo "r = $r" >> "$ELOG"
-            url=$(cat "$r")
-            req="${r%.*}"
+            local url=$(cat "$r")
+            local req="${r%.*}"
             rm "$r"
+            local name
+            local name_arg
             if [[ -f "$req$SUFNAME" ]];
             then
                 name=$(cat "$req$SUFNAME")
@@ -45,20 +46,20 @@ function daemon {
                 name_arg=
                 name=
             fi
-            my_notify normal "Started download: $(print_dl $url $name)"
+            # my_notify normal "Started download: $(print_dl $url $name)"
             echo "$name : $url" > "$LAST"
-            print_log "Download started\n\t$(print_dl $url $name)"
+            print_log "Download started" "$url" "$name"
             if wget $name_arg -c "$url" 2>> "$WGETLOG";
             then
-                my_notify normal "Download complete: $(print_dl $url $name)"
-                print_log "Download complete\n\t$(print_dl $url $name)"
+                # my_notify normal "Download complete: $(print_dl $url $name)"
+                print_log "Download complete" "$url" "$name"
                 rm "$LAST"
             else
                 my_notify critical "Error while downloading: $(print_dl $url $name)"
-                print_log "Error while downloading:\n\t$(print_dl $url $name)"
+                print_log "Error while downloading" "$url" "$name"
             fi
         done
-        sleep 5
+        sleep $DAEMON_PERIOD
     done
 }
 
@@ -92,6 +93,7 @@ ICON=$QPATH/icon.png
 DAEMON=$QPATH/daemonrunning
 REQUESTS=$QPATH/requests
 ATOM=$QPATH/atom
+DAEMON_PERIOD=15s
 
 ELOG=$QPATH/error.log
 WGETLOG=$QPATH/get.log
@@ -175,7 +177,7 @@ do
             exit 255
         fi
         shift
-        name="$1"
+        name="$PWD/$1"
         shift
     fi
     r=`mktemp -u --tmpdir="$ATOM"`
