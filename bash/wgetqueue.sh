@@ -18,7 +18,7 @@ function print_log {
     local URL=$2
     local FILENAME=$3
     echo -e "$1\n\t" >> "$ELOG"
-    echo -e "$(print_dl "$URL" "$FILENAME")"
+    echo -e "$(print_dl "$URL" "$FILENAME")" >> "$ELOG"
 }
 
 function my_notify {
@@ -87,6 +87,7 @@ function show_last {
 }
 
 QPATH=$HOME/.nyaqueue
+DPATH="$PWD"
 TITLE=wgetqueue
 ICON=$QPATH/icon.png
 
@@ -177,7 +178,7 @@ do
             exit 255
         fi
         shift
-        name="$PWD/$1"
+        name="$DPATH/$1"
         shift
     fi
     r=`mktemp -u --tmpdir="$ATOM"`
