@@ -55,7 +55,7 @@ function daemon {
             # my_notify normal "Started download: $(print_dl $url $name)"
             echo "$name : $url" > "$LAST"
             print_log "Download started" "$url" "$name"
-            if wget $name_arg --continue "$url" 2>> "$WGETLOG";
+            if wget $name_arg --continue "$url" --append-output "$WGETLOG";
             then
                 # my_notify normal "Download complete: $(print_dl $url $name)"
                 print_log "Download complete" "$url" "$name"
