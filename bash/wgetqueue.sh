@@ -22,11 +22,12 @@ function print_log {
 }
 
 function my_notify {
-    notify-send -i "$ICON" -u $1 "$TITLE" "$2"
+    notify-send --icon="$ICON" --urgency $1 "$TITLE" "$2"
 }
 
 function daemon {
-    DAEMONDIR=$(pwd -P)
+    DAEMONDIR=$(pwd -P) # NB: pwd is bash builtin, not /bin/pwd
+                        # bash builtin does not have long options
     echo "$DAEMONDIR" > "$DAEMON_PWD_FILE"
     trap "" SIGHUP
     while true
@@ -36,6 +37,9 @@ function daemon {
             echo "r = $r" >> "$ELOG"
             local url=$(cat "$r")
             local req="${r%.*}"
+            # currently ^^^^^ code is too obscure
+            # TODO possible better code:
+            # local req="${r%$SUFREQ}" # cut $SUFREQ from the end of $r
             rm "$r"
             local name
             local name_arg
@@ -108,7 +112,7 @@ LAST=$QPATH/last.log
 SUFNAME=.name
 SUFREQ=.req
 
-if [[ $# -eq 0 ]] || [[ $1 == "-h" ]];
+if [[ $# -eq 0 ]] || [[ "$1" == "-h" ]];
 then
     usage
     exit
@@ -118,7 +122,7 @@ mkdir -p "$QPATH"
 mkdir -p "$REQUESTS"
 mkdir -p "$ATOM"
 
-if [[ $1 == "-c" ]];
+if [[ "$1" == "-c" ]];
 then
     if [[ -f "$DAEMON_PID_FILE" ]];
     then
@@ -132,7 +136,7 @@ then
     exit
 fi
 
-if [[ $1 == "-k" ]];
+if [[ "$1" == "-k" ]];
 then
     if [[ -f "$DAEMON_PID_FILE" ]];
     then
@@ -148,7 +152,7 @@ then
     exit
 fi
 
-if [[ $1 == "-d" ]];
+if [[ "$1" == "-d" ]];
 then
     if [[ -f "$DAEMON_PID_FILE" ]];
     then
@@ -186,7 +190,7 @@ do
         name="$DPATH/$1"
         shift
     fi
-    r=`mktemp -u --tmpdir="$ATOM"`
+    r=`mktemp --dry-run --tmpdir="$ATOM"`
     echo "$1" > "$r$SUFREQ"
     if [[ -n "$name" ]];
     then
