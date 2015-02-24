@@ -12,18 +12,18 @@ TODO
 * use `wget`'s option `--directory-prefix=PREFIX` to choose directory instead
   of `name="$DPATH/$1"`
   outline:
+
+    echo "$DPATH" > "$r$SUFDIR" # inside `while (( "$#" ));
+    ...
+    # inside daemon function
+    if -f $req$SUFDIR
+    then
+        dir=...
+    else
+        echo "ERROR"
+        mv <request files> into [new] special ERRORDIR
+    fi
+    ...
     
-      echo "$DPATH" > "$r$SUFDIR" # inside `while (( "$#" ));
-      ...
-      # inside daemon function
-      if -f $req$SUFDIR
-      then
-          dir=...
-      else
-          echo "ERROR"
-          mv <request files> into [new] special ERRORDIR
-      fi
-      ...
-  
-      ... wget ... --directory-prefix="$dir" ...
-  
+    ... wget ... --directory-prefix="$dir" ...
+
