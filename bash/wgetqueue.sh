@@ -2,7 +2,7 @@
 
 shopt -s nullglob
 function dpid {
-    cat "$DAEMON"
+    cat "$DAEMON_PID_FILE"
 }
 
 function print_dl {
@@ -26,6 +26,8 @@ function my_notify {
 }
 
 function daemon {
+    DAEMONDIR=$(pwd -P)
+    echo "$DAEMONDIR" > "$DAEMON_PWD_FILE"
     trap "" SIGHUP
     while true
     do
@@ -91,7 +93,8 @@ DPATH="$PWD"
 TITLE=wgetqueue
 ICON=$QPATH/icon.png
 
-DAEMON=$QPATH/daemonrunning
+DAEMON_PID_FILE=$QPATH/daemonrunning
+DAEMON_PWD_FILE=$QPATH/daemonpwd
 REQUESTS=$QPATH/requests
 ATOM=$QPATH/atom
 DAEMON_PERIOD=15s
@@ -115,7 +118,7 @@ mkdir -p "$ATOM"
 
 if [[ $1 == "-c" ]];
 then
-    if [[ -f "$DAEMON" ]];
+    if [[ -f "$DAEMON_PID_FILE" ]];
     then
         pid=$(dpid)
         echo "Daemon is running: PID = $pid"
@@ -129,14 +132,14 @@ fi
 
 if [[ $1 == "-k" ]];
 then
-    if [[ -f "$DAEMON" ]];
+    if [[ -f "$DAEMON_PID_FILE" ]];
     then
         # TODO make a check if there is a current download // file $LAST exists
         show_last "Unfinished download was interrupted:" >> "$ELOG"
         pid=$(dpid)
         echo "Killing daemon: PID = $pid"
         kill -9 "$pid"
-        rm -f "$DAEMON"
+        rm -f "$DAEMON_PID_FILE"
     else
         echo "Daemon is not running."
     fi
@@ -145,14 +148,14 @@ fi
 
 if [[ $1 == "-d" ]];
 then
-    if [[ -f "$DAEMON" ]];
+    if [[ -f "$DAEMON_PID_FILE" ]];
     then
         pid=$(dpid)
         echo "Error: Daemon is already running: PID = $pid"
         exit 255
     fi
     daemon 1> '/dev/null' 2>&1 & disown
-    echo "$!" > "$DAEMON"
+    echo "$!" > "$DAEMON_PID_FILE"
     pid=$(dpid)
     echo -e "Daemon started: PID = $pid"
     exit
@@ -199,7 +202,7 @@ do
     shift
 done
 
-if [[ ! -f "$DAEMON" ]]; then
+if [[ ! -f "$DAEMON_PID_FILE" ]]; then
     $0 -d 0<&- & disown
     sleep 1
     exit
