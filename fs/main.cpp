@@ -1,48 +1,73 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
+#include <unordered_map>
+#include <vector>
+#include <set>
+#include <functional>
 
-using std::cout;
-using std::endl;
+#include <cstdlib>
 
-#include "cryptopp/integer.h"
-#include "cryptopp/md5.h"
-using CryptoPP::Integer;
-#include <cryptopp/sha.h>
+#include "loop.h"
+#include "commands.h"
+
 
 // ~/lab/os-course/midterm/*.c <<< has shell-style sha calculation
 
-int main( int argc, char* argv[] ) {
-    CryptoPP::SHA256 sha256gen;
-    byte hashb[256];
-    const byte word[256] = "test";
-    sha256gen.CalculateDigest(hashb, word, 4 );
-    std::cout << (hashb[0] + 'A') << std::endl;
-    return 0;
+void my_exit()
+{
+    exit(EXIT_SUCCESS);
 }
 
-//int main( int, char** )
-//{
-//    CryptoPP::MD5 hash;
-//    byte digest[ CryptoPP::MD5::DIGESTSIZE ];
-//    std::string message = "abcdefghijklmnopqrstuvwxyz";
-//
-//    hash.CalculateDigest( digest, message.c_str(), message.length() );
-//
-//    CryptoPP::HexEncoder encoder;
-//    std::string output;
-//    encoder.Attach( new CryptoPP::StringSink( output ) );
-//    encoder.Put( digest, sizeof(digest) );
-//    encoder.MessageEnd();
-//
-//    std::cout << output << std::endl;
-//
-//    Integer i;
-//    cout << "i: " << i << endl;
-//    return 0;
-//}
-//
-    //std::string password;
-    //std::getline(std::cin, password);
+void my_put(const std::string &name)
+{
+    std::cout << "my_put : " << name << std::endl;
+}
 
+void my_delete(const std::string &name)
+{
+    std::cout << "my_delete : " << name << std::endl;
+}
+
+int main(int argc, char* argv[] )
+{
+    std::set<std::string> commands;
+    commands.insert(GET);
+    commands.insert(DELETE);
+    commands.insert(PUT);
+    commands.insert(QUIT);
+    while (true)
+    {
+        std::cout << PROMPT;
+        std::string line;
+        std::getline(std::cin, line);
+        auto words = split_cmd(line);
+        if (commands.count(words[0]) == 0)
+        {
+            std::cout << "Commands:" << std::endl;
+            for (auto s : commands)
+            {
+                std::cout << s << std::endl;
+            }
+            continue;
+        }
+        if (words[0] == QUIT)
+        {
+            return 0;
+        }
+        if (words.size() != 2)
+        {
+            continue;
+        }
+        if (words[0] == PUT)
+        {
+            my_get(words[1]);
+        }
+        if (words[0] == DELETE)
+        {
+            my_delete(words[1]);
+        }
+    }
+    return 0;
+}
 

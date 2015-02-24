@@ -21,7 +21,6 @@ struct announce_message
 
     announce_message();
     announce_message(const packed_message &);
-
     mac_addr_t mac_addr;
     chat_time_t timestamp;
     int ip;

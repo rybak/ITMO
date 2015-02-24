@@ -38,7 +38,7 @@ void sl::cycle()
     int nready = select(maxfd + 1, &read_fds, NULL, NULL, &tv);
     if (nready == -1)
     {
-        die("sl::cycle : select");
+        dontdie("sl::cycle : select");
     }
     for(int i = 0; i <= maxfd && nready > 0; i++)
     {

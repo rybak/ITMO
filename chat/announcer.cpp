@@ -40,6 +40,7 @@ announcer::announcer(const uint16_t port)
     : last_announce_time(time(NULL) - TIME_INTERVAL)
 {
     make_udp_socket(sock, aa, 0);
+    std::cerr << "ANNOUNCER SOCK = " << sock << std::endl;
     aa.sin_addr.s_addr = htonl(-1);
     aa.sin_port = htons(port);
     int yes = 1;

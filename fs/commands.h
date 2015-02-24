@@ -3,14 +3,13 @@
 
 #include <string>
 
-namespace commands
-{
-    using std::string;
+using std::string;
 
-    const string GET = "get";
-    const string DELETE = "delete";
-    const string PUT = "put";
+const string GET = "get";
+const string DELETE = "delete";
+const string PUT = "put";
+const string QUIT = "quit";
+const string PRINT = "print";
 
-}
 
 #endif
