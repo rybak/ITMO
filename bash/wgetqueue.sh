@@ -85,6 +85,8 @@ function show_last {
     then
         echo "$1"
         cat "$LAST"
+    else
+        echo "Seems that no current downloads are running."
     fi
 }
 
