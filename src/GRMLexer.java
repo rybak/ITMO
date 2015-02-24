@@ -1,4 +1,4 @@
-
+// Generated from GRM.g4 by ANTLR 4.0
 
 import java.util.*;
 import java.io.*;

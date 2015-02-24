@@ -35,7 +35,8 @@ public class Main {
 	public static void main(String[] args) {
 		try {
 			System.out.println(System.getProperty("user.dir"));
-			new Main("src/test/", "src/test/CVars.grm").run();
+			new Main("../parsing-lab4-test/src/",
+					"../parsing-lab4-test/src/CVars.grm").run();
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.err.println("ERROR " + e.getMessage());

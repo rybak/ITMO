@@ -1,4 +1,3 @@
-
 public class LexerRule {
 	public final String name;
 	public final String regexp;

@@ -1,4 +1,3 @@
-
 import java.util.*;
 
 public class ParserRule {
@@ -11,7 +10,7 @@ public class ParserRule {
 	final int cnt;
 
 	boolean isEPS;
-	
+
 	public ParserRule(String name, ArrayList<String> args,
 			ArrayList<String> sVars, String initCode,
 			ArrayList<ArrayList<ParseItem>> options) {
