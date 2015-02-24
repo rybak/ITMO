@@ -42,7 +42,7 @@ function daemon {
             if [[ -f "$req$SUFNAME" ]];
             then
                 name=$(cat "$req$SUFNAME")
-                name_arg="-O $name"
+                name_arg="--output-document=$name"
                 rm "$req$SUFNAME"
             else
                 name_arg=
@@ -51,7 +51,7 @@ function daemon {
             # my_notify normal "Started download: $(print_dl $url $name)"
             echo "$name : $url" > "$LAST"
             print_log "Download started" "$url" "$name"
-            if wget $name_arg -c "$url" 2>> "$WGETLOG";
+            if wget $name_arg --continue "$url" 2>> "$WGETLOG";
             then
                 # my_notify normal "Download complete: $(print_dl $url $name)"
                 print_log "Download complete" "$url" "$name"
