@@ -6,7 +6,9 @@ import Monstupar.Core
 import Monstupar.Derived
 import UnTyLambda.Interpreter
 import Prelude hiding (catch)
-import Control.Exception
+import Control.Exception hiding (catch)
+
+import System.Console.Haskeline
 
 alphaPar = oneOf ['a'..'z']
 
@@ -81,19 +83,24 @@ prettyPrint (App t1 t2) = "(" ++ prettyPrint t1 ++ ") (" ++
 -- Собственно сам REPL. Первый аргумент — максимальное число итераций при
 -- попытке нормализации стратегией из второго аргумента.
 replLoop :: Integer -> (Integer -> Term -> Term) -> IO ()
-replLoop patience strategy = do
-    putStr "> "
-    s <- getLine
-    catch (putStrLn $
-        case runParser parseLambda s of
+replLoop patience strategy = runInputT defaultSettings repl where
+  repl = do
+    minput <- getInputLine "> "
+    case minput of
+      Nothing -> outputStrLn "Bye-bye."
+      Just s -> do
+        catch (outputStrLn $ case runParser parseLambda s of
             Left (ParseErrorMsg msg) -> "Error: " ++ msg
             Left _        -> "Error"
             Right ("", t) -> prettyPrint $ strategy patience t
             Right (s', t) -> "Error in parser : " ++ s'
-        ) (\e -> print (e :: SomeException))
-    replLoop patience strategy
+          ) (\e -> outputStrLn $ show (e :: SomeException))
+        repl
 -- Диалог с (replLoop 100 no) должен выглядеть так:
 -- > \x . (\y . y) x x
 -- \x . x x
+
+main = replLoop 100 wh
+
 
 
