@@ -2,6 +2,7 @@
 
 shopt -s nullglob
 
+
 set -e
 set -u
 
@@ -14,8 +15,7 @@ DAEMON_PID_FILE="${QPATH}/daemonrunning" # contains pid of daemon
 DAEMON_PWD_FILE="${QPATH}/daemonpwd" # contains pwd of daemon
 REQUESTS="${QPATH}/requests"
 ATOM="${QPATH}/atom" # used to `mv` files atomically
-DAEMON_PERIOD=15s    # period for which daemon sleeps before checking for new
-request
+DAEMON_PERIOD=15s    # period for which daemon sleeps before checking for new request
 
 ELOG="${QPATH}/error.log"
 WGETLOG="${QPATH}/get.log"
@@ -29,19 +29,17 @@ function dpid {
 }
 
 function print_dl {
-    echo "URL $1 > $2"
+    echo -e "\tURL $1\n\t> $2"
 }
 
 function print_log {
     local pid=$(dpid)
-    echo -n `date -Iseconds` >> "${ELOG}"
-    echo -n " $$ " >> "${ELOG}"
-    echo "PID = ${pid}" >> "${ELOG}"
+    echo -e "\n$(date -Iseconds) $$ PID = ${pid}" >> "${ELOG}"
     local MESSAGE="$1"
     local URL="$2"
     local FILENAME="$3"
-    echo -e "$1\n" >> "${ELOG}"
-    echo -e "\t$(print_dl "${URL}" "${FILENAME}")" >> "${ELOG}"
+    echo -e "$MESSAGE" >> "${ELOG}"
+    echo -e "$(print_dl "${URL}" "${FILENAME}")" >> "${ELOG}"
 }
 
 function my_notify {
@@ -66,7 +64,7 @@ function daemon {
             rm "${r}"
             local name
             local name_arg
-            if [[ -f "${req}${SUFNAME}" ]];
+            if [[ -f "${req}${SUFNAME}" ]]
             then
                 name="$(cat "${req}${SUFNAME}")"
                 name_arg="--output-document=${name}"
@@ -76,9 +74,9 @@ function daemon {
                 name=
             fi
             # my_notify normal "Started download: $(print_dl ${url} ${name})"
-            echo "${name} : ${url}" > "${LAST}"
+            echo "${name} : ${url}" > "${LAST}" && echo "fine " >> /tmp/wgq-echo1
             print_log "Download started" "${url}" "${name}"
-            if wget ${name_arg} --continue "${url}" --append-output "${WGETLOG}";
+            if wget ${name_arg} --continue "${url}" --append-output "${WGETLOG}"
             then
                 # my_notify normal "Download complete: $(print_dl ${url} ${name})"
                 print_log "Download complete" "${url}" "${name}"
@@ -108,16 +106,17 @@ function usage {
 }
 
 function show_last {
-    if [[ -f "${LAST}" ]];
+    EXISTS_MESSAGE="$1"
+    if [[ -f "${LAST}" ]]
     then
-        echo "$1"
+        echo "${EXISTS_MESSAGE}"
         cat "${LAST}"
     else
         echo "Seems that no current downloads are running."
     fi
 }
 
-if [[ $# -eq 0 ]] || [[ "$1" = '-h' ]];
+if [[ $# -eq 0 ]] || [[ "$1" = '-h' ]]
 then
     usage
     exit
@@ -127,13 +126,20 @@ mkdir -p "${QPATH}"
 mkdir -p "${REQUESTS}"
 mkdir -p "${ATOM}"
 
-if [[ "$1" = '-c' ]];
+if [[ "$1" = '-c' ]]
 then
-    if [[ -f "${DAEMON_PID_FILE}" ]];
+    if [[ -f "${DAEMON_PID_FILE}" ]]
     then
         pid="$(dpid)"
         echo "Daemon is running: PID = ${pid}"
-        show_last "Download in progress :"
+        # checking if there is a process with such PID
+        if ps -ejH | grep --quiet "${pid}"
+        then
+            show_last "Download in progress:"
+        else
+            echo "Daemon was killed:"
+            show_last "Unfinished download was interrupted:"
+        fi
     else
         echo "Daemon is not running."
         show_last "Unfinished download was interrupted:"
@@ -141,15 +147,20 @@ then
     exit
 fi
 
-if [[ "$1" = '-k' ]];
+if [[ "$1" = '-k' ]]
 then
-    if [[ -f "${DAEMON_PID_FILE}" ]];
+    if [[ -f "${DAEMON_PID_FILE}" ]]
     then
-        # TODO make a check if there is a current download // file ${LAST} exists
         show_last "Unfinished download was interrupted:" >> "${ELOG}"
         pid=$(dpid)
         echo "Killing daemon: PID = ${pid}"
-        kill -9 "${pid}"
+        if kill -9 "${pid}"
+        then
+            echo "Process ${pid} killed."
+        else
+            echo "No process with PID = ${pid}. Daemon crashed."
+        fi
+        # `set -e` option exits the script if non zero is returned
         rm -f "${DAEMON_PID_FILE}"
     else
         echo "Daemon is not running."
@@ -157,12 +168,12 @@ then
     exit
 fi
 
-if [[ "$1" = '-d' ]];
+if [[ "$1" = '-d' ]]
 then
-    if [[ -f "${DAEMON_PID_FILE}" ]];
+    if [[ -f "${DAEMON_PID_FILE}" ]]
     then
         pid=$(dpid)
-        echo "Error: Daemon is already running: PID = ${pid}"
+        echo "Error: Daemon is already running: PID = ${pid}" >> "${ELOG}"
         exit 255
     fi
     daemon 1> '/dev/null' 2>&1 & disown
@@ -172,7 +183,7 @@ then
     exit
 fi
 
-if [[ "$1" = '--dry' ]];
+if [[ "$1" = '--dry' ]]
 then
     DRY=true
     shift
@@ -180,12 +191,12 @@ else
     DRY=false
 fi
 
-while (( "$#" ));
+while (( "$#" ))
 do
     name=
-    if [[ "$1" = '-n' ]];
+    if [[ "$1" = '-n' ]]
     then
-        if [[ $# -lt 3 ]];
+        if [[ $# -lt 3 ]]
         then
             echo "Wrong arguments: $@"
             usage
@@ -195,16 +206,19 @@ do
         name="${DPATH}/$1"
         shift
     fi
-    r=`mktemp --dry-run --tmpdir="${ATOM}"`
+    r=$(mktemp --dry-run --tmpdir="${ATOM}")
     echo "$1" > "${r}${SUFREQ}"
-    if [[ -n "${name}" ]];
+    if [[ -n "${name}" ]]
     then
         echo "${name}" > "${r}${SUFNAME}"
     fi
     if "${DRY}"
     then
         echo "Request:"
-        ls "${r}"* | xargs cat
+        for f in "${r}"*
+        do
+            cat "${f}" # ls "${r}"* | xargs cat
+        done
         rm "${r}"*
     else
         r=${r##*/}
@@ -213,7 +227,8 @@ do
     shift
 done
 
-if [[ ! -f "${DAEMON_PID_FILE}" ]]; then
+if [[ ! -f "${DAEMON_PID_FILE}" ]]
+then
     $0 -d 0<&- & disown
     sleep 1
     exit
