@@ -1,10 +1,13 @@
 import System.Environment
 
+-- bnfc
 import L.Abs
 import L.Par (pParProgram)
 import L.Lex (tokens, Token)
 import L.Print
 import qualified L.ErrM as ErrM
+-- LLanguage
+import LLanguage.BuiltIn
 
 parseProg = pParProgram . tokens
 
@@ -13,9 +16,6 @@ scopeCheck = undefined
 desugar = undefined
 codegen = undefined
 
-builtInFunctions, builtInConsts :: String
-builtInFunctions = ""
-builtInConsts = ""
 
 printLLVM :: ParProgram -> String
 printLLVM prog = unlines [
