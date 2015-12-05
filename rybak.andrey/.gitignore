@@ -1,2 +1,7 @@
 semTask.pdf
 test/
+*.hi
+*.o
+*.bak
+*.swp
+*_flymake.hs
