@@ -1,7 +1,7 @@
 comment "//" ;
 
 Prog. ParProgram ::= [ParTopLevel] ;
-terminator ParTopLevel "" ;
+terminator ParTopLevel ";" ;
 
 TopDecl. ParTopLevel ::= Decl ;
 

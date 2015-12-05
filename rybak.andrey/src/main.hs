@@ -8,6 +8,27 @@ import qualified L.ErrM as ErrM
 
 parseProg = pParProgram . tokens
 
+typeCheck = undefined
+scopeCheck = undefined
+desugar = undefined
+codegen = undefined
+
+builtInFunctions, builtInConsts :: String
+builtInFunctions = ""
+builtInConsts = ""
+
+printLLVM :: ParProgram -> String
+printLLVM prog = unlines [
+		builtInConsts,
+		codegen typeChecked,
+		builtInFunctions
+		]
+	where
+		typeChecked = typeCheck scopeChecked
+		scopeChecked = scopeCheck desugared
+		desugared = desugar prog
+
+
 main = do
 	args <- getArgs
 	input <- readFile $ head args
