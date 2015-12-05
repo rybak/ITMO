@@ -1,0 +1,12 @@
+comment "//" ;
+
+Prog. ParProgram ::= [ParTopLevel] ;
+terminator ParTopLevel "" ;
+
+TopDecl. ParTopLevel ::= Decl ;
+
+Dec. Decl ::= PIdent ":" ParLType ;
+
+TInt.	ParLType ::= "int" ;
+
+position token PIdent (letter | '_' ) (letter | digit | '_' )* ;
