@@ -1,9 +1,9 @@
 comment "//" ;
 
 Prog. ParProgram ::= [ParTopLevel] ;
-terminator ParTopLevel ";" ;
+terminator ParTopLevel "" ;
 
-TopDecl. ParTopLevel ::= Decl ;
+TopDecl. ParTopLevel ::= Decl ";" ;
 
 Dec. Decl ::= PIdent ":" ParLType ;
 
