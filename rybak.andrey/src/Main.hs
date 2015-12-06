@@ -12,7 +12,6 @@ import LLanguage.BuiltIn
 parseProg = pParProgram . tokens
 
 typeCheck = undefined
-scopeCheck = undefined
 desugar = undefined
 codegen = undefined
 
