@@ -8,6 +8,8 @@ import L.Print
 import qualified L.ErrM as ErrM
 -- LLanguage
 import LLanguage.BuiltIn
+-- Compiler
+import Scope
 
 parseProg = pParProgram . tokens
 
