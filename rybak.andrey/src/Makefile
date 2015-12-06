@@ -11,8 +11,8 @@ all: $(PDIR)/L.cf
 clean:
 	-rm -f *.log *.aux *.hi *.o *.dvi
 
-main: main.hs all
-	ghc --make main.hs -o main
+main: Main.hs all
+	ghc --make $< -o $@
 
 
 runMain: main input.l
