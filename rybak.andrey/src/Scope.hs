@@ -17,6 +17,8 @@ type Name = String
 data SymTabItem = STVar PIdent ParLType deriving (Eq,Show)
 
 type Scope = (String, [Integer])
+globalScopeStart :: Scope
+globalScopeStart = ("", [])
 type SymTab = M.Map Scope (M.Map Name SymTabItem)
 
 data BuildSt = St {
@@ -53,7 +55,7 @@ addToErrs str = do
 predefinedFuncs = M.empty
 scopeCheck :: ParProgram -> BuildSt
 scopeCheck prog = let
-    ((), buildStGlobal) = runState (collectGlobals prog) (St predefinedFuncs ("", []) 0 [])
+    ((), buildStGlobal) = runState (collectGlobals prog) (St predefinedFuncs globalScopeStart 0 [])
     in
         snd $ runState (buildSTProgram prog) buildStGlobal
 
