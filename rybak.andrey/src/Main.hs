@@ -17,7 +17,6 @@ typeCheck = undefined
 desugar = undefined
 codegen = undefined
 
-
 printLLVM :: ParProgram -> String
 printLLVM prog = unlines [
 		builtInConsts,
@@ -26,15 +25,20 @@ printLLVM prog = unlines [
 		]
 	where
 		typeChecked = typeCheck scopeChecked
-		scopeChecked = scopeCheck desugared
-		desugared = desugar prog
+		scopeChecked = scopeCheck prog
 
 
 main = do
 	args <- getArgs
 	input <- readFile $ head args
 	case parseProg input of
-		ErrM.Ok prog -> let
-			ppProg = printTree prog
-			in mapM_ putStrLn [ppProg, show prog]
+		ErrM.Ok prog -> do
+			let ppProg = printTree prog
+			mapM_ putStrLn [ppProg, show prog]
+			let scopeCheckResult = scopeCheck prog
+			case null (errs scopeCheckResult) of
+				True -> putStrLn "Scope check successfull."
+				False -> do
+					putStrLn "Scope check errors:"
+					mapM_ ((putStr "\t" >>) . putStrLn) (errs scopeCheckResult)
 		ErrM.Bad s -> putStrLn $ "Error : " ++ s
