@@ -96,14 +96,14 @@ type Duplicate = SymTabItem
 addSymbolCurrentScope :: SymTabItem -> SM BuildSt (Maybe Duplicate)
 addSymbolCurrentScope symbol = do
 	scope <- getScope
-	symTab <- getSymTab
-	case M.lookup scope symTab of
-		Nothing -> -- no scope at this level defined, start with empty SymTab
-			insertNewSymbol symbol M.empty scope symTab
+	symbolTable <- getSymTab
+	case M.lookup scope symbolTable of
+		Nothing -> -- no scope at this level defined, start with empty listing
+			insertNewSymbol symbol M.empty scope symbolTable
 		Just scopeListing -> -- scope found, needs checking for duplicates
 			case M.lookup (symTabItemToName symbol) scopeListing of
 				Nothing -> -- no duplicate found, can insert
-					insertNewSymbol symbol scopeListing scope symTab
+					insertNewSymbol symbol scopeListing scope symbolTable
 				Just x -> return (Just x) -- return SymTabItem of duplicate
 
 insertNewSymbol symbol scopeListing scope symTab = do
