@@ -1,6 +1,7 @@
 module Scope (
     scopeCheck,
-	BuildSt (errs)
+	BuildSt (scope, symTab, errs),
+	SymTab
 ) where
 
 import L.Abs

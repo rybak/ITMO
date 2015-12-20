@@ -37,7 +37,10 @@ main = do
 			mapM_ putStrLn [ppProg, show prog]
 			let scopeCheckResult = scopeCheck prog
 			case null (errs scopeCheckResult) of
-				True -> putStrLn "Scope check successfull."
+				True -> do
+					putStrLn "Scope check successfull."
+					putStrLn $ show (scope scopeCheckResult)
+					putStrLn $ show (symTab scopeCheckResult)
 				False -> do
 					putStrLn "Scope check errors:"
 					mapM_ ((putStr "\t" >>) . putStrLn) (errs scopeCheckResult)
