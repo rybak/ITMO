@@ -4,18 +4,18 @@ Prog. ParProgram ::= [ParTopLevel] ;
 terminator ParTopLevel "" ;
 
 TopDecl. ParTopLevel ::= Decl ";" ;
-TopFun. ParTopLevel ::= PIdent "(" [Decl] ")" "->" ParLType Block ;
-separator Decl "," ;
+-- TopFun. ParTopLevel ::= PIdent "(" [Decl] ")" "->" ParLType Block ;
+-- separator Decl "," ;
 
 
 Dec. Decl ::= PIdent ":" ParLType ;
 
 TInt.	ParLType ::= "int" ;
 
-BlockB. Block ::= "{" [ParStm] "}" ;
-terminator ParStm "" ;
-
-SDecl. ParStm ::= Decl ";" ;
+-- BlockB. Block ::= "{" [ParStm] "}" ;
+-- terminator ParStm "" ;
+-- 
+-- SDecl. ParStm ::= Decl ";" ;
 
 
 position token PIdent (letter | '_' ) (letter | digit | '_' )* ;

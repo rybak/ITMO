@@ -1,5 +1,5 @@
-module Scope (
-    scopeCheck,
+module LLanguage.Scope (
+    checkScope,
 	BuildSt (scope, symTab, errs),
 	SymTab
 ) where
@@ -17,8 +17,6 @@ type Name = String
 data SymTabItem = STVar PIdent ParLType deriving (Eq,Show)
 
 type Scope = (String, [Integer])
-globalScopeStart :: Scope
-globalScopeStart = ("", [])
 type SymTab = M.Map Scope (M.Map Name SymTabItem)
 
 data BuildSt = St {
@@ -30,31 +28,12 @@ data BuildSt = St {
 
 type Result = SM BuildSt ()
 
--- helper functions
-pIdentToString :: PIdent -> String
-pIdentToString (PIdent ((_,_), str)) = str
-
-symTabItemToName :: SymTabItem -> Name
-symTabItemToName (STVar pi _) = pIdentToString pi
-
--- SM BuildSt helper functions
-getErrs :: SM BuildSt [String]
-getErrs = SM (\st -> (errs st,st))
-
-setErrs :: [String] -> Result
-setErrs newErrs = SM (\st -> ((), st { errs = newErrs }))
-
-addToErrs :: String -> Result
-addToErrs str = do
-  errors <- getErrs
-  setErrs (str:errors)
-
--- helper for building error messages:
-
--- scopeCheck
+-- scope check
+globalScopeStart :: Scope
+globalScopeStart = ("", [])
 predefinedFuncs = M.empty
-scopeCheck :: ParProgram -> BuildSt
-scopeCheck prog = let
+checkScope :: ParProgram -> BuildSt
+checkScope prog = let
     ((), buildStGlobal) = runState (collectGlobals prog) (St predefinedFuncs globalScopeStart 0 [])
     in
         snd $ runState (buildSTProgram prog) buildStGlobal
@@ -66,10 +45,7 @@ buildSTProgram prog = SM (\st -> ((), st)) -- ~same as undefined
 collectGlobals :: ParProgram -> Result
 collectGlobals (Prog topLevels) = collectGlobalVars topLevels
 collectGlobalVars :: [ParTopLevel] -> Result
-collectGlobalVars [] = return ()
-collectGlobalVars (tl : tls) = do
-	collectGlobalVar tl
-	collectGlobalVars tls
+collectGlobalVars = mapM_ collectGlobalVar
 
 collectGlobalVar :: ParTopLevel -> Result
 collectGlobalVar x = case x of
@@ -79,7 +55,7 @@ collectGlobalVar x = case x of
 		when (isJust addError) $
 			duplicateError "global var: " newVar (fromJust addError)
 		return ()
-	_ -> undefined
+	_ -> return () -- do nothing with TopFun
 
 showPI :: PIdent -> String
 showPI (PIdent ((x,y), name)) = name ++ " at line " ++ show x ++ " column " ++ show y
@@ -119,4 +95,22 @@ getSymTab = SM (\st -> (symTab st, st))
 setSymTab :: SymTab -> Result
 setSymTab newSymTab = SM (\st -> ((), st { symTab = newSymTab }))
 
+-- helper functions
+pIdentToString :: PIdent -> String
+pIdentToString (PIdent ((_,_), str)) = str
+
+symTabItemToName :: SymTabItem -> Name
+symTabItemToName (STVar pi _) = pIdentToString pi
+
+-- SM BuildSt helper functions
+getErrs :: SM BuildSt [String]
+getErrs = SM (\st -> (errs st,st))
+
+setErrs :: [String] -> Result
+setErrs newErrs = SM (\st -> ((), st { errs = newErrs }))
+
+addToErrs :: String -> Result
+addToErrs str = do
+  errors <- getErrs
+  setErrs (str:errors)
 

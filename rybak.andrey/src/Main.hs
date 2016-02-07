@@ -8,8 +8,8 @@ import L.Print
 import qualified L.ErrM as ErrM
 -- LLanguage
 import LLanguage.BuiltIn
--- Compiler
-import Scope
+import LLanguage.Scope
+import LLanguage.TypeCheck
 
 parseProg = pParProgram . tokens
 
@@ -24,8 +24,7 @@ printLLVM prog = unlines [
 		builtInFunctions
 		]
 	where
-		typeChecked = typeCheck scopeChecked
-		scopeChecked = scopeCheck prog
+		typeChecked = typeCheck prog
 
 
 main = do
@@ -35,13 +34,15 @@ main = do
 		ErrM.Ok prog -> do
 			let ppProg = printTree prog
 			mapM_ putStrLn [ppProg, show prog]
-			let scopeCheckResult = scopeCheck prog
-			case null (errs scopeCheckResult) of
+			let (aTree, buildst) = checkTypes prog
+			case null (errs buildst) of
 				True -> do
-					putStrLn "Scope check successfull."
-					putStrLn $ show (scope scopeCheckResult)
-					putStrLn $ show (symTab scopeCheckResult)
+					putStrLn "Scope and type checks successfull."
+					putStrLn $ show (scope buildst)
+					putStrLn $ show (symTab buildst)
+					putStrLn $ show aTree
 				False -> do
-					putStrLn "Scope check errors:"
-					mapM_ ((putStr "\t" >>) . putStrLn) (errs scopeCheckResult)
-		ErrM.Bad s -> putStrLn $ "Error : " ++ s
+					putStrLn "Scope and type check errors:"
+					mapM_ ((putStr "\t" >>) . putStrLn) (errs buildst)
+		ErrM.Bad s -> putStrLn $ "Parser error : " ++ s
+
