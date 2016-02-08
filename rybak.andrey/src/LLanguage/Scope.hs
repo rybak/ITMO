@@ -7,6 +7,7 @@ module LLanguage.Scope (
 import L.Abs
 import L.Print -- for pretty printing error messages
 import L.ErrM
+import LLanguage.Utils
 
 import Control.Monad
 import Utils.SM
@@ -96,8 +97,6 @@ setSymTab :: SymTab -> Result
 setSymTab newSymTab = SM (\st -> ((), st { symTab = newSymTab }))
 
 -- helper functions
-pIdentToString :: PIdent -> String
-pIdentToString (PIdent ((_,_), str)) = str
 
 symTabItemToName :: SymTabItem -> Name
 symTabItemToName (STVar pi _) = pIdentToString pi
