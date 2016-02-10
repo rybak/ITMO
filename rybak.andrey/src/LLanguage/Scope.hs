@@ -9,16 +9,21 @@ import L.Print -- for pretty printing error messages
 import L.ErrM
 import LLanguage.Utils
 
-import Control.Monad
+import Control.Monad hiding (forM_)
+import Data.Foldable (forM_)
 import Utils.SM
 import Data.Maybe
 import qualified Data.Map as M
 
 type Name = String
-data SymTabItem = STVar PIdent ParLType deriving (Eq,Show)
+data SymTabItem = STVar PIdent ParLType
+                  | STFun PIdent ParLType
+                deriving (Eq,Show)
+
 
 type Scope = (String, [Integer])
-type SymTab = M.Map Scope (M.Map Name SymTabItem)
+type ScopeListing = M.Map Name SymTabItem
+type SymTab = M.Map Scope ScopeListing
 
 data BuildSt = St {
         symTab :: SymTab,
@@ -37,8 +42,9 @@ checkScope :: ParProgram -> BuildSt
 checkScope prog = let
     ((), buildStGlobal) = runState (collectGlobals prog) (St predefinedFuncs globalScopeStart 0 [])
     in
-        snd $ runState (buildSTProgram prog) buildStGlobal
+        execState (buildSTProgram prog) buildStGlobal
 
+execState f s = snd $ runState f s
 buildSTProgram prog = SM (\st -> ((), st)) -- ~same as undefined
 
 {- collectGlobals before doing anything else
@@ -53,8 +59,7 @@ collectGlobalVar x = case x of
 	TopDecl (Dec pi parType) -> do
 		let newVar = STVar pi parType
 		addError <- addSymbolCurrentScope newVar
-		when (isJust addError) $
-			duplicateError "global var: " newVar (fromJust addError)
+		forM_ addError $ duplicateError "global var: " newVar
 		return ()
 	_ -> return () -- do nothing with TopFun
 
@@ -70,18 +75,14 @@ duplicateError msg dup orig = addToErrs ("Name clash " ++ msg ++ showSTItem dup
 
 {- Nothing indicates no error, Just x indicates that symbol duplicates name of x -}
 type Duplicate = SymTabItem
-addSymbolCurrentScope :: SymTabItem -> SM BuildSt (Maybe Duplicate)
+--addSymbolCurrentScope :: SymTabItem -> SM BuildSt (Maybe Duplicate)
 addSymbolCurrentScope symbol = do
 	scope <- getScope
 	symbolTable <- getSymTab
 	case M.lookup scope symbolTable of
 		Nothing -> -- no scope at this level defined, start with empty listing
 			insertNewSymbol symbol M.empty scope symbolTable
-		Just scopeListing -> -- scope found, needs checking for duplicates
-			case M.lookup (symTabItemToName symbol) scopeListing of
-				Nothing -> -- no duplicate found, can insert
-					insertNewSymbol symbol scopeListing scope symbolTable
-				Just x -> return (Just x) -- return SymTabItem of duplicate
+		Just scopeListing -> maybe (insertNewSymbol symbol scopeListing scope symbolTable) return (M.lookup (symTabItemToName symbol) scopeListing)
 
 insertNewSymbol symbol scopeListing scope symTab = do
 	let newScopeListing = M.insert (symTabItemToName symbol) symbol scopeListing

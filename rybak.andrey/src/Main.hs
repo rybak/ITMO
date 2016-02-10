@@ -3,7 +3,7 @@ import System.Environment
 -- bnfc
 import L.Abs
 import L.Par (pParProgram)
-import L.Lex (tokens, Token)
+import L.Lex (tokens)
 import L.Print
 import qualified L.ErrM as ErrM
 -- LLanguage
@@ -12,6 +12,7 @@ import LLanguage.TypeCheck
 import LLanguage.Codegen
 import LLanguage.BuiltIn
 
+parseProg :: String -> ErrM.Err ParProgram
 parseProg = pParProgram . tokens
 
 printLLVM :: ParProgram -> String
@@ -20,7 +21,7 @@ printLLVM prog = unlines [
 		builtInFunctions
 		]
 
-
+main :: IO ()
 main = do
 	args <- getArgs
 	input <- readFile $ head args
@@ -29,16 +30,16 @@ main = do
 			let ppProg = printTree prog
 			mapM_ putStrLn [ppProg, show prog]
 			let (aTree, buildst) = checkTypes prog
-			case null (errs buildst) of
-				True -> do
-					putStrLn "Scope and type checks successfull."
-					putStrLn $ show (scope buildst)
-					putStrLn $ show (symTab buildst)
-					putStrLn $ show aTree
-					putStrLn ""
-					putStrLn $ unlines $ codegen aTree
-				False -> do
-					putStrLn "Scope and type check errors:"
-					mapM_ ((putStr "\t" >>) . putStrLn) (errs buildst)
+			if null (errs buildst)
+                          then do
+				putStrLn "Scope and type checks successfull."
+				print $ scope buildst
+				print $ symTab buildst
+				print aTree
+				putStrLn ""
+				putStrLn $ unlines $ codegen aTree
+			  else do
+				putStrLn "Scope and type check errors:"
+				mapM_ ((putStr "\t" >>) . putStrLn) (errs buildst)
 		ErrM.Bad s -> putStrLn $ "Parser error : " ++ s
 

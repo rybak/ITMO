@@ -14,7 +14,7 @@ instance Monad m => Monad (ST s m) where
 	st >>= f = ST $ \s -> do
 		(a1,s1) <- runST st s -- run the st on the initial state
 		(a2,s2) <- runST (f a1) s1 -- apply f to a1 getting another st and apply it to s1
-		return $ (a2,s2) -- push through m
+		return (a2,s2) -- push through m
 
 instance MonadTrans (ST s) where
 	lift m = ST $ \s -> do
@@ -32,7 +32,7 @@ updateST :: Monad m => (s -> s) -> ST s m ()
 updateST u = ST $ \s -> return ((),u s)
 
 setST :: Monad m => s -> ST s m ()
-setST s = ST $ \s' -> return ((),s)
+setST s = ST $ \_ -> return ((),s)
 
 -- | A simple example.  Gets a number from IO inside the state monad
 testStIO :: ST Int IO Int
