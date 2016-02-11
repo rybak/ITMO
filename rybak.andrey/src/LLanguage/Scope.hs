@@ -82,7 +82,10 @@ addSymbolCurrentScope symbol = do
 	case M.lookup scope symbolTable of
 		Nothing -> -- no scope at this level defined, start with empty listing
 			insertNewSymbol symbol M.empty scope symbolTable
-		Just scopeListing -> maybe (insertNewSymbol symbol scopeListing scope symbolTable) return (M.lookup (symTabItemToName symbol) scopeListing)
+		Just scopeListing -> maybe
+			(insertNewSymbol symbol scopeListing scope symbolTable)
+			(return . Just)
+			(M.lookup (symTabItemToName symbol) scopeListing)
 
 insertNewSymbol symbol scopeListing scope symTab = do
 	let newScopeListing = M.insert (symTabItemToName symbol) symbol scopeListing
