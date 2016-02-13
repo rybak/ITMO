@@ -15,15 +15,15 @@ import Control.Applicative
 import qualified Data.Map as M
 
 data Binding = Global String
-	deriving (Eq, Ord, Show, Read)
+    deriving (Eq, Ord, Show, Read)
 
 data CodegenState = CodegenState {
-	counter :: Int
+    counter :: Int
 }
 emptyState = CodegenState 0
 
 newtype Codegen a = Codegen {
-	runCodegen :: State CodegenState a
+    runCodegen :: State CodegenState a
 } deriving (Functor, Applicative, Monad, MonadState CodegenState)
 
 fresh :: String -> Codegen String
@@ -48,8 +48,8 @@ convertToLLVMType TInt = TInt32
 
 data LLVMType = TInt32
 instance Show LLVMType where
-	show TInt32 = "i32"
+    show TInt32 = "i32"
 
 compileGlobalVar (name, llType) = "@" ++ name
-	++ " = global " ++ show llType ++ " 0"
+    ++ " = global " ++ show llType ++ " 0"
 {- // -}
