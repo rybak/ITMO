@@ -11,6 +11,7 @@ separator Decl "," ;
 Dec. Decl ::= PIdent ":" ParLType ;
 
 TInt.	ParLType ::= "int" ;
+TVoid.	ParLType ::= "void" ;
 TFun. ParLType ::= "(" [ParLType] ")" "->" ParLType ;
 separator ParLType "," ;
 

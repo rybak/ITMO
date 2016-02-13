@@ -6,7 +6,7 @@ import L.ErrM
 import Utils.SM
 import LLanguage.Annotated
 import LLanguage.Scope
-
+import LLanguage.Utils
 
 checkTypes :: ParProgram -> (AProgram (Maybe ParLType), BuildSt)
 checkTypes prog =
@@ -32,5 +32,8 @@ typeTopLevel (TopFun pi args retType body) = do
 	return $ ATopFun "<empty> : TODO Later" -- TODO ATopFun should not be empty
 
 typeDecl :: Decl -> TypeCheckResult ADecl
-typeDecl (Dec pi parType) = return $ ADec pi parType
-
+typeDecl (Dec pi parType) = case parType of
+  TVoid -> do
+    addToErrs ("Can't declare Void variables : " ++ showPIwithType pi parType)
+    return $ ADec pi parType
+  _ -> return $ ADec pi parType
