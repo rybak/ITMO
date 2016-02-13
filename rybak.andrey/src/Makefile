@@ -22,13 +22,15 @@ L/Par.hs : L/Par.y
 Test: L/Par.hs L/Lex.hs
 	$(HC) $(PDIR)/Test.hs -o Test
 
-main: Main.hs L/Par.hs L/Lex.hs
-	$(HC) $< -o $@
+main: FORCE # let GHC decide all dependencies
+	$(HC) Main.hs -o $@
 
 runMain: main input.l
 	./main input.l
 
-clean:
+clean: FORCE
 	-rm -f *.log *.aux *.hi *.o *.dvi
 	-rm main
 	-rm Test
+
+FORCE:

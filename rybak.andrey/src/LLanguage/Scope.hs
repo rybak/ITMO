@@ -45,29 +45,32 @@ checkScope prog = let
         execState (buildSTProgram prog) buildStGlobal
 
 execState f s = snd $ runState f s
-buildSTProgram prog = SM (\st -> ((), st)) -- ~same as undefined
+buildSTProgram prog = SM (\st -> ((), st)) -- add builtIn later
 
 {- collectGlobals before doing anything else
  - this is needed to simplify mutual recursion processing -}
 collectGlobals :: ParProgram -> Result
-collectGlobals (Prog topLevels) = collectGlobalVars topLevels
-collectGlobalVars :: [ParTopLevel] -> Result
-collectGlobalVars = mapM_ collectGlobalVar
+collectGlobals (Prog topLevels) = mapM_ collectTopLevel topLevels
 
-collectGlobalVar :: ParTopLevel -> Result
-collectGlobalVar x = case x of
+collectTopLevel :: ParTopLevel -> Result
+collectTopLevel x = case x of
 	TopDecl (Dec pi parType) -> do
 		let newVar = STVar pi parType
 		addError <- addSymbolCurrentScope newVar
 		forM_ addError $ duplicateError "global var: " newVar
 		return ()
-	_ -> return () -- do nothing with TopFun
+	TopFun pi argsDecls retType body -> do
+		let newFun = STFun pi (funDeclToFunType (map declToType argsDecls) retType)
+		addError <- addSymbolCurrentScope newFun
+		forM_ addError $ duplicateError "global function: " newFun
+		return ()
 
 showPI :: PIdent -> String
 showPI (PIdent ((x,y), name)) = name ++ " at line " ++ show x ++ " column " ++ show y
 showSTItem :: SymTabItem -> String
-showSTItem (STVar pi parLType) = showPI pi ++ " of type " ++ printTree parLType -- maybe use prettyPrint
-showSTItem _ = undefined
+showSTItem (STVar pi parLType) = showPIwithType pi parLType
+showSTItem (STFun pi parLType) = showPIwithType pi parLType
+showPIwithType pi t = showPI pi ++ " of type " ++ printTree t
 
 duplicateError :: String -> SymTabItem -> SymTabItem -> Result
 duplicateError msg dup orig = addToErrs ("Name clash " ++ msg ++ showSTItem dup
@@ -104,6 +107,7 @@ setSymTab newSymTab = SM (\st -> ((), st { symTab = newSymTab }))
 
 symTabItemToName :: SymTabItem -> Name
 symTabItemToName (STVar pi _) = pIdentToString pi
+symTabItemToName (STFun pi _) = pIdentToString pi
 
 -- SM BuildSt helper functions
 getErrs :: SM BuildSt [String]

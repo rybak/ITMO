@@ -27,7 +27,9 @@ typeTopLevel :: ParTopLevel -> TypeCheckResult (ATopLevel (Maybe ParLType))
 typeTopLevel (TopDecl decl) = do
 	dec <- typeDecl decl
 	return $ ATopDecl dec
-typeTopLevel _ = undefined
+typeTopLevel (TopFun pi args retType body) = do
+	-- TODO empty typecheck
+	return $ ATopFun "<empty> : TODO Later" -- TODO ATopFun should not be empty
 
 typeDecl :: Decl -> TypeCheckResult ADecl
 typeDecl (Dec pi parType) = return $ ADec pi parType

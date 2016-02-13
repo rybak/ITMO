@@ -31,7 +31,7 @@ main = do
 			mapM_ putStrLn [ppProg, show prog]
 			let (aTree, buildst) = checkTypes prog
 			if null (errs buildst)
-                          then do
+			  then do
 				putStrLn "Scope and type checks successfull."
 				print $ scope buildst
 				print $ symTab buildst
