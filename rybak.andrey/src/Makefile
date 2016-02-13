@@ -29,14 +29,14 @@ runMain: main input.l
 	./main input.l
 
 clean: FORCE
-	-rm -f *.log *.aux *.dvi
-	-rn -f *.hi L/*.hi LLanguage/*.hi
-	-rm -f *.o L/*.o LLanguage/*.o
-	-rm main
-	-rm Test
+	-@rm -f *.log *.aux *.dvi
+	-@rm -f *.hi L/*.hi LLanguage/*.hi
+	-@rm -f *.o L/*.o LLanguage/*.o
+	-@rm -f main
+	-@rm -f Test
 
 cleanBnfc: FORCE
-	-rm L/Lex.x L/Par.y
-	-rm L/*.hs
+	-@rm -f L/Lex.x L/Par.y
+	-@rm -f L/*.hs
 
 FORCE:
