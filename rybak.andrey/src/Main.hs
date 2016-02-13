@@ -17,29 +17,29 @@ parseProg = pParProgram . tokens
 
 printLLVM :: ParProgram -> String
 printLLVM prog = unlines [
-		builtInConsts,
-		builtInFunctions
-		]
+        builtInConsts,
+        builtInFunctions
+        ]
 
 main :: IO ()
 main = do
-	args <- getArgs
-	input <- readFile $ head args
-	case parseProg input of
-		ErrM.Ok prog -> do
-			let ppProg = printTree prog
-			mapM_ putStrLn [ppProg, show prog]
-			let (aTree, buildst) = checkTypes prog
-			if null (errs buildst)
-			  then do
-				putStrLn "Scope and type checks successfull."
-				print $ scope buildst
-				print $ symTab buildst
-				print aTree
-				putStrLn ""
-				putStrLn $ unlines $ codegen aTree
-			  else do
-				putStrLn "Scope and type check errors:"
-				mapM_ ((putStr "\t" >>) . putStrLn) (errs buildst)
-		ErrM.Bad s -> putStrLn $ "Parser error : " ++ s
+  args <- getArgs
+  input <- readFile $ head args
+  case parseProg input of
+    ErrM.Ok prog -> do
+      let ppProg = printTree prog
+      mapM_ putStrLn [ppProg, show prog]
+      let (aTree, buildst) = checkTypes prog
+      if null (errs buildst)
+        then do
+          putStrLn "Scope and type checks successfull."
+          print $ scope buildst
+          print $ symTab buildst
+          print aTree
+          putStrLn ""
+          putStrLn $ unlines $ codegen aTree
+        else do
+          putStrLn "Scope and type check errors:"
+          mapM_ ((putStr "\t" >>) . putStrLn) (errs buildst)
+    ErrM.Bad s -> putStrLn $ "Parser error : " ++ s
 
