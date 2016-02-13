@@ -1,6 +1,8 @@
 module LLanguage.Utils where
 
 import L.Abs
+import L.Print
+import LLanguage.Symtab
 
 pIdentToString :: PIdent -> String
 pIdentToString (PIdent ((_,_), str)) = str

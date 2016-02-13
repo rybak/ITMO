@@ -1,12 +1,9 @@
-module LLanguage.Scope (
-    checkScope,
-	BuildSt (scope, symTab, errs),
-	SymTab
-) where
+module LLanguage.Scope where
 
 import L.Abs
 import L.Print -- for pretty printing error messages
 import L.ErrM
+import LLanguage.Symtab
 import LLanguage.Utils
 
 import Control.Monad hiding (forM_)
@@ -14,16 +11,6 @@ import Data.Foldable (forM_)
 import Utils.SM
 import Data.Maybe
 import qualified Data.Map as M
-
-type Name = String
-data SymTabItem = STVar PIdent ParLType
-                  | STFun PIdent ParLType
-                deriving (Eq,Show)
-
-
-type Scope = (String, [Integer])
-type ScopeListing = M.Map Name SymTabItem
-type SymTab = M.Map Scope ScopeListing
 
 data BuildSt = St {
         symTab :: SymTab,
@@ -120,9 +107,9 @@ buildSTStm (SDecl x) = buildSTDecl x
 
 -- helper functions
 
-newVariable :: Decl -> Result -- used both for local and global vars
+newVariable :: String -> Decl -> Result -- used both for local and global vars
 newVariable kindOfVar (Dec pi parType) = do
-	let newVar = STVar (pIdentToString pi) parType
+	let newVar = STVar pi parType
 	addError <- addSymbolCurrentScope newVar
 	forM_ addError $ duplicateError (kindOfVar ++ " var: ") newVar
 	return ()
@@ -140,6 +127,15 @@ resetScope :: Result
 resetScope = do
 	setCounter 0
 	setScope emptyScope
+pushScope :: Result
+pushScope = do
+    x <- getCounter
+    (scopeTitle, xs) <- getScope
+    setScope (scopeTitle, x:xs)
+popScope :: Result
+popScope = do
+    (s, (_ : xs)) <- getScope
+    setScope (s, xs)
 
 getSymTab :: SM BuildSt SymTab
 getSymTab = SM (\st -> (symTab st, st))
