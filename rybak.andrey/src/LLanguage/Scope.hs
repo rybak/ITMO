@@ -45,7 +45,6 @@ checkScope prog = let
         execState (buildSTProgram prog) buildStGlobal
 
 execState f s = snd $ runState f s
-buildSTProgram prog = SM (\st -> ((), st)) -- add builtIn later
 
 {- collectGlobals before doing anything else
  - this is needed to simplify mutual recursion processing -}
@@ -53,13 +52,8 @@ collectGlobals :: ParProgram -> Result
 collectGlobals (Prog topLevels) = mapM_ collectTopLevel topLevels
 
 collectTopLevel :: ParTopLevel -> Result
-collectTopLevel x = case x of
-	TopDecl (Dec pi parType) -> do
-		let newVar = STVar pi parType
-		addError <- addSymbolCurrentScope newVar
-		forM_ addError $ duplicateError "global var: " newVar
-		return ()
-	TopFun pi argsDecls retType body -> do
+collectTopLevel (TopDecl x) = newVariable "global" x
+collectTopLevel (TopFun pi argsDecls retType body) = do
 		let newFun = STFun pi (funDeclToFunType (map declToType argsDecls) retType)
 		addError <- addSymbolCurrentScope newFun
 		forM_ addError $ duplicateError "global function: " newFun
@@ -88,22 +82,75 @@ insertNewSymbol symbol scopeListing scope symTab = do
 	let newScopeListing = M.insert (symTabItemToName symbol) symbol scopeListing
 	let newSymbols = M.insert scope newScopeListing symTab
 	setSymTab newSymbols
-	return Nothing -- no error
+	return Nothing -- no error by definition
 
-getScope :: SM BuildSt Scope
-getScope = SM (\st -> (scope st, st))
-getSymTab :: SM BuildSt SymTab
-getSymTab = SM (\st -> (symTab st, st))
-setSymTab :: SymTab -> Result
-setSymTab newSymTab = SM (\st -> ((), st { symTab = newSymTab }))
+-- /collectGlobals
+
+buildSTProgram :: ParProgram -> Result
+buildSTProgram (Prog topLevels) = mapM_ buildSTFunction $ filter isFunction topLevels
+isFunction :: ParTopLevel -> Bool
+isFunction (TopFun _ _ _ _) = True
+isFunction _ = False
+
+buildSTFunction :: ParTopLevel -> Result
+buildSTFunction (TopDecl _) = error "should not happen"
+buildSTFunction (TopFun pi args retType body) = do
+	setScope (pIdentToString pi, [])
+	mapM_ buildSTDecl args
+	-- TODO add check for dead code after return
+	-- TODO add check for returns in all execution paths
+	buildSTBlock body
+	resetScope
+
+buildSTDecl :: Decl -> Result
+buildSTDecl = newVariable "local"
+
+buildSTBlock :: Block -> Result
+buildSTBlock (BlockB statements) = do
+	counter <- getCounter
+	scope <- getScope
+	pushScope
+	setCounter 0
+	mapM_ buildSTStm statements
+	setCounter (counter + 1)
+
+buildSTStm :: ParStm -> Result
+buildSTStm (SDecl x) = buildSTDecl x
+-- TODO : other statements
 
 -- helper functions
+
+newVariable :: Decl -> Result -- used both for local and global vars
+newVariable kindOfVar (Dec pi parType) = do
+	let newVar = STVar (pIdentToString pi) parType
+	addError <- addSymbolCurrentScope newVar
+	forM_ addError $ duplicateError (kindOfVar ++ " var: ") newVar
+	return ()
 
 symTabItemToName :: SymTabItem -> Name
 symTabItemToName (STVar pi _) = pIdentToString pi
 symTabItemToName (STFun pi _) = pIdentToString pi
 
 -- SM BuildSt helper functions
+getScope :: SM BuildSt Scope
+getScope = SM (\st -> (scope st, st))
+setScope :: Scope -> Result
+setScope newScope = SM (\st -> ((), st { scope = newScope }))
+resetScope :: Result
+resetScope = do
+	setCounter 0
+	setScope emptyScope
+
+getSymTab :: SM BuildSt SymTab
+getSymTab = SM (\st -> (symTab st, st))
+setSymTab :: SymTab -> Result
+setSymTab newSymTab = SM (\st -> ((), st { symTab = newSymTab }))
+
+getCounter :: SM BuildSt Integer
+getCounter = SM (\st -> (counter st, st))
+setCounter :: Integer -> Result
+setCounter newCounter = SM (\st -> ((), st { counter = newCounter }))
+
 getErrs :: SM BuildSt [String]
 getErrs = SM (\st -> (errs st,st))
 setErrs :: [String] -> Result
