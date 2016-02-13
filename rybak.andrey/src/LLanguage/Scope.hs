@@ -35,12 +35,12 @@ data BuildSt = St {
 type Result = SM BuildSt ()
 
 -- scope check
-globalScopeStart :: Scope
-globalScopeStart = ("", [])
-predefinedFuncs = M.empty
+emptyScope :: Scope
+emptyScope = ("", [])
+predefinedFuncs = M.empty -- add builtins later
 checkScope :: ParProgram -> BuildSt
 checkScope prog = let
-    ((), buildStGlobal) = runState (collectGlobals prog) (St predefinedFuncs globalScopeStart 0 [])
+    ((), buildStGlobal) = runState (collectGlobals prog) (St predefinedFuncs emptyScope 0 [])
     in
         execState (buildSTProgram prog) buildStGlobal
 
@@ -65,13 +65,6 @@ collectTopLevel x = case x of
 		forM_ addError $ duplicateError "global function: " newFun
 		return ()
 
-showPI :: PIdent -> String
-showPI (PIdent ((x,y), name)) = name ++ " at line " ++ show x ++ " column " ++ show y
-showSTItem :: SymTabItem -> String
-showSTItem (STVar pi parLType) = showPIwithType pi parLType
-showSTItem (STFun pi parLType) = showPIwithType pi parLType
-showPIwithType pi t = showPI pi ++ " of type " ++ printTree t
-
 duplicateError :: String -> SymTabItem -> SymTabItem -> Result
 duplicateError msg dup orig = addToErrs ("Name clash " ++ msg ++ showSTItem dup
 	++ ", previously defined : " ++ showSTItem orig)
@@ -85,11 +78,12 @@ addSymbolCurrentScope symbol = do
 	case M.lookup scope symbolTable of
 		Nothing -> -- no scope at this level defined, start with empty listing
 			insertNewSymbol symbol M.empty scope symbolTable
-		Just scopeListing -> maybe
-			(insertNewSymbol symbol scopeListing scope symbolTable)
-			(return . Just)
-			(M.lookup (symTabItemToName symbol) scopeListing)
+		Just scopeListing -> maybe -- maybe :: onNothing -> onJust -> Maybe
+			(insertNewSymbol symbol scopeListing scope symbolTable) -- check didn't find anything, no error
+			(return . Just) -- just return error
+			(M.lookup (symTabItemToName symbol) scopeListing) -- check existing scopeListing
 
+-- insert new symbol into scope listing without checks
 insertNewSymbol symbol scopeListing scope symTab = do
 	let newScopeListing = M.insert (symTabItemToName symbol) symbol scopeListing
 	let newSymbols = M.insert scope newScopeListing symTab
@@ -112,7 +106,6 @@ symTabItemToName (STFun pi _) = pIdentToString pi
 -- SM BuildSt helper functions
 getErrs :: SM BuildSt [String]
 getErrs = SM (\st -> (errs st,st))
-
 setErrs :: [String] -> Result
 setErrs newErrs = SM (\st -> ((), st { errs = newErrs }))
 
