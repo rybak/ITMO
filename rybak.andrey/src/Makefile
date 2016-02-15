@@ -22,7 +22,7 @@ L/Par.hs : L/Par.y
 Test: L/Par.hs L/Lex.hs
 	$(HC) $(PDIR)/Test.hs -o Test
 
-main: FORCE # let GHC decide all dependencies
+main: L/Par.hs L/Lex.hs FORCE # let GHC decide all dependencies
 	$(HC) Main.hs -o $@
 
 runMain: main input.l

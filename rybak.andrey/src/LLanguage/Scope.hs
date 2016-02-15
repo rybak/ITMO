@@ -103,8 +103,42 @@ buildSTBlock (BlockB statements) = do
 
 buildSTStm :: ParStm -> Result
 buildSTStm (SDecl x) = buildSTDecl x
+buildSTStm (Assign pi exp) = do
+    inScope <- lookupSymCurScope (pIdentToString pi) 
+    (case inScope of
+        Nothing -> noDeclarationError pi
+        (Just f@(STFun _ _)) -> addToErrs $ "Trying to assign to global function " ++ showSTItem f
+        (Just (STVar _ _)) -> return () -- assigning to a var, OK
+        ) >> buildSTExp exp
 -- TODO : other statements
+noDeclarationError :: PIdent -> Result
+noDeclarationError pi = addToErrs $ "Using variable before declaration : " ++ showPI pi
 
+buildSTExp :: ParExp -> Result
+buildSTExp (EVar pi) = do
+    inScope <- lookupSymCurScope (pIdentToString pi)
+    when (isNothing inScope) $ noDeclarationError pi
+buildSTExp (IntLit n) = return () -- nothing to do with integer literal
+
+lookupSymCurScope :: Name -> SM BuildSt (Maybe SymTabItem)
+lookupSymCurScope name = do
+    scope <- getScope
+    symbolTable <- getSymTab
+    return $ upClose name scope symbolTable
+
+upClose :: Name -> Scope -> SymTab -> Maybe SymTabItem
+upClose name (n, []) tab = maybe
+    Nothing
+    (M.lookup name)
+    (M.lookup (n,[]) tab)
+upClose name (n,(x:xs)) tab = maybe
+    (upClose name (n,xs) tab)
+    (\sl -> maybe
+        (upClose name (n,xs) tab)
+        Just
+        (M.lookup name sl)
+    )
+    (M.lookup (n,(x:xs)) tab)
 -- helper functions
 
 newVariable :: String -> Decl -> Result -- used both for local and global vars

@@ -19,6 +19,10 @@ BlockB. Block ::= "{" [ParStm] "}" ;
 terminator ParStm "" ;
 -- 
 SDecl. ParStm ::= Decl ";" ;
+Assign.  ParStm ::= PIdent "=" ParExp ";" ;
+
+IntLit. ParExp ::= Integer ;
+EVar. ParExp ::= PIdent ;
 
 
 position token PIdent (letter | '_' ) (letter | digit | '_' )* ;
