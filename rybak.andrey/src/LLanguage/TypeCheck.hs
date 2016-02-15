@@ -33,7 +33,7 @@ typeTopLevel (TopFun pi args retType body) = do
     setScope (pIdentToString pi, [])
     ablock <- typeBlock body
     -- TODO empty typecheck
-    return $ ATopFun "<empty> : TODO Later" -- TODO ATopFun should not be empty
+    return $ ATopFun pi (topFunToType args retType) ablock -- TODO ATopFun should not be empty
 
 typeDecl :: Decl -> TypeCheckResult ADecl
 typeDecl (Dec pi parType) = case parType of

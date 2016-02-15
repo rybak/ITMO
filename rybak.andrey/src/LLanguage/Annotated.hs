@@ -4,7 +4,7 @@ import L.Abs
 
 data AProgram a = AProg [ATopLevel a]
     deriving (Eq, Ord, Show)
-data ATopLevel a = ATopDecl ADecl | ATopFun String
+data ATopLevel a = ATopDecl ADecl | ATopFun PIdent ParLType (ABlock a)
     deriving (Eq, Ord, Show)
 
 data ADecl = ADec PIdent ParLType

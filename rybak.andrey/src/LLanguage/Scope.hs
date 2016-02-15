@@ -41,7 +41,7 @@ collectGlobals (Prog topLevels) = mapM_ collectTopLevel topLevels
 collectTopLevel :: ParTopLevel -> Result
 collectTopLevel (TopDecl x) = newVariable "global" x
 collectTopLevel (TopFun pi argsDecls retType body) = do
-        let newFun = STFun pi (funDeclToFunType (map declToType argsDecls) retType)
+        let newFun = STFun pi (topFunToType argsDecls retType)
         addError <- addSymbolCurrentScope newFun
         forM_ addError $ duplicateError "global function: " newFun
         return ()
