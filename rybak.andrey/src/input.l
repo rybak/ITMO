@@ -7,3 +7,7 @@ f (x : int, y : int) -> (int) -> int
     a : int;
     a = a;
 }
+main () -> int
+{
+
+}

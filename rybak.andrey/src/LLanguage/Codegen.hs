@@ -8,10 +8,14 @@ import L.ErrM
 import LLanguage.Annotated
 import LLanguage.Utils
 
-import Data.Monoid
-import Control.Monad.State
-import Control.Applicative
+import qualified LLVM.General.AST as LLVM
+import qualified LLVM.General.AST.Type as T
+import qualified LLVM.General.AST.Global as G
+import qualified LLVM.General.Module as CModule
 
+import Data.Monoid
+import Control.Monad.State hiding (void)
+import Control.Applicative
 import qualified Data.Map as M
 
 data Binding = Global String
@@ -32,24 +36,24 @@ fresh pref = do
   modify (\s -> s{counter = x + 1})
   return $ pref ++ show x
 
-codegen :: AProgram (Maybe ParLType) -> [String]
+codegen :: AProgram (Maybe ParLType) -> LLVM.Module
 codegen p = evalState (runCodegen $ compileProgram p) emptyState
 
-compileProgram :: AProgram (Maybe ParLType) -> Codegen [String]
+compileProgram :: AProgram (Maybe ParLType) -> Codegen LLVM.Module
 compileProgram (AProg topLevels) = do
-    let gvars = getVars topLevels
-        llVars = M.map convertToLLVMType gvars
-        gVarsText = map compileGlobalVar (M.toList llVars)
-    return $ gVarsText
+    let defs = map (LLVM.GlobalDefinition . compileGlobalVar) $ getVars topLevels
+    return $ LLVM.defaultModule { LLVM.moduleName = "Main", LLVM.moduleDefinitions = defs }
 
-getVars ts = M.fromList [(pIdentToString pi, t) | ATopDecl (ADec pi t) <- ts]
-convertToLLVMType :: ParLType -> LLVMType
-convertToLLVMType TInt = TInt32
+getVars ts = [(pIdentToString pi, t) | ATopDecl (ADec pi t) <- ts]
+convertToLLVMType :: ParLType -> T.Type -- from LLVM.G.A.T
+convertToLLVMType TInt = T.i32
+convertToLLVMType TVoid = T.void
 
-data LLVMType = TInt32
-instance Show LLVMType where
-    show TInt32 = "i32"
+compileGlobalVar :: (String, ParLType) -> G.Global
+compileGlobalVar (varName, parType) = G.globalVariableDefaults {
+    G.name = LLVM.Name varName,
+    G.type' = convertToLLVMType parType
+}
 
-compileGlobalVar (name, llType) = "@" ++ name
-    ++ " = global " ++ show llType ++ " 0"
+--"@" ++ name ++ " = global " ++ show llType ++ " 0"
 {- // -}

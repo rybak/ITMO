@@ -12,6 +12,12 @@ import LLanguage.TypeCheck
 import LLanguage.Codegen
 import LLanguage.BuiltIn
 
+import qualified LLVM.General.Module as CLLVM
+import qualified LLVM.General.AST as AST
+import LLVM.General.Context
+
+--import Control.Monad ((>=>))
+import Control.Monad.Except
 import qualified Data.Map as M
 
 parseProg :: String -> ErrM.Err ParProgram
@@ -22,6 +28,16 @@ printLLVM prog = unlines [
         builtInConsts,
         builtInFunctions
         ]
+
+printIR :: AST.Module -> IO ()
+printIR mod = do
+    withContext $ \context -> do
+        x <- runExceptT $ CLLVM.withModuleFromAST context mod $ \m -> do
+            s <- CLLVM.moduleLLVMAssembly m
+            putStrLn s
+        case x of
+            Left e -> putStrLn $ "LLVM error" ++ show e
+            Right _ -> putStrLn "Ok"
 
 showLine :: Integer -> String -> String
 showLine n s = show n ++ ":\t|" ++ s
@@ -46,7 +62,8 @@ main = do
           print $ symTab buildst
           print aTree
           putStrLn ""
-          putStrLn $ unlines $ codegen aTree
+          let myAST = codegen aTree
+          printIR myAST
         else do
           putStrLn "Scope and type check errors:"
           mapM_ ((putStr "\t" >>) . putStrLn) (reverse $ errs buildst)
