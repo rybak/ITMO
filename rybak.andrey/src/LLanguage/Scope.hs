@@ -95,11 +95,9 @@ buildSTDecl = newVariable "local"
 buildSTBlock :: Block -> Result
 buildSTBlock (BlockB statements) = do
     counter <- getCounter
-    scope <- getScope
     pushScope
-    setCounter 0
     mapM_ buildSTStm statements
-    setScope scope
+    popScope
     setCounter (counter + 1)
 
 buildSTStm :: ParStm -> Result
@@ -170,6 +168,7 @@ pushScope = do
     x <- getCounter
     (scopeTitle, xs) <- getScope
     setScope (scopeTitle, x:xs)
+    setCounter 0
 popScope :: Result
 popScope = do
     (s, (_ : xs)) <- getScope

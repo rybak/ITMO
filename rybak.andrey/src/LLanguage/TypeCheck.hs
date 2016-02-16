@@ -46,11 +46,9 @@ typeDecl (Dec pi parType) = case parType of
 typeBlock :: Block -> TypeCheckResult (ABlock (Maybe ParLType))
 typeBlock (BlockB stms) = do
     counter <- getCounter
-    scope <- getScope
     pushScope
-    setCounter 0
     astms <- mapM typeStm stms
-    setScope scope
+    popScope
     setCounter (counter + 1)
     return $ ABlockB astms
 
