@@ -156,6 +156,13 @@ symTabItemToName (STFun pi _) = pIdentToString pi
 
 -- SM BuildSt helper functions
 getScope :: SM BuildSt Scope
+{- TODO later : when processing calls to function need to 
+    do
+        scope <- getScope
+        setScope globalScope
+        --lookup here
+        setScope scope`
+-}
 getScope = SM (\st -> (scope st, st))
 setScope :: Scope -> Result
 setScope newScope = SM (\st -> ((), st { scope = newScope }))
