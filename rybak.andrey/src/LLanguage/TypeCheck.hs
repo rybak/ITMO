@@ -1,7 +1,7 @@
 module LLanguage.TypeCheck where
 
 import L.Abs
--- import L.Print -- for pretty printing error messages
+import L.Print -- for pretty printing error messages
 import L.ErrM
 import Utils.SM
 import LLanguage.Annotated
@@ -62,7 +62,7 @@ typeStm (Assign pi exp) = do
     varInfo <- lookupSymCurScope (pIdentToString pi)
     case (getAExp aexp, varInfo) of
         (Just expType, Just (STVar _ varType)) -> do
-            when (expType /= varType) $ addToErrs $ "Assignment type mismatch: " ++ showPI pi ++ " types: \n" ++ typeMismatch varType expType
+            when (expType /= varType) $ addToErrs $ "Assignment type mismatch: '" ++ showPI pi ++ "'\n" ++ typeMismatch varType expType
             return $ AAssign pi aexp
         _ -> do
             addToErrs "Internal error in typeStm ?"
@@ -73,7 +73,7 @@ getAExp (AIntLit _ x) = x
 getAExp (AEVar _ x) = x
 getAExp (AEFun _ x) = x
 typeMismatch :: ParLType -> ParLType -> String
-typeMismatch expectedType actualType = "\tExpected:\t" ++ show expectedType ++ "\tActual:\t" ++ show actualType
+typeMismatch expectedType actualType = "\t\tExpected type:\t" ++ printTree expectedType ++ "\n\t\t  Actual type:\t" ++ printTree actualType
 
 typeExp :: ParExp -> TypeCheckResult (AExp (Maybe ParLType))
 typeExp (IntLit n) = return $ AIntLit n (Just TInt)

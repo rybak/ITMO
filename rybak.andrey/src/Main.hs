@@ -21,10 +21,17 @@ printLLVM prog = unlines [
         builtInFunctions
         ]
 
+showLine :: Integer -> String -> String
+showLine n s = show n ++ ":\t|" ++ s
+printNumberedLines :: String -> String
+printNumberedLines = unlines . (map (uncurry showLine)) . (zip [1..]) . lines
+
 main :: IO ()
 main = do
   args <- getArgs
   input <- readFile $ head args
+  putStrLn $ "Parsed " ++ (show $ length $ lines input) ++ " lines."
+  putStrLn $ printNumberedLines input
   case parseProg input of
     ErrM.Ok prog -> do
       let ppProg = printTree prog
