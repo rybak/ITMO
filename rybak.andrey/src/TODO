@@ -2,3 +2,4 @@
 * add scope check for global functions
 * add syntax for local variables
 * add scope check for local variables
+* add llvm-general to cabal dependencies
