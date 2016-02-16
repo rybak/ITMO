@@ -12,6 +12,8 @@ import LLanguage.TypeCheck
 import LLanguage.Codegen
 import LLanguage.BuiltIn
 
+import qualified Data.Map as M
+
 parseProg :: String -> ErrM.Err ParProgram
 parseProg = pParProgram . tokens
 
@@ -47,6 +49,7 @@ main = do
           putStrLn $ unlines $ codegen aTree
         else do
           putStrLn "Scope and type check errors:"
-          mapM_ ((putStr "\t" >>) . putStrLn) (errs buildst)
+          mapM_ ((putStr "\t" >>) . putStrLn) (reverse $ errs buildst)
+          putStrLn $ unlines $ map show $ M.toList $ symTab buildst -- TODO remove debug output
     ErrM.Bad s -> putStrLn $ "Parser error : " ++ s
 

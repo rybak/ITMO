@@ -22,12 +22,12 @@ data BuildSt = St {
 type Result = SM BuildSt ()
 
 -- scope check
-emptyScope :: Scope
-emptyScope = ("", [])
+globalScope :: Scope
+globalScope = ("", [])
 predefinedFuncs = M.empty -- add builtins later
 checkScope :: ParProgram -> BuildSt
 checkScope prog = let
-    ((), buildStGlobal) = runState (collectGlobals prog) (St predefinedFuncs emptyScope 0 [])
+    ((), buildStGlobal) = runState (collectGlobals prog) (St predefinedFuncs globalScope 0 [])
     in
         execState (buildSTProgram prog) buildStGlobal
 
@@ -99,6 +99,7 @@ buildSTBlock (BlockB statements) = do
     pushScope
     setCounter 0
     mapM_ buildSTStm statements
+    setScope scope
     setCounter (counter + 1)
 
 buildSTStm :: ParStm -> Result
@@ -107,7 +108,7 @@ buildSTStm (Assign pi exp) = do
     inScope <- lookupSymCurScope (pIdentToString pi) 
     (case inScope of
         Nothing -> noDeclarationError pi
-        (Just f@(STFun _ _)) -> addToErrs $ "Trying to assign to global function " ++ showSTItem f
+        (Just f@(STFun _ _)) -> addToErrs $ "Trying to assign to global function " ++ showPI pi ++ ", previously declared : " ++ showSTItem f
         (Just (STVar _ _)) -> return () -- assigning to a var, OK
         ) >> buildSTExp exp
 -- TODO : other statements
@@ -128,7 +129,10 @@ lookupSymCurScope name = do
 
 upClose :: Name -> Scope -> SymTab -> Maybe SymTabItem
 upClose name (n, []) tab = maybe
-    Nothing
+    (maybe
+        Nothing
+        (M.lookup name)
+        (M.lookup globalScope tab))
     (M.lookup name)
     (M.lookup (n,[]) tab)
 upClose name (n,(x:xs)) tab = maybe
@@ -160,7 +164,7 @@ setScope newScope = SM (\st -> ((), st { scope = newScope }))
 resetScope :: Result
 resetScope = do
     setCounter 0
-    setScope emptyScope
+    setScope globalScope
 pushScope :: Result
 pushScope = do
     x <- getCounter

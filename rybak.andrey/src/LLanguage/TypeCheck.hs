@@ -33,6 +33,7 @@ typeTopLevel (TopFun pi args retType body) = do
     setScope (pIdentToString pi, [])
     ablock <- typeBlock body
     -- TODO empty typecheck
+    resetScope
     return $ ATopFun pi (topFunToType args retType) ablock -- TODO ATopFun should not be empty
 
 typeDecl :: Decl -> TypeCheckResult ADecl
@@ -65,7 +66,7 @@ typeStm (Assign pi exp) = do
             when (expType /= varType) $ addToErrs $ "Assignment type mismatch: '" ++ showPI pi ++ "'\n" ++ typeMismatch varType expType
             return $ AAssign pi aexp
         _ -> do
-            addToErrs "Internal error in typeStm ?"
+            addToErrs $ "Look for scope errors about " ++ showPI pi
             return $ AAssign pi aexp
 
 getAExp :: AExp x -> x

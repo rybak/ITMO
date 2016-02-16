@@ -28,6 +28,9 @@ main: L/Par.hs L/Lex.hs FORCE # let GHC decide all dependencies
 runMain: main input.l
 	./main input.l
 
+runMainError: main input-error.l
+	./main input-error.l
+
 clean: FORCE
 	-@rm -f *.log *.aux *.dvi
 	-@rm -f *.hi L/*.hi LLanguage/*.hi

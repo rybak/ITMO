@@ -6,5 +6,12 @@ f (x : int, y : int) -> (int) -> int
 {
     a : int;
     b : (int) -> int;
-    a = b;
+}
+
+g () -> int
+{
+    a : int;
+    f = a;
+    c = a;
+    a = c;
 }
