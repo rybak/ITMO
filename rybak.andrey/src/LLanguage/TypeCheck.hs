@@ -32,16 +32,17 @@ typeTopLevel (TopDecl decl) = do
 typeTopLevel (TopFun pi args retType body) = do
     setScope (pIdentToString pi, [])
     ablock <- typeBlock body
-    -- TODO empty typecheck
+    adecls <- mapM typeDecl args
     resetScope
-    return $ ATopFun pi (topFunToType args retType) ablock -- TODO ATopFun should not be empty
+    return $ ATopFun pi adecls retType ablock
 
 typeDecl :: Decl -> TypeCheckResult ADecl
-typeDecl (Dec pi parType) = case parType of
+typeDecl decl@(Dec pi parType) = case parType of
   TVoid -> do
     addToErrs ("Can't declare Void variables : " ++ showPIwithType pi parType)
     return $ ADec pi parType
-  _ -> return $ ADec pi parType
+  _ -> do
+    return $ ADec pi parType
 
 typeBlock :: Block -> TypeCheckResult (ABlock (Maybe ParLType))
 typeBlock (BlockB stms) = do

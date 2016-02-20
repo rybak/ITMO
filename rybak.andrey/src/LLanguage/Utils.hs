@@ -3,6 +3,7 @@ module LLanguage.Utils where
 import L.Abs
 import L.Print
 import LLanguage.Symtab
+import LLanguage.Annotated
 
 pIdentToString :: PIdent -> String
 pIdentToString (PIdent ((_,_), str)) = str
@@ -22,3 +23,9 @@ showSTItem :: SymTabItem -> String
 showSTItem (STVar pi parLType) = showPIwithType pi parLType
 showSTItem (STFun pi parLType) = showPIwithType pi parLType
 showPIwithType pi t = showPI pi ++ " of type " ++ printTree t
+
+isTopFun :: ParTopLevel -> Bool
+isTopFun (TopFun _ _ _ _) = True
+isTopFun _ = False
+isATopFun (ATopFun _ _ _ _) = True
+isATopFun _ = False

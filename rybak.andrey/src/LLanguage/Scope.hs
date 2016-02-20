@@ -74,10 +74,7 @@ insertNewSymbol symbol scopeListing scope symTab = do
 -- /collectGlobals
 
 buildSTProgram :: ParProgram -> Result
-buildSTProgram (Prog topLevels) = mapM_ buildSTFunction $ filter isFunction topLevels
-isFunction :: ParTopLevel -> Bool
-isFunction (TopFun _ _ _ _) = True
-isFunction _ = False
+buildSTProgram (Prog topLevels) = mapM_ buildSTFunction $ filter isTopFun topLevels
 
 buildSTFunction :: ParTopLevel -> Result
 buildSTFunction (TopDecl _) = error "should not happen"
