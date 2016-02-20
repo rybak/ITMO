@@ -57,6 +57,7 @@ main = do
       let (aTree, buildst) = checkTypes prog
       if null (errs buildst)
         then do
+          putStrLn "=================================="
           putStrLn "Scope and type checks successfull."
           print $ scope buildst
           print $ symTab buildst
@@ -65,6 +66,7 @@ main = do
           let myAST = codegen aTree
           printIR myAST
         else do
+          putStrLn "============================"
           putStrLn "Scope and type check errors:"
           mapM_ ((putStr "\t" >>) . putStrLn) (reverse $ errs buildst)
           putStrLn $ unlines $ map show $ M.toList $ symTab buildst -- TODO remove debug output

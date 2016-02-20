@@ -11,6 +11,7 @@ import LLanguage.Utils
 import qualified LLVM.General.AST as LLVM
 import qualified LLVM.General.AST.Type as T
 import qualified LLVM.General.AST.Global as G
+import LLVM.General.AST.Operand
 import qualified LLVM.General.Module as CModule
 
 import Data.Monoid
@@ -86,8 +87,28 @@ compileParameters = map compileParameter -- TODO add "([Parameter], Bool)
 compileParameter (ADec pi t) = G.Parameter (compileType t) (compileName pi) []
 
 codegenFunctionBody :: ABlock a -> Codegen [G.BasicBlock]
-codegenFunctionBody _ = return [] -- stub TODO add codegen
+codegenFunctionBody (ABlockB astms) = do
+    bblockss <- mapM codegenStm astms
+    return $ concat bblockss -- stub TODO add codegen
 
+codegenStm :: AStm a -> Codegen [G.BasicBlock]
+codegenStm _ = return []
+
+-- LLVM vars infrastructure
+type Names = M.Map String Int
+startIndex :: Int
+startIndex = 0
+uniqueName :: String -> Names -> (String, Names)
+uniqueName name names = maybe
+    (name ++ show startIndex, M.insert name startIndex names)
+    (\index -> let newIndex = index + 1 in
+        (name ++ show newIndex, M.insert name newIndex names))
+    (M.lookup name names)
+
+local :: T.Type -> LLVM.Name -> Operand
+local = LocalReference
+    
+-- /LLVM vars
 
 --"@" ++ name ++ " = global " ++ show llType ++ " 0"
 {- // -}
