@@ -68,12 +68,12 @@ compileName pi = LLVM.Name $ pIdentToString pi
 
 codegenTopFun :: ATopLevel a -> Codegen G.Global
 codegenTopFun (ATopFun pi as rt b) = do
-    ablocks <- codegenFunctionBody b
+    bblocks <- codegenFunctionBody b
     return $ G.functionDefaults {
             G.returnType = compileType rt,
             G.name = compileName pi,
             G.parameters = (compileParameters as, isVarArgSupported),
-            G.basicBlocks = ablocks
+            G.basicBlocks = bblocks
         }
 codegenTopFun _ = error "Internal error: codegen function out of something else."
 
@@ -85,7 +85,7 @@ compileParameters :: [ADecl] -> [G.Parameter]
 compileParameters = map compileParameter -- TODO add "([Parameter], Bool)
 compileParameter (ADec pi t) = G.Parameter (compileType t) (compileName pi) []
 
-
+codegenFunctionBody :: ABlock a -> Codegen [G.BasicBlock]
 codegenFunctionBody _ = return [] -- stub TODO add codegen
 
 
