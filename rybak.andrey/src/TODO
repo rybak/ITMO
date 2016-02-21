@@ -1,5 +1,5 @@
-* add syntax for global functions
-* add scope check for global functions
-* add syntax for local variables
-* add scope check for local variables
+v add syntax for global functions
+v add scope check for global functions
+v add syntax for local variables
+v add scope check for local variables
 * add llvm-general to cabal dependencies

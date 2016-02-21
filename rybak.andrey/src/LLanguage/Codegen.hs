@@ -8,9 +8,10 @@ import L.ErrM
 import LLanguage.Annotated
 import LLanguage.Utils
 
-import qualified LLVM.General.AST as LLVM
+import LLVM.General.AST
 import qualified LLVM.General.AST.Type as T
 import qualified LLVM.General.AST.Global as G
+import LLVM.General.AST.Instruction
 import LLVM.General.AST.Operand
 import qualified LLVM.General.Module as CModule
 
@@ -39,18 +40,18 @@ fresh pref = do
   modify (\s -> s{counter = x + 1})
   return $ pref ++ show x
 
-codegen :: AProgram (Maybe ParLType) -> LLVM.Module
+codegen :: AProgram (Maybe ParLType) -> Module
 codegen p = evalState (runCodegen $ compileProgram p) emptyState
 
-compileProgram :: AProgram (Maybe ParLType) -> Codegen LLVM.Module
+compileProgram :: AProgram (Maybe ParLType) -> Codegen Module
 compileProgram (AProg topLevels) = do
-    let varDefs = map (LLVM.GlobalDefinition . compileGlobalVar) $ getVars topLevels
+    let varDefs = map (GlobalDefinition . compileGlobalVar) $ getVars topLevels
     let funs = getFuns topLevels
     funsCode <- mapM codegenTopFun funs
-    let funDefs = map LLVM.GlobalDefinition funsCode
-    return $ LLVM.defaultModule {
-            LLVM.moduleName = "Main",
-            LLVM.moduleDefinitions = varDefs ++ funDefs
+    let funDefs = map GlobalDefinition funsCode
+    return $ defaultModule {
+            moduleName = "Main",
+            moduleDefinitions = varDefs ++ funDefs
         }
 
 getVars ts = [(pi, t) | ATopDecl (ADec pi t) <- ts]
@@ -65,11 +66,11 @@ compileGlobalVar (pi, t) = G.globalVariableDefaults {
     G.name = compileName pi,
     G.type' = convertToLLVMType t
 }
-compileName pi = LLVM.Name $ pIdentToString pi
+compileName pi = Name $ pIdentToString pi
 
 codegenTopFun :: ATopLevel a -> Codegen G.Global
 codegenTopFun (ATopFun pi as rt b) = do
-    bblocks <- codegenFunctionBody b
+    bblocks <- codegenFunctionBody rt b
     return $ G.functionDefaults {
             G.returnType = compileType rt,
             G.name = compileName pi,
@@ -86,14 +87,22 @@ compileParameters :: [ADecl] -> [G.Parameter]
 compileParameters = map compileParameter -- TODO add "([Parameter], Bool)
 compileParameter (ADec pi t) = G.Parameter (compileType t) (compileName pi) []
 
-codegenFunctionBody :: ABlock a -> Codegen [G.BasicBlock]
-codegenFunctionBody (ABlockB astms) = do
-    bblockss <- mapM codegenStm astms
-    return $ concat bblockss -- stub TODO add codegen
+codegenFunctionBody :: ParLType -> ABlock a -> Codegen [G.BasicBlock]
+codegenFunctionBody rt (ABlockB astms) = do
+    nis <- mapM codegenStm astms
+    let returnName = my_name "fun_ret_" "val"
+    let returnNI = [my_alloca returnName rt]
+    let entry = G.BasicBlock (Name "entry") ((concat nis) ++ returnNI) (Do $ Ret (Just $ local rt returnName) [])
+    return $ [entry] -- : concat bblockss -- still a stub, TODO proper BasicBlock codegen
 
-codegenStm :: AStm a -> Codegen [G.BasicBlock]
+codegenStm :: AStm a -> Codegen ([Named Instruction])
+codegenStm (ASDecl (ADec pi t)) =
+    return $ [ my_alloca (my_name "var_" (pIdentToString pi)) t]
+    --  ^^ Instruction data constructor
 codegenStm _ = return []
 
+my_name p v = Name $ p ++ v
+my_alloca n t = n := (Alloca (compileType t) Nothing 0 [])
 -- LLVM vars infrastructure
 type Names = M.Map String Int
 startIndex :: Int
@@ -105,8 +114,8 @@ uniqueName name names = maybe
         (name ++ show newIndex, M.insert name newIndex names))
     (M.lookup name names)
 
-local :: T.Type -> LLVM.Name -> Operand
-local = LocalReference
+local :: ParLType -> Name -> Operand
+local t = LocalReference (compileType t)
     
 -- /LLVM vars
 
