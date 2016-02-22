@@ -34,11 +34,6 @@ newtype Codegen a = Codegen {
     runCodegen :: State CodegenState a
 } deriving (Functor, Applicative, Monad, MonadState CodegenState)
 
-fresh :: String -> Codegen String
-fresh pref = do
-  x <- gets counter
-  modify (\s -> s{counter = x + 1})
-  return $ pref ++ show x
 
 codegen :: AProgram (Maybe ParLType) -> Module
 codegen p = evalState (runCodegen $ compileProgram p) emptyState
@@ -53,7 +48,6 @@ compileProgram (AProg topLevels) = do
             moduleName = "Main",
             moduleDefinitions = varDefs ++ funDefs
         }
-
 getVars ts = [(pi, t) | ATopDecl (ADec pi t) <- ts]
 getFuns ts = filter isATopFun ts
 
@@ -66,7 +60,6 @@ compileGlobalVar (pi, t) = G.globalVariableDefaults {
     G.name = compileName pi,
     G.type' = convertToLLVMType t
 }
-compileName pi = Name $ pIdentToString pi
 
 codegenTopFun :: ATopLevel a -> Codegen G.Global
 codegenTopFun (ATopFun pi as rt b) = do
@@ -79,6 +72,7 @@ codegenTopFun (ATopFun pi as rt b) = do
         }
 codegenTopFun _ = error "Internal error: codegen function out of something else."
 
+compileName pi = Name $ pIdentToString pi
 compileType TVoid = T.void
 compileType TInt = T.i32
 compileType (TFun ats rt) = T.ptr $
