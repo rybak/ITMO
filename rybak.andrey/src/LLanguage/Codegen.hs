@@ -25,10 +25,23 @@ import qualified Data.Map as M
 
 isVarArgSupported = False
 
+data BlockState = BlockState {
+    indwx :: Integer,
+    stack :: [Named Instruction],
+    term :: Maybe (Named Terminator)
+} deriving Show
+
+type CGSymTab = [(String, Operand)]
 data CodegenState = CodegenState {
-    counter :: Int
+    currentBlock :: Name,
+    blocks :: M.Map Name BlockState,
+    symtab :: CGSymTab,
+    blockCount :: Integer,
+    count :: Integer,
+    names :: Names
 }
-emptyState = CodegenState 0
+emptyState :: CodegenState
+emptyState = CodegenState (Name "vitaliy") M.empty [] 0 0 M.empty
 
 newtype Codegen a = Codegen {
     runCodegen :: State CodegenState a
@@ -112,6 +125,9 @@ local :: ParLType -> Name -> Operand
 local t = LocalReference (compileType t)
     
 -- /LLVM vars
+-- LLVM BasicBlock infrastructure
+
+-- /LLVM BasicBlock
 
 --"@" ++ name ++ " = global " ++ show llType ++ " 0"
 {- // -}
