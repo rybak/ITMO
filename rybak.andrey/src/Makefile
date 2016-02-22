@@ -6,6 +6,7 @@ HC=ghc --make $(GHC_FLAGS)
 all : main Test
 
 L/Par.y : $(PDIR)/L.cf
+	echo "Launching bnfc"
 	bnfc -d $^
 
 L/Lex.x : L/Par.y
