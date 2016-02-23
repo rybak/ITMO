@@ -25,6 +25,10 @@ import qualified Data.Map as M
 
 isVarArgSupported = False
 
+newtype LLVM a = LLVM { unLLVM :: State Module a }
+runLLVM :: Module -> LLVM a -> Module
+runLLVM = flip (execState . unLLVM)
+
 data BlockState = BlockState {
     indwx :: Integer,
     stack :: [Named Instruction],
