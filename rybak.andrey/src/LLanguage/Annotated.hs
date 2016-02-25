@@ -12,8 +12,10 @@ data ADecl = ADec PIdent ParLType
 
 data ABlock a = ABlockB [AStm a]
     deriving (Eq, Ord, Show)
-data AStm a = ASDecl ADecl | AAssign PIdent (AExp a)
+data AStm a = ASDecl ADecl
+    | AAssign PIdent (AExp a)
+    | ARet (Maybe (AExp a))
     deriving (Eq, Ord, Show)
 
-data AExp a = AIntLit Integer a | AEVar PIdent a | AEFun PIdent a
+data AExp a = AIntLit Integer | AEVar PIdent a | AEFun PIdent a
     deriving (Eq, Ord, Show)

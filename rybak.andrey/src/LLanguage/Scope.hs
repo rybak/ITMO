@@ -106,6 +106,8 @@ buildSTStm (Assign pi exp) = do
         (Just f@(STFun _ _)) -> addToErrs $ "Trying to assign to global function " ++ showPI pi ++ ", previously declared : " ++ showSTItem f
         (Just (STVar _ _)) -> return () -- assigning to a var, OK
         ) >> buildSTExp exp
+buildSTStm (SRet exp) = buildSTExp exp
+    
 -- TODO : other statements
 noDeclarationError :: PIdent -> Result
 noDeclarationError pi = addToErrs $ "Using variable before declaration : " ++ showPI pi

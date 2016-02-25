@@ -21,6 +21,7 @@ import Control.Monad.Except
 import qualified Data.Map as M
 
 parseProg :: String -> ErrM.Err ParProgram
+-- helper for binding with BNFC generated lexer and parser
 parseProg = pParProgram . tokens
 
 printLLVM :: ParProgram -> String
@@ -33,16 +34,11 @@ printIR :: AST.Module -> IO ()
 printIR mod = do
     withContext $ \context -> do
         x <- runExceptT $ CLLVM.withModuleFromAST context mod $ \m -> do
-            s <- CLLVM.moduleLLVMAssembly m
-            putStrLn s
+            llstr <- CLLVM.moduleLLVMAssembly m
+            putStrLn llstr
         case x of
-            Left e -> putStrLn $ "LLVM error" ++ show e
-            Right _ -> putStrLn "Ok"
-
-showLine :: Integer -> String -> String
-showLine n s = show n ++ ":\t|" ++ s
-printNumberedLines :: String -> String
-printNumberedLines = unlines . (map (uncurry showLine)) . (zip [1..]) . lines
+            Left e -> putStrLn $ "LLVM error: " ++ show e
+            Right _ -> putStrLn "LLVM: Ok"
 
 main :: IO ()
 main = do
@@ -72,3 +68,7 @@ main = do
           putStrLn $ unlines $ map show $ M.toList $ symTab buildst -- TODO remove debug output
     ErrM.Bad s -> putStrLn $ "Parser error : " ++ s
 
+showLine :: Integer -> String -> String
+showLine n s = show n ++ ":\t|" ++ s
+printNumberedLines :: String -> String
+printNumberedLines = unlines . (map (uncurry showLine)) . (zip [1..]) . lines

@@ -29,3 +29,6 @@ isTopFun (TopFun _ _ _ _) = True
 isTopFun _ = False
 isATopFun (ATopFun _ _ _ _) = True
 isATopFun _ = False
+
+internalError s = error $ "Internal error: " ++ s
+

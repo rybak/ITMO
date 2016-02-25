@@ -67,16 +67,41 @@ typeStm (Assign pi exp) = do
         _ -> do
             addToErrs $ "Look for scope errors about " ++ showPI pi
             return $ AAssign pi aexp
+typeStm (SRet exp) = do
+    aexp <- typeExp exp
+    scope@(fn, _) <- getScope
+    setScope globalScope
+    funIn <- lookupSymCurScope fn
+    setScope scope
+    case (getAExp aexp, funIn) of
+        (Just et, Just f@(STFun _ ft)) -> do
+            when (et /= returnType ft) $ addToErrs $ "Trying to return " ++ printTree exp ++ " of type " ++ printTree et ++ " from function " ++ showSTItem f
+            return $ ARet (Just aexp)
+typeStm SVoidRet = do
+    scope@(fn, _) <- getScope
+    setScope globalScope
+    funIn <- lookupSymCurScope fn
+    -- CURSOR HERE
+    setScope scope
+    -- CURSOR HERE
+    case funIn of
+        (Just f@(STFun _ ft)) -> do
+            when (returnType ft /= TVoid) $ addToErrs $ "Trying to return something from void function " ++ showSTItem f
+            return $ ARet Nothing
 
-getAExp :: AExp x -> x
-getAExp (AIntLit _ x) = x
+
+returnType :: ParLType -> ParLType
+returnType (TFun _ rt) = rt
+returnType x = internalError $ "Can not take a return type from " ++ printTree x
+getAExp :: AExp (Maybe ParLType) -> (Maybe ParLType)
+getAExp (AIntLit _) = (Just TInt)
 getAExp (AEVar _ x) = x
 getAExp (AEFun _ x) = x
 typeMismatch :: ParLType -> ParLType -> String
 typeMismatch expectedType actualType = "\t\tExpected type:\t" ++ printTree expectedType ++ "\n\t\t  Actual type:\t" ++ printTree actualType
 
 typeExp :: ParExp -> TypeCheckResult (AExp (Maybe ParLType))
-typeExp (IntLit n) = return $ AIntLit n (Just TInt)
+typeExp (IntLit n) = return $ AIntLit n
 typeExp (EVar pi) = do
     varInfo <- lookupSymCurScope (pIdentToString pi)
     case varInfo of
