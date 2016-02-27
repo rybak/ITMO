@@ -68,8 +68,7 @@ typeStm (Assign pi exp) = do
             addToErrs $ "Look for scope errors about " ++ showPI pi
             return $ AAssign pi aexp
 typeStm (SRet exp) = do
-    aexp <- typeExp exp
-    typeReturn (printTree exp) (Just aexp)
+    typeExp exp >>= typeReturn (printTree exp) . Just
 typeStm SVoidRet = do
     typeReturn "nothing" Nothing
 
