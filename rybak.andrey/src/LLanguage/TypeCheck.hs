@@ -69,26 +69,22 @@ typeStm (Assign pi exp) = do
             return $ AAssign pi aexp
 typeStm (SRet exp) = do
     aexp <- typeExp exp
-    scope@(fn, _) <- getScope
-    setScope globalScope
-    funIn <- lookupSymCurScope fn
-    setScope scope
-    case (getAExp aexp, funIn) of
-        (Just et, Just f@(STFun _ ft)) -> do
-            when (et /= returnType ft) $ addToErrs $ "Trying to return " ++ printTree exp ++ " of type " ++ printTree et ++ " from function " ++ showSTItem f
-            return $ ARet (Just aexp)
+    typeReturn (printTree exp) (Just aexp)
 typeStm SVoidRet = do
+    typeReturn "nothing" Nothing
+
+typeReturn :: String -> Maybe (AExp (Maybe ParLType)) -> TypeCheckResult (AStm (Maybe ParLType))
+typeReturn returned me = do
     scope@(fn, _) <- getScope
     setScope globalScope
     funIn <- lookupSymCurScope fn
-    -- CURSOR HERE
     setScope scope
-    -- CURSOR HERE
-    case funIn of
-        (Just f@(STFun _ ft)) -> do
-            when (returnType ft /= TVoid) $ addToErrs $ "Trying to return something from void function " ++ showSTItem f
-            return $ ARet Nothing
-
+    let mt = maybe (Just TVoid) getAExp me
+    case (mt, funIn) of
+        (Just et, Just f@(STFun _ ft)) -> do
+            when (et /= returnType ft) $ addToErrs $ "Trying to return " ++ returned ++ " of type " ++ printTree et ++ " from function " ++ showSTItem f
+            return $ ARet me
+        (Nothing, _) -> internalError $ "Caught returning of something without type"
 
 returnType :: ParLType -> ParLType
 returnType (TFun _ rt) = rt
