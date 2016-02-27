@@ -108,6 +108,15 @@ codegenStm (ARet Nothing) = do
     internalError $ "no support for void return yet"
     ret Nothing
     return ()
+codegenStm (AAssign pi e) = do
+    maybe (internalError $ "no type : " ++ show e)
+        (\t -> do
+            i <- alloca t
+            codegenExp e >>= store t i
+            assign (pIdentToString pi) i
+        )
+        (getType e)
+    return ()
 codegenStm _ = return ()
 
 constInt n = ConstantOperand $ C.Int 32 n
