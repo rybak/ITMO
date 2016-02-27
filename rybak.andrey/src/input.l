@@ -5,7 +5,10 @@ c : int; b : int;
 f (x : int, y : int) -> int
 {
     a : int;
-    a = a;
+    b : int;
+    b = 0;
+    a = 42;
+    a = b;
     return a;
 }
 main () -> int

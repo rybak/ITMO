@@ -60,7 +60,7 @@ typeStm (SDecl decl) = do
 typeStm (Assign pi exp) = do
     aexp <- typeExp exp
     varInfo <- lookupSymCurScope (pIdentToString pi)
-    case (getAExp aexp, varInfo) of
+    case (getType aexp, varInfo) of
         (Just expType, Just (STVar _ varType)) -> do
             when (expType /= varType) $ addToErrs $ "Assignment type mismatch: '" ++ showPI pi ++ "'\n" ++ typeMismatch varType expType
             return $ AAssign pi aexp
@@ -78,7 +78,7 @@ typeReturn returned me = do
     setScope globalScope
     funIn <- lookupSymCurScope fn
     setScope scope
-    let mt = maybe (Just TVoid) getAExp me
+    let mt = maybe (Just TVoid) getType me
     case (mt, funIn) of
         (Just et, Just f@(STFun _ ft)) -> do
             when (et /= returnType ft) $ addToErrs $ "Trying to return " ++ returned ++ " of type " ++ printTree et ++ " from function " ++ showSTItem f
@@ -88,10 +88,6 @@ typeReturn returned me = do
 returnType :: ParLType -> ParLType
 returnType (TFun _ rt) = rt
 returnType x = internalError $ "Can not take a return type from " ++ printTree x
-getAExp :: AExp (Maybe ParLType) -> (Maybe ParLType)
-getAExp (AIntLit _) = (Just TInt)
-getAExp (AEVar _ x) = x
-getAExp (AEFun _ x) = x
 typeMismatch :: ParLType -> ParLType -> String
 typeMismatch expectedType actualType = "\t\tExpected type:\t" ++ printTree expectedType ++ "\n\t\t  Actual type:\t" ++ printTree actualType
 

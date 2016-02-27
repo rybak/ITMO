@@ -67,8 +67,7 @@ codegenTop (ATopFun pi args rt body) = do
             setBlock entry
             forM args $ \a@(ADec pi t) -> do
                 var <- alloca t
-                let llt = compileType t
-                store llt var (local (compileName pi) llt)
+                store t var (local (compileName pi) t)
                 assign (pIdentToString pi) var
             codegenFunctionBody body
             return ()
@@ -99,7 +98,7 @@ codegenStm :: AStm (Maybe ParLType) -> Codegen ()
 codegenStm (ASDecl (ADec pi t)) = do
     i <- alloca t
     let val = constInt 0 -- TODO add other types
-    store (compileType t) i val
+    store t i val
     assign (pIdentToString pi) i
 codegenStm (ARet (Just e)) = do
     o <- codegenExp e
@@ -113,12 +112,8 @@ codegenStm _ = return ()
 
 constInt n = ConstantOperand $ C.Int 32 n
 codegenExp :: AExp (Maybe ParLType) -> Codegen Operand
-codegenExp (AIntLit n) =
-    return $ constInt n
-codegenExp (AEVar pi (Just t)) = do
-    x <- getvar $ pIdentToString pi
-    o <- load (compileType t) x
-    return o
+codegenExp (AIntLit n) = return $ constInt n
+codegenExp (AEVar pi (Just t)) = getvar pi >>= load t
 codegenExp (AEVar pi Nothing) = internalError $ "Caught variable without type : " ++ showPI pi
 codegenExp (AEFun pi mt) = undefined
 
@@ -129,7 +124,7 @@ fresh = do
     let newCount = i + 1
     modify $ \s -> s { count = newCount }
     return newCount
-instr :: T.Type -> Instruction -> Codegen Operand
+instr :: ParLType -> Instruction -> Codegen Operand
 instr t i = do
     n <- fresh
     let ref = (UnName n)
@@ -151,13 +146,13 @@ current = do
         Nothing -> internalError $ "no such block : " ++ show b
 
 alloca :: ParLType -> Codegen Operand
-alloca t = instr llt $ Alloca llt Nothing 0 [] where
+alloca t = instr t $ Alloca llt Nothing 0 [] where
     llt = compileType t
 
-store :: T.Type -> Operand -> Operand -> Codegen Operand
+store :: ParLType -> Operand -> Operand -> Codegen Operand
 store t ptr val = instr t $ Store False ptr val Nothing 0 []
 
-load :: T.Type -> Operand -> Codegen Operand
+load :: ParLType -> Operand -> Codegen Operand
 load t ptr = instr t $ Load False ptr Nothing 0 []
 --
 ret :: Maybe Operand -> Codegen (Named Terminator)
@@ -178,15 +173,15 @@ assign :: String -> Operand -> Codegen ()
 assign var x = do
     localVars <- gets symtab
     modify $ \s -> s { symtab = [(var, x)] ++ localVars }
-getvar :: String -> Codegen Operand
-getvar var = do
+getvar :: PIdent -> Codegen Operand
+getvar pi = do
     st <- gets symtab
-    case lookup var st of
+    case lookup (pIdentToString pi) st of
         Just x -> return x
-        Nothing -> internalError $ "Local var not in scope: " ++ show var
+        Nothing -> internalError $ "Local var not in scope: " ++ showPI pi
 -- refs
-local :: Name -> T.Type -> Operand
-local n t = LocalReference t n
+local :: Name -> ParLType -> Operand
+local n t = LocalReference (compileType t) n
     
 -- global defs
 addDefinition :: Definition -> LLVM ()

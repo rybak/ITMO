@@ -32,3 +32,8 @@ isATopFun _ = False
 
 internalError s = error $ "Internal error: " ++ s
 
+getType :: AExp (Maybe ParLType) -> (Maybe ParLType)
+getType (AIntLit _) = (Just TInt)
+getType (AEVar _ x) = x
+getType (AEFun _ x) = x
+
