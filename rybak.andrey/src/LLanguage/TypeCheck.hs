@@ -96,6 +96,8 @@ typeExp (IntLit n) = return $ AIntLit n
 typeExp (EVar pi) = do
     varInfo <- lookupSymCurScope (pIdentToString pi)
     case varInfo of
+        -- no distinction between args and vars in "rvalues"
+        Just (STArg name parType) -> return $ AEVar pi (Just parType)
         Just (STVar name parType) -> return $ AEVar pi (Just parType)
         Just (STFun name parType) -> return $ AEFun pi (Just parType)
         _ -> do

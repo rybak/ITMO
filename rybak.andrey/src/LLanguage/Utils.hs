@@ -22,6 +22,7 @@ showPI (PIdent ((x,y), name)) = name ++ " at line " ++ show x ++ " column " ++ s
 showSTItem :: SymTabItem -> String
 showSTItem (STVar pi parLType) = showPIwithType pi parLType
 showSTItem (STFun pi parLType) = showPIwithType pi parLType
+showSTItem (STArg pi parLType) = showPIwithType pi parLType
 showPIwithType pi t = showPI pi ++ " of type " ++ printTree t
 
 isTopFun :: ParTopLevel -> Bool

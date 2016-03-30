@@ -7,6 +7,7 @@ import qualified Data.Map as M
 type Name = String
 data SymTabItem = STVar PIdent ParLType
                   | STFun PIdent ParLType
+                  | STArg PIdent ParLType
                 deriving (Eq,Show)
 
 

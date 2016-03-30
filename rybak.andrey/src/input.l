@@ -9,6 +9,7 @@ f (x : int, y : int) -> int
     b = 0;
     a = 42;
     a = b;
+    a = x;
     return a;
 }
 main () -> int

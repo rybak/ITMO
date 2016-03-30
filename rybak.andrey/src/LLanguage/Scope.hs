@@ -39,7 +39,7 @@ collectGlobals :: ParProgram -> Result
 collectGlobals (Prog topLevels) = mapM_ collectTopLevel topLevels
 
 collectTopLevel :: ParTopLevel -> Result
-collectTopLevel (TopDecl x) = newVariable "global" x
+collectTopLevel (TopDecl x) = newVariable STVar "global var" x
 collectTopLevel (TopFun pi argsDecls retType body) = do
         let newFun = STFun pi (topFunToType argsDecls retType)
         addError <- addSymbolCurrentScope newFun
@@ -80,14 +80,17 @@ buildSTFunction :: ParTopLevel -> Result
 buildSTFunction (TopDecl _) = error "should not happen"
 buildSTFunction (TopFun pi args retType body) = do
     setScope (pIdentToString pi, [])
-    mapM_ buildSTDecl args
+    mapM_ buildSTArg args
     -- TODO add check for dead code after return
     -- TODO add check for returns in all execution paths
     buildSTBlock body
     resetScope
 
+buildSTArg :: Decl -> Result
+buildSTArg = newVariable STArg "function argument"
+
 buildSTDecl :: Decl -> Result
-buildSTDecl = newVariable "local"
+buildSTDecl = newVariable STVar "local var"
 
 buildSTBlock :: Block -> Result
 buildSTBlock (BlockB statements) = do
@@ -105,6 +108,7 @@ buildSTStm (Assign pi exp) = do
         Nothing -> noDeclarationError pi
         (Just f@(STFun _ _)) -> addToErrs $ "Trying to assign to global function " ++ showPI pi ++ ", previously declared : " ++ showSTItem f
         (Just (STVar _ _)) -> return () -- assigning to a var, OK
+        (Just arg@(STArg _ _)) -> addToErrs $ "Trying to assign to function argument " ++ showPI pi ++ ", declared as : " ++ showSTItem arg
         ) >> buildSTExp exp
 buildSTStm (SRet exp) = buildSTExp exp
     
@@ -142,16 +146,18 @@ upClose name (n,(x:xs)) tab = maybe
     (M.lookup (n,(x:xs)) tab)
 -- helper functions
 
-newVariable :: String -> Decl -> Result -- used both for local and global vars
-newVariable kindOfVar (Dec pi parType) = do
-    let newVar = STVar pi parType
+newVariable :: (PIdent -> ParLType -> SymTabItem)
+    -> String -> Decl -> Result -- used for arguments, local and global vars
+newVariable c kindOfVar (Dec pi parType) = do
+    let newVar = c pi parType
     addError <- addSymbolCurrentScope newVar
-    forM_ addError $ duplicateError (kindOfVar ++ " var: ") newVar
+    forM_ addError $ duplicateError kindOfVar newVar
     return ()
 
 symTabItemToName :: SymTabItem -> Name
 symTabItemToName (STVar pi _) = pIdentToString pi
 symTabItemToName (STFun pi _) = pIdentToString pi
+symTabItemToName (STArg pi _) = pIdentToString pi
 
 -- SM BuildSt helper functions
 getScope :: SM BuildSt Scope
