@@ -129,21 +129,23 @@ lookupSymCurScope name = do
     return $ upClose name scope symbolTable
 
 upClose :: Name -> Scope -> SymTab -> Maybe SymTabItem
-upClose name (n, []) tab = maybe
-    (maybe
-        Nothing
-        (M.lookup name)
-        (M.lookup globalScope tab))
-    (M.lookup name)
-    (M.lookup (n,[]) tab)
-upClose name (n,(x:xs)) tab = maybe
-    (upClose name (n,xs) tab)
-    (\sl -> maybe
-        (upClose name (n,xs) tab)
-        Just
-        (M.lookup name sl)
-    )
-    (M.lookup (n,(x:xs)) tab)
+upClose name s@(n, []) tab = case M.lookup s tab of
+    Nothing -> globalScopeLookup name tab
+    Just sl -> case M.lookup name sl of
+        Nothing -> globalScopeLookup name tab
+        Just x -> Just x
+upClose name s@(n,(x:xs)) tab = case M.lookup s tab of
+    Nothing -> upClose name (n,xs) tab
+    Just sl -> case M.lookup name sl of
+        Nothing -> upClose name (n,xs) tab
+        Just x -> Just x
+
+globalScopeLookup :: Name -> SymTab -> Maybe SymTabItem
+globalScopeLookup name tab = case M.lookup globalScope tab of
+    Nothing -> error "no global scope"
+    Just gsl -> case M.lookup name gsl of
+        Nothing -> Nothing
+        Just x -> Just x
 -- helper functions
 
 newVariable :: (PIdent -> ParLType -> SymTabItem)

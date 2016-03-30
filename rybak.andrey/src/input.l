@@ -4,12 +4,9 @@ c : int; b : int;
 
 f (x : int, y : int) -> int
 {
+    c = x;
     a : int;
-    b : int;
-    b = 0;
-    a = 42;
-    a = b;
-    a = x;
+    a = c;
     return a;
 }
 main () -> int
