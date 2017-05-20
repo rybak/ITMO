@@ -17,4 +17,4 @@ server : server.cpp client.o http.o
 
 
 clean :
-	rm -f server *.o server receiver
+	rm -f server *.o sender receiver
