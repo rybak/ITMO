@@ -13,3 +13,6 @@ http.o : http.h http.cpp
 
 server : http.o server.cpp epollfd.o
 	$(CC) epollfd.o server.cpp http.o -o server
+
+clean :
+	rm -f *.o server
