@@ -8,3 +8,6 @@ http.o : http.cpp http.h
 
 offtp : offtp.cpp http.o
 	g++ -g -std=c++11 offtp.cpp http.o -o offtp
+
+clean :
+	rm -f *.o receiver offtp

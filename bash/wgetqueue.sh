@@ -82,7 +82,7 @@ function daemon {
                 print_log "Download complete" "${url}" "${name}"
                 rm "${LAST}"
             else
-                my_notify critical "Error while downloading: $(print_dl ${url} ${name})"
+                my_notify critical "Error while downloading: ${url} ${name}"
                 print_log "Error while downloading" "${url}" "${name}"
             fi
         done

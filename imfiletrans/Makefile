@@ -14,3 +14,7 @@ client.o : client.h client.cpp big_buffer.h http.o
 
 server : server.cpp client.o http.o
 	g++ -g -std=c++11 server.cpp client.o http.o -o server
+
+
+clean :
+	rm -f server *.o server receiver
