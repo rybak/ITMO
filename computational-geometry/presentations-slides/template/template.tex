@@ -1,0 +1,188 @@
+%\documentclass{beamer}
+\documentclass[hyperref={pdfpagelabels=false}]{beamer}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\usepackage{url}
+\usepackage{graphics}
+
+\usepackage{textcomp}
+\usepackage{xspace}
+\usepackage{tikz}
+
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage[cp1251]{inputenc}
+
+\setbeamertemplate{headline}{}
+
+\title[Шаблон для презентаций]{Шаблон для презентаций \\ по вычислительной геометрии}
+\author[Андрей Рыбак]{Андрей Рыбак}
+\institute{НИУ ИТМО}
+\date{март 2012}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+
+\begin{document}
+
+% outline style
+\AtBeginSection[]
+{
+ \begin{frame}
+  \frametitle{Содержание}
+  \tableofcontents[currentsection]
+ \end{frame}
+}
+
+% sub-outline style
+\AtBeginSubsection[]
+{
+ \begin{frame}
+  \frametitle{Содержание}
+  \tableofcontents[currentsection,currentsubsection]
+ \end{frame}
+}
+
+\begin{frame}
+	\titlepage
+\end{frame}
+
+\begin{frame}
+	\frametitle{Содержание}
+	\tableofcontents % [pausesections]
+\end{frame}
+
+\section{Введение}
+
+\subsection{Мотивация}
+\begin{frame}
+	\frametitle{Мотивация}
+	\begin{figure}
+		\centering
+		\includegraphics[height = 150pt, keepaspectratio = true]{motivate.jpg} % для template.pdf
+		\\ Ура! Можно вставлять jpg. % для template.pdf
+		%Печаль, latex + dvips + ps2pdf не умеет вставлять jpg. % для template2.pdf
+	\end{figure}
+\end{frame}
+
+\subsection{Матрица}
+\begin{frame}
+	\frametitle{Матрица}
+	\begin{theorem}
+		Ложки нет.
+	\end{theorem}
+\end{frame}
+
+\section{Работа с графикой}
+
+\subsection{tikz}
+
+\begin{frame}
+   \frametitle{Картинка из презентации Антона}
+   \begin{figure}[htb]
+     \begin{minipage}[b]{1.0\linewidth}
+       \begin{tikzpicture} 
+       
+         \coordinate[label=left:$s_1$]  (s1) at (0, 0.4);
+         \coordinate[label=left:$s_2$]  (s2) at (2, 1);
+         \coordinate[label=left:$s_3$]  (s3) at (1, 2);
+       
+         \draw[->] (-0.5, 2.8) -- (11.3, 2.8);
+       
+         \draw[-] (0, 0.4)--(10:11);
+         \draw[-] (2, 1)--(1:10);
+         \draw[-] (1, 2)--(-2:11);
+         
+         \draw[dotted, red] (0, -1) -- (0, 2.5);
+         \draw[dotted, red] (1, -1) -- (1, 2.5);
+         \draw[dotted, red] (2, -1) -- (2, 2.5);
+
+         \draw[dashed, green] (3.33, -1) -- (3.33, 2.5);
+         \draw[dashed, green] (4.87, -1) -- (4.87, 2.5);
+         \draw[dotted, green] (7.64, -1) -- (7.64, 2.5);
+
+         \draw[-, green] (4, -1)   -- (4, 2.5);
+         \draw[-, green] (4.3, -1) -- (4.3, 2.5);
+
+         \draw[dotted, blue] (10.83, -1) -- (10.83, 2.5);
+         \draw[dotted, blue] (10.99, -1) -- (10.99, 2.5);
+         \draw[dotted, blue] (10, -1) -- (10, 2.5);
+         
+         \draw[->, gray] (3.33, 2.4) to[out=45, in=135] (4.3, 2.4);
+         \draw[->, gray] (4.87, 2.4) to[out=-135, in=-45] (4, 2.4);
+
+         \node[circle, draw, fill=black!20, minimum size=0.01, outer sep=0.1, inner sep=0.5] at (4, 1.2) {};
+         \node[circle, draw, fill=black!20, minimum size=0.01, outer sep=0.1, inner sep=0.5] at (4.3, 0.7) {};
+         \node[circle, draw, fill=black!20, minimum size=0.01, outer sep=0.1, inner sep=0.5] at (5.8, 1) {};
+
+       \end{tikzpicture}
+     \end{minipage}
+   \end{figure}
+\end{frame}
+
+\subsection{METAPOST}
+
+\begin{frame}
+	\frametitle{Картинка из условия}
+	\begin{center}
+		\begin{figure}[htb]
+			\includegraphics[height = 150pt]{picture.eps}
+		\end{figure}
+		%Обратите внимание на подписи точек (команда label в METAPOST).
+	\end{center}
+\end{frame}
+
+\section{Проблемы и ограничения}
+\begin{frame}
+	\frametitle{Проблемы}
+	\pause
+	\begin{itemize}
+		\item beamer не поддерживает использование latex + dvipdfmx, а pdfLatex не умеет рисовать label в картинках сделанных в METAPOST
+		\pause
+		\item Как решить эту проблему?
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Простое решение}
+	Использовать TikZ для рисунков и pdflatex для сборки презентации.
+\end{frame}
+
+\begin{frame}
+	\frametitle{Сложное решение}
+	\begin{itemize}
+		\item Использовать latex + dvips + ps2pdf, если нужны подписи в METAPOST
+		\pause \item Но появляется вторая проблема: latex + dvips + ps2pdf не поддерживает вставку jpeg
+	\end{itemize}
+\end{frame}
+
+\section{Заключение}
+\begin{frame}
+	\frametitle{Ссылки}
+	\begin{thebibliography}{10}
+		\beamertemplatearticlebibitems
+			\bibitem{Introduction to Beamer}
+				\href{http://www.math-linux.com/spip.php?article77}{How to make a presentation with Latex - Introduction to Beamer}
+			\bibitem{Tutorial on Beamer}
+				\href{http://www.rennes.enst-bretagne.fr/~gbertran/pages/tutorials_latex.html}{Tutorials on LaTeX, BibTeX and Beamer}
+	\end{thebibliography}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Вопросы}
+	\begin{center}
+		\resizebox{\linewidth}{!}{???}
+	\end{center}
+\end{frame}
+
+\begin{frame}
+	\begin{center}
+		\LARGE Спасибо за внимание!
+	\end{center}
+\end{frame}
+
+\end{document}
