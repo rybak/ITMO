@@ -1,0 +1,6 @@
+.*\.o$
+.*\.hi$
+.*\~$
+.*\.sh$
+^ITMOPrelude/my.hs$
+.*\.lagda$
