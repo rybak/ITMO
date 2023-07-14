@@ -1,0 +1,98 @@
+\documentclass[17pt]{beamer}
+
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{amsfonts, amsxtra}
+\usepackage[english,russian]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage{graphicx}
+\graphicspath{{pic/}}
+
+\usepackage{agda}
+\input{utils/unicode-characters.tex}
+%%% Agda helper shortcuts -- Rybak
+\newcommand{\D}{\AgdaDatatype}
+\newcommand{\F}{\AgdaFunction}
+\newcommand{\DC}{\AgdaInductiveConstructor}
+
+\usetheme{Madrid}
+\setbeamertemplate{headline}{}
+\setbeamerfont{frametitle}{
+    size={\fontsize{14}{12}}
+}
+\setbeamertemplate{caption}[numbered]
+\setbeamerfont{page number in head/foot}{size=\normalsize}
+\setbeamertemplate{footline}[frame number]
+
+\title{Представление структур данных индуктивными семействами и доказательства их свойств}
+\institute{НИУ ИТМО}
+\author{Андрей Рыбак}
+\date{
+июнь 2014
+}
+
+\begin{document}
+{
+\fontsize{14pt}{14pt}\selectfont
+\setbeamertemplate{footline}{}
+\begin{frame}
+  \maketitle
+  \begin{flushright}
+    Научный руководитель: Малаховски Я. М.
+  \end{flushright}
+\end{frame}
+}
+
+% \begin{frame}
+%     \frametitle{Изоморфизм Карри—Ховарда}
+% \end{frame}
+\begin{frame}
+    \frametitle{Индуктивные семейства}
+    \emph{Индуктивное семейство} — индуктивный (рекурсивный) тип данных,
+        который может зависеть от других типов и значений.
+    \pause
+    \begin{itemize}
+        \item Data.AVL
+        \item 2-3-деревья
+    \end{itemize}
+\end{frame}
+
+\AgdaHide{
+\input{latex/AgdaPresentation.tex}
+}
+
+\begin{frame}
+    \frametitle{Куча}
+    \begin{itemize}
+        \item двоичное дерево
+        \item заполняется слева
+        \item значение в узле $ \leq $ значений в корнях поддеревьев
+    \end{itemize}
+\end{frame}
+\AgdaHide{
+\begin{frame}
+    \frametitle{Пример}
+    \includegraphics[width=0.6\textwidth]{pic/min-heap.png}
+\end{frame}
+}
+
+\fontsize{14pt}{14pt}\selectfont
+\input{latex/PresentationHeap.tex}
+
+\begin{frame}
+    \frametitle{Заключение}
+    \begin{itemize}
+        \item Разработаны типы данных для структуры данных и инвариантов
+        \item Реализованы функции обработки
+        \item Доказано сохранение инвариантов
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \begin{center}
+        \Large Спасибо за внимание!
+    \end{center}
+\end{frame}
+
+\end{document}
+

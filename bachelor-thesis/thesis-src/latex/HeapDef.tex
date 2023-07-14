@@ -1,0 +1,87 @@
+\AgdaHide{
+\begin{code}\>\<%
+\\
+\>\AgdaKeyword{module} \AgdaModule{HeapDef} \AgdaKeyword{where}\<%
+\\
+\>\AgdaKeyword{open} \AgdaKeyword{import} \AgdaModule{AgdaDescription}\<%
+\\
+\>\<\end{code}
+}
+\section{Тип данных для двоичной кучи}
+
+\subsection{Заполнение дерева}
+Куча заполняется элементами слева. Формализуем \cite{HeapFill} заполненность дерева:
+
+\begin{definition}
+Двоичное дерево высоты $h$ — \emph{полное} тогда и только тогда,
+когда в нем $2^{h+1} - 1$ узлов.
+
+Двоичное дерево высоты $h$ \emph{заполнено слева} тогда и только тогда,
+когда выполняется ровно один из пунктов:
+  \begin{itemize}
+    \item дерево — пустое
+    \item дерево — полное (то есть оба его поддерева — либо полные высоты $h-1$, либо пустые)
+    \label{def:fill-nd}
+    \item его левое поддерево — полное высотой $h-1$ и его правое поддерево — полное высотой $h-2$
+    \item его левое поддерево — заполнено слева высотой $h-1$ и его правое поддерево — полное высотой $h-2$
+    \item его левое поддерево — полное высотой $h-1$ и его правое поддерево — заполнено слева высотой $h-1$
+  \end{itemize}
+\end{definition}
+Определим вспомогательный тип данных для обозначения заполненности дерева:
+\begin{code}\>\<%
+\\
+\>\AgdaKeyword{data} \AgdaDatatype{TreeState} \AgdaSymbol{:} \AgdaPrimitiveType{Set} \AgdaKeyword{where}\<%
+\\
+\>[0]\AgdaIndent{2}{}\<[2]%
+\>[2]\AgdaInductiveConstructor{full} \AgdaInductiveConstructor{almost} \AgdaSymbol{:} \AgdaDatatype{TreeState}\<%
+\\
+\>\<\end{code}
+Теперь, используя этот тип данных как дополнительный индекс и
+индексируя дерево его высотой, задать тип данных для заполненного слева дерева
+\begin{code}\>\<%
+\\
+\>\AgdaKeyword{data} \AgdaDatatype{Tree} \AgdaSymbol{:} \AgdaSymbol{(}\AgdaBound{h} \AgdaSymbol{:} \AgdaDatatype{ℕ}\AgdaSymbol{)} \AgdaSymbol{→} \AgdaDatatype{TreeState} \AgdaSymbol{→} \AgdaPrimitiveType{Set} \AgdaKeyword{where}\<%
+\\
+\>[0]\AgdaIndent{2}{}\<[2]%
+\>[2]\AgdaInductiveConstructor{et} \AgdaSymbol{:} \AgdaDatatype{Tree} \AgdaInductiveConstructor{zero} \AgdaInductiveConstructor{full} \AgdaComment{-- Пустое дерево}\<%
+\\
+\>[0]\AgdaIndent{2}{}\<[2]%
+\>[2]\AgdaInductiveConstructor{nf} \AgdaSymbol{:} \AgdaSymbol{∀} \AgdaSymbol{\{}\AgdaBound{n}\AgdaSymbol{\}} \AgdaSymbol{→} \AgdaSymbol{(}\AgdaBound{a} \AgdaSymbol{:} \AgdaDatatype{Tree} \AgdaBound{n} \AgdaInductiveConstructor{full}\AgdaSymbol{)} \AgdaSymbol{→} \AgdaSymbol{(}\AgdaBound{b} \AgdaSymbol{:} \AgdaDatatype{Tree} \AgdaBound{n} \AgdaInductiveConstructor{full}\AgdaSymbol{)}\<%
+\\
+\>[2]\AgdaIndent{6}{}\<[6]%
+\>[6]\AgdaSymbol{→} \AgdaDatatype{Tree} \AgdaSymbol{(}\AgdaInductiveConstructor{succ} \AgdaBound{n}\AgdaSymbol{)} \AgdaInductiveConstructor{full} \AgdaComment{-- Полное дерево}\<%
+\\
+\>[0]\AgdaIndent{2}{}\<[2]%
+\>[2]\AgdaInductiveConstructor{nd} \AgdaSymbol{:} \AgdaSymbol{∀} \AgdaSymbol{\{}\AgdaBound{n}\AgdaSymbol{\}} \AgdaSymbol{→} \AgdaSymbol{(}\AgdaBound{a} \AgdaSymbol{:} \AgdaDatatype{Tree} \AgdaSymbol{(}\AgdaInductiveConstructor{succ} \AgdaBound{n}\AgdaSymbol{)} \AgdaInductiveConstructor{full}\AgdaSymbol{)} \AgdaSymbol{→} \AgdaSymbol{(}\AgdaBound{b} \AgdaSymbol{:} \AgdaDatatype{Tree} \AgdaBound{n} \AgdaInductiveConstructor{full}\AgdaSymbol{)}\<%
+\\
+\>[0]\AgdaIndent{6}{}\<[6]%
+\>[6]\AgdaSymbol{→} \AgdaDatatype{Tree} \AgdaSymbol{(}\AgdaInductiveConstructor{succ} \AgdaSymbol{(}\AgdaInductiveConstructor{succ} \AgdaBound{n}\AgdaSymbol{))} \AgdaInductiveConstructor{almost} \AgdaComment{-- Полные поддеревья разной высоты}\<%
+\\
+\>[0]\AgdaIndent{2}{}\<[2]%
+\>[2]\AgdaInductiveConstructor{nl} \AgdaSymbol{:} \AgdaSymbol{∀} \AgdaSymbol{\{}\AgdaBound{n}\AgdaSymbol{\}} \AgdaSymbol{→} \AgdaSymbol{(}\AgdaBound{a} \AgdaSymbol{:} \AgdaDatatype{Tree} \AgdaSymbol{(}\AgdaInductiveConstructor{succ} \AgdaBound{n}\AgdaSymbol{)} \AgdaInductiveConstructor{almost}\AgdaSymbol{)} \AgdaSymbol{→} \AgdaSymbol{(}\AgdaBound{b} \AgdaSymbol{:} \AgdaDatatype{Tree} \AgdaBound{n} \AgdaInductiveConstructor{full}\AgdaSymbol{)}\<%
+\\
+\>[0]\AgdaIndent{6}{}\<[6]%
+\>[6]\AgdaSymbol{→} \AgdaDatatype{Tree} \AgdaSymbol{(}\AgdaInductiveConstructor{succ} \AgdaSymbol{(}\AgdaInductiveConstructor{succ} \AgdaBound{n}\AgdaSymbol{))} \AgdaInductiveConstructor{almost} \AgdaComment{-- Правое поддерево — полное}\<%
+\\
+\>[0]\AgdaIndent{2}{}\<[2]%
+\>[2]\AgdaInductiveConstructor{nr} \AgdaSymbol{:} \AgdaSymbol{∀} \AgdaSymbol{\{}\AgdaBound{n}\AgdaSymbol{\}} \AgdaSymbol{→} \AgdaSymbol{(}\AgdaBound{a} \AgdaSymbol{:} \AgdaDatatype{Tree} \AgdaBound{n} \AgdaInductiveConstructor{full}\AgdaSymbol{)} \AgdaSymbol{→} \AgdaSymbol{(}\AgdaBound{b} \AgdaSymbol{:} \AgdaDatatype{Tree} \AgdaBound{n} \AgdaInductiveConstructor{almost}\AgdaSymbol{)}\<%
+\\
+\>[0]\AgdaIndent{6}{}\<[6]%
+\>[6]\AgdaSymbol{→} \AgdaDatatype{Tree} \AgdaSymbol{(}\AgdaInductiveConstructor{succ} \AgdaBound{n}\AgdaSymbol{)} \AgdaInductiveConstructor{almost} \AgdaComment{-- Левое поддерево — полное}\<%
+\\
+\>\<\end{code}
+Для удобства будем называть заполненное слева дерево, индексированное \DC{almost}
+\emph{неполным}.
+
+\section{Вставка элементов}
+\label{sec:insert}
+
+\subsection{Вставка элементов в полное дерево}
+\label{sec:finsert}
+\subsection{Вставка элементов в неполное дерево}
+\label{sec:ainsert}
+
+\section{Удаление элементов}
+\label{sec:delete}
+\subsection{Удаление из полного дерева}
+\subsection{Удаление из неполного дерева}

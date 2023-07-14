@@ -1,0 +1,144 @@
+\documentclass[a4paper,oneside]{report}
+
+% \usepackage[T2A]{fontenc}
+% \usepackage[utf8]{inputenc}
+
+\usepackage{graphicx}
+\graphicspath{{pic/}}
+
+% \usepackage{placeins}
+
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setdefaultlanguage[spelling=modern]{russian}
+\setotherlanguage{english}
+
+\newcommand{\myfont}[0]{FreeSerif}
+\setmainfont[Ligatures=TeX]{\myfont}
+\newfontfamily\cyrillicfont{\myfont}
+\newfontfamily\cyrillicfontsf{\myfont}
+\newfontfamily\cyrillicfontit{\myfont}
+\newfontfamily\cyrillicfonttt{\myfont}
+
+\usepackage{sty/rac}
+
+\usepackage{textcomp}
+\usepackage{csquotes}
+
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{amsfonts, amsxtra}
+\usepackage{mathtools} % for xleftrightarrow
+\usepackage{sty/dbl12}
+% \usepackage{epsfig}
+% \usepackage{verbatim}
+\usepackage{agda-print}
+%\usepackage[singlelinecheck=false]{caption}
+%%% Unicode characters
+% \input{utils/unicode-characters.tex}
+%%% Agda helper shortcuts -- Rybak
+
+\newcommand{\D}{\AgdaDatatype}
+\newcommand{\F}{\AgdaFunction}
+\newcommand{\DC}{\AgdaInductiveConstructor}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[section]{algorithm}
+\usepackage{algorithmic}
+
+% надо сделать нумерацию нумерами, а у меня почему-то рендерится буквами
+\usepackage[backend=biber,bibencoding=utf8,sorting=none,sortcites=true,bibstyle=sty/gost71,maxnames=99,citestyle=numeric-comp,babel=other]{biblatex}
+
+\binoppenalty=10000
+\relpenalty=10000
+
+\addbibresource{thesis.bib}
+\defbibenvironment{bibliography}
+  {\list
+     {\printfield[labelnumberwidth]{labelnumber}.}
+     {\setlength{\labelwidth}{2\labelnumberwidth}%
+      \setlength{\leftmargin}{\labelwidth}%
+      \setlength{\labelsep}{\biblabelsep}%
+      \addtolength{\leftmargin}{\labelsep}%
+      \setlength{\itemsep}{\bibitemsep}%
+      \setlength{\parsep}{\bibparsep}}%
+      \renewcommand*{\makelabel}[1]{\hss##1}}
+  {\endlist}
+  {\item}
+
+%\usepackage[nottoc,notbib]{tocbibind}
+%\usepackage{listings}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+
+\input{utils/braces.tex}
+%%%
+
+%%% Russian captions:
+\input{utils/theorems.tex}
+
+% \usepackage{bold-extra}
+% \usepackage{titlesec}
+% \titleformat*{\chapter}{\filcenter}
+% \titleformat*{\section}{\scshape\bfseries\filcenter}
+\begin{document}
+
+\initializefrontsections
+
+\pagestyle{title}
+
+\begin{center}
+Санкт-Петербургский национальный исследовательский университет \\ информационных технологий, механики и оптики
+
+\vspace{2cm}
+
+Факультет информационных технологий и программирования
+
+Кафедра компьютерных технологий
+
+\vspace{3cm}
+
+{\Large Рыбак Андрей Викторович}
+
+\vspace{2cm}
+
+\vbox{\LARGE\bfseries
+Представление структур данных индуктивными семействами и доказательства их свойств
+}
+
+\vspace{4cm}
+
+% Общее правило: в таких местах пишут научные звания, а не должности у
+% меня научных званий нет.
+% По этому же правилу ты не "студент", а просто "ты" чуть выше.
+{\Large Научный руководитель: Я.~М.~Малаховски}
+
+\vspace{6cm}
+Санкт-Петербург\\ 2014
+\end{center}
+
+\newpage
+\setcounter{page}{3}
+\pagestyle{plain}
+
+\tableofcontents
+%\listoffigures
+
+% Chapters
+\startthechapters
+\input{parts/intro.tex}
+\input{parts/chapter1.tex}
+\input{parts/chapter2.tex}
+% \input{parts/chapter3.tex}
+\input{parts/outro.tex}
+
+\printbibliography
+
+\end{document}
+
