@@ -1,0 +1,4 @@
+x:\evaluator\export\problem1.2\problem1.2.cpp(14): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details. [X:\evaluator\export\problem1.2\problem1.2.vcxproj]
+
+[Generated at February 23, 2011 12:05:43 PM GMT+03:00]
+
