@@ -1,0 +1,12 @@
+.*\.o$
+.*\.swp$
+.*\.gch$
+.*\.txt$
+.*\.hi$
+.*\~$
+.*\.sh$
+^bash/kr/*$
+^midterm/*$
+^oxij/*$
+^testdir/*$
+^c/*$
