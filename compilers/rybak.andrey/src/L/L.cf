@@ -1,0 +1,30 @@
+comment "//" ;
+
+Prog. ParProgram ::= [ParTopLevel] ;
+terminator ParTopLevel "" ;
+
+TopDecl. ParTopLevel ::= Decl ";" ;
+TopFun. ParTopLevel ::= PIdent "(" [Decl] ")" "->" ParLType Block ;
+separator Decl "," ;
+
+
+Dec. Decl ::= PIdent ":" ParLType ;
+
+TInt.	ParLType ::= "int" ;
+TVoid.	ParLType ::= "void" ;
+TFun. ParLType ::= "(" [ParLType] ")" "->" ParLType ;
+separator ParLType "," ;
+
+BlockB. Block ::= "{" [ParStm] "}" ;
+terminator ParStm "" ;
+-- 
+SDecl. ParStm ::= Decl ";" ;
+Assign.  ParStm ::= PIdent "=" ParExp ";" ;
+SRet. ParStm ::= "return" ParExp ";" ;
+SVoidRet. ParStm ::= "return" ";" ;
+
+IntLit. ParExp ::= Integer ;
+EVar. ParExp ::= PIdent ;
+
+
+position token PIdent (letter | '_' ) (letter | digit | '_' )* ;
